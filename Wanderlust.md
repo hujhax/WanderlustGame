@@ -10,7 +10,7 @@ If the folder does not include a sound asset, search the web for "[name of sound
 This game is written in Vanilla JS and Canvas to run in a browser.
 
 ## Cast
-This game has eight "cast members", and each has a "head shot" image in the /images directory:
+This game has eight "cast members", and each has a "head shot" image in the /images/cast directory, and a folder of sprites in the /images/sprites/cast directory:
 1. Claire: claire.png
 1. Gilbert: gilbert.png
 1. Jason: jason.png
@@ -28,12 +28,17 @@ Below the rectangle, show a "Press Enter to Continue" message.
 If a piece of dialog is too long to display in the dialog rectangle, split it into multiple sections that do fit in the dialog rectangle.  The player can hit enter to proceed from one section to the next.
 
 Dialog is written in this document like this:
-[Character name] ([actor name]): text
+[Character name] ([actor name]) {[style]}: text
 
 So for this example:
 Mr. Willis (Jason): Hello world!
 
 You would display Jason's head shot in the square, label it "Mr. Willis", and set the dialog block to "Hello world!"
+
+"style" is an optional tag, and it can take the values "silhouette" and "inverted".
+"silhouette" means, instead of drawing the head shot, you draw a black silhouette of the head shot against a gray background.
+"inverted" means you draw the head shot with the colors inverted, like a photographic negative.
+
 
 
 # Gameplay
@@ -46,7 +51,7 @@ When the user clicks, proceed to the Title Screen.
 ## Title Screen
 The title "WANDERLUST" has a faint drop shadow behind it.
 
-This shows an animation loop of a station wagon driving along a highway at sunset with white fluffy clouds in the sky (use the 'cloud.png' file in the /images subdirectory for the clouds).  We see the car from a distance, driving left to right on the screen.  The car is centered in the screen; the road moves past it, as does the occasional tree on the far side of the road.
+This shows an animation loop of a station wagon driving along a highway at sunset with white fluffy clouds in the sky (use the 'cloud.png' file in the /images subdirectory for the clouds).  We see the car from a distance, driving left to right on the screen.  The car is centered in the screen; the road moves past it, as does the occasional tree on the far side of the road.  Do not use the anything in the images directory for the station wagon on this screen.
 
 The background music for this phase is a chiptune version of "Chicago" by Sufjan Stevens, available [here](https://www.youtube.com/watch?v=xHGH2iiaPcQ).  Download it as a media file and play it in the game.  Start the track at the twelve second mark.
 
@@ -58,6 +63,8 @@ This shows a character-select screen.  The title of the screen says "CHOOSE YOUR
 The player uses arrow keys to select a box and presses the enter key to proceed to the next phase.
 
 The player can also click a box to select it and proceed to the next phase.
+
+Play a short, percussive sound effect when the player moves to a new box or selects a traveler.
 
 The background music for this phase is "Best Friend", available [here](http://youtu.be/42Yw2Llnwzw). Download it as a media file and play it in the game.
 
@@ -84,7 +91,15 @@ The background music for this phase is the victory Zelda music, available [here]
 When the player presses Enter on this screen, proceed to the Departure Cutscene, even if the background music has not finished playing yet.
 
 ## Departure Cutscene
-The screen shows a pixel-art animation of a station wagon leaving behind a waving group of people in front of a suburban house.
+For the background image of this screen, pull the image from https://images.stockcake.com/public/1/3/3/1334aeeb-1ada-4302-a5b1-104d7330f413_large/cozy-pixel-cottage-stockcake.jpg and scale it to the canvas.  
+
+This screen shows a pixel-art animation of a station wagon leaving a house.
+
+Show the station wagon leaving along the street, going left to right along the road depicted in the background image.; use the image from /images/station_wagon.png.
+
+Show the sprites for the player and the companion sitting in the car (use the fourth row of sprites in the "sit.png" file for each) -- we should just see their heads, the top half of the sprites, in the front and rear windows.
+
+Show the sprites for all the other cast members standing in front of the house (and not the tree to the left of the house).  (Use the third row of sprites in the "slash.png" file.) Their animation cycles should be randomly out of sync with each other.
 
 The background music for this phase is a chiptune version of "Chicago" by Sufjan Stevens, available [here](https://www.youtube.com/watch?v=xHGH2iiaPcQ).  Download it as a media file and play it in the game.  Start the track at the thirty second mark.
 
@@ -119,7 +134,7 @@ Either way, the game then proceeds to the post-minigame screen, which includes:
 2. A piece of dialog from the character associated with winning or losing the minigame, as appropriate — these are different for each minigame.
 3. The instructions "Press Enter to Continue".
 
-If the player presses enter, they proceed either to (1) the next minigame (for the first two minigames) or (2) the Closing Credits (for the third minigame).
+If the player presses enter, they proceed either to (1) the next minigame (for the first two minigames) or (2) the The Confrontation phase (for the third minigame).
 
 Note: for debugging purposes, each minigame has a "query string name".  If a game has a query string name of "foo", and the full game is started with the query parameter "minigame=foo", then the game will start directly with that minigame as if it's stop number 1, and after the post-minigame screen, we just restart that same minigame as stop number 1.  Otherwise, the game runs normally.
 
@@ -131,13 +146,28 @@ This minigame's background music is "Bluegrass in the Year 20XX", available at h
 Introductory dialog:
 Farmer Lucky (Jason): "Thanks for stopping at my farm — all my chickens are running loose! Can you help me catch them? Just don't hit any skulls — press the enter key to jump!"
 
-The game screen represents the player as a running figure on the left side of the screen, staying in place.  The player runs along a dirt road.  It is a bright sunny day.  Behind the player, occasional trees and farm buildings and clouds move by slowly, in parallax.  Text reads "Press Enter to Jump".
+The game screen represents the player as a running figure on the left side of the screen, staying in place.  The player runs along a dirt road.  Behind the player, occasional trees and move by slowly, in parallax.
+
+Text at the bottom of the screen reads "Press Enter to Jump".
 
 There are a hundred chickens along this road.  At most two are visible at the start of the game; the rest are somewhere down the road.  All the chickens are running to the right, but slightly slower than the player.
 
 Occasionally there are cow skulls along the ground.  They don't move, so they appear to move left at the speed the player is running.
 
 If the player presses Enter, the running figure jumps up high enough to easily clear a cow skull.
+
+For the background, use the image at https://thumbs.dreamstime.com/b/pixelated-idyllic-farm-scene-red-barn-golden-field-charming-pixel-art-depiction-nestled-sun-drenched-under-bright-summer-359321595.jpg?w=992 -- scale it larger than the canvas and move it towards the left very slowly, in parallax; loop the image horizontally.
+Use the sprites in /images/sprites/chicken.png -- specifically the first row -- to depict a running chicken.  That first row has sixteen images of the chicken, each one approximately square.  Shrink the chickens by 50%; onscreen they should appear as half the size of the sprites on file.
+Use /images/cow-skull.png for the cow skulls.
+To show the character running, use the sprites in row 4 of run.png (in the selected character sprite directory) that show the character running to the right.
+To show the character jumping, use the sprites in row 4 of jump.png (in the selected character sprite directory) that show the character running to the right.
+If there is no selected character (say, in debug mode), default to Peter.
+Double the size of the player -- onscreen they should appear as double the size of the sprites on file.
+For the dirt path that the character runs on, use imaes/country_road.png.
+The screen below the dirt path image should be a similar green as the grass in the dirt path image.
+Use /images/tree.png for the trees; scale them up by a random quantity between 80% and 120%, flip half of them left-to-right, and make sure the bottom of the tree sits behind the grass in the dirt path image.  Make sure all the trees draw behind the dirt path in z order.
+
+Make sure the bottoms of the chicken spirtes, the bottoms of the cow skulls, and the bottom of the player sprites are all at the same height, and that height is at the middle of the dirt path.
 
 If the player makes contact with a chicken, play a "success" sound, remove the contacted chicken from the game, give the player 100 points, and increase the success counter.
 
@@ -160,11 +190,12 @@ Mr. Bergemot (Peter): Well if it isn't our favorite former mathlete! Welcome bac
  
 The game screen shows Peter standing in front of a chalkboard.
 
-Via dialog, Mr. Bergemot (Peter) asks the player a simple arithmetic question for which the answer is a number.
+Via dialog, Mr. Bergemot (Peter) asks the player a simple arithmetic question for which the answer is a nonnegative number.
 
 Then additional screen text reads "Type in your answer and press enter."
 
 Then the game shows a ten-second counter, counting down.
+
 
 If the answer is correct, it counts as a success.  The player gets 100 points.  The next question will be much, much more difficult.
 
@@ -205,6 +236,42 @@ If the player won:
 Lord Karaoke (Velvet): Killer performance! Your next round of drinks is on me!
 If the player lost:
 Lord Karaoke (Velvet): You have failed karaoke night.  Leave here, and take your dishonor with you.
+
+## The Confrontation
+You can access this section directly by setting the query parameter "minigame=confrontation".
+
+This section opens with a title card: "The Confrontation" and "Press Enter to Continue".
+
+This section is a single-player 2D fighting game.
+
+It includes a player character (represented using the selected cast member's sprites) and an AI enemy (represnted using the companion's sprites).
+
+The player character moves left and right by pressing or holding down the left and right keys -- use the second and fourth rows of the walk.png sprites for this.
+
+The player character punches with the "a" key; use the appropriate row of sprites in 1h_halfslash.png to depict this.
+
+The player character kicks with the "s" key; use the appropriate row of sprites in 1h_backslash.png to depict this.
+
+Both attacks are implemented with hitboxes.
+
+A punch or kick is always aimed in the direction the character is currently facing.
+
+Use the combat.png sprites when a character is standing still.
+
+Both characters have health bars.
+
+The AI should move towards the player and attack randomly.
+
+Use images/gas_station.webp for the background.
+
+When the player wins or loses, play the "ta-da!" sound or the "sad trombone" sound and show "Press Enter to Continue".
+
+Before play starts:
+[Companion's First Name]([Companion's First Name]): Well, maybe we shouldn't be friends any more!
+
+In that dialog, the character name is the first name of the companion, not their full name.
+
+At that point, when the player presses enter, continue to the closing credits.
 
 ## Closing Credits
 This section should scroll credits fairly quickly, in white Nintendo font against a black background.
