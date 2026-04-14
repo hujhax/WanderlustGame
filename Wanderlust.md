@@ -9,6 +9,10 @@ If the folder does not include a sound asset, search the web for "[name of sound
 
 This game is written in Vanilla JS and Canvas to run in a browser.
 
+For debug purposes, a player may always type the ">" key to skip to the next section of the game.
+
+If we have loaded a phase of the game via the query parameter without selecting a traveler, set the traveler to Peter by default.
+
 ## Cast
 This game has eight "cast members", and each has a "head shot" image in the /images/cast directory, and a folder of sprites in the /images/sprites/cast directory:
 1. Claire: claire.png
@@ -35,9 +39,12 @@ Mr. Willis (Jason): Hello world!
 
 You would display Jason's head shot in the square, label it "Mr. Willis", and set the dialog block to "Hello world!"
 
-"style" is an optional tag, and it can take the values "silhouette" and "inverted".
-"silhouette" means, instead of drawing the head shot, you draw a black silhouette of the head shot against a gray background.
-"inverted" means you draw the head shot with the colors inverted, like a photographic negative.
+"style" is an optional tag, and it can take the values "silhouette", "inverted", and "top".
+"silhouette" means, instead of drawing the head shot, you draw a black silhouette of the head shot.
+"inverted" means you use the appropriate head shot from /images/cast/inverted.
+"top" means you draw the whole dialog display at the top of the screen and not the bottom.
+
+In "silhouette" mode, the square behind the head shot is gray.  In all other modes (including default), it's black.
 
 
 
@@ -53,7 +60,7 @@ The title "WANDERLUST" has a faint drop shadow behind it.
 
 This shows an animation loop of a station wagon driving along a highway at sunset with white fluffy clouds in the sky (use the 'cloud.png' file in the /images subdirectory for the clouds).  We see the car from a distance, driving left to right on the screen.  The car is centered in the screen; the road moves past it, as does the occasional tree on the far side of the road.  Do not use the anything in the images directory for the station wagon on this screen.
 
-The background music for this phase is a chiptune version of "Chicago" by Sufjan Stevens, available [here](https://www.youtube.com/watch?v=xHGH2iiaPcQ).  Download it as a media file and play it in the game.  Start the track at the twelve second mark.
+The background music for this phase is music/chicago.mp3.  Start the track at the twelve second mark.
 
 At the bottom center are the words "Press Enter to Start", written in the [Nintendo Font](https://fontstruct.com/fontstructions/show/406653/nintendo_nes_font).  If the user presses enter, we go to the next phase.
 
@@ -66,8 +73,7 @@ The player can also click a box to select it and proceed to the next phase.
 
 Play a short, percussive sound effect when the player moves to a new box or selects a traveler.
 
-The background music for this phase is "Best Friend", available [here](http://youtu.be/42Yw2Llnwzw). Download it as a media file and play it in the game.
-
+The background music for this phase is music/best_friend.mp3.
 
 ## Partner Announcement
 This screen tells the player who their traveling companion is.
@@ -86,12 +92,12 @@ A large box onscreen shows the partner's head shot.
 
 Text at the bottom of this screen says "Press Enter to Continue".
 
-The background music for this phase is the victory Zelda music, available [here](https://www.youtube.com/watch?v=uinctpSn9_w).  Download it as a media file and play it in the game.
+The background music for this phase is music/zelda_victory.mp3.
 
 When the player presses Enter on this screen, proceed to the Departure Cutscene, even if the background music has not finished playing yet.
 
 ## Departure Cutscene
-For the background image of this screen, pull the image from https://images.stockcake.com/public/1/3/3/1334aeeb-1ada-4302-a5b1-104d7330f413_large/cozy-pixel-cottage-stockcake.jpg and scale it to the canvas.  
+The background image of this screen is images/departure_bg.jpg; scale it to the canvas.  
 
 This screen shows a pixel-art animation of a station wagon leaving a house.
 
@@ -101,9 +107,29 @@ Show the sprites for the player and the companion sitting in the car (use the fo
 
 Show the sprites for all the other cast members standing in front of the house (and not the tree to the left of the house).  (Use the third row of sprites in the "slash.png" file.) Their animation cycles should be randomly out of sync with each other.
 
-The background music for this phase is a chiptune version of "Chicago" by Sufjan Stevens, available [here](https://www.youtube.com/watch?v=xHGH2iiaPcQ).  Download it as a media file and play it in the game.  Start the track at the thirty second mark.
+The background music for this phase is music/chicago.mp3.  Start the track at the thirty second mark.
 
-When this is done, automatically proceed to the first Minigame.
+When this is done, automatically proceed to In the Car.
+
+Also, the player may press enter at any time in this phase to proceed to In the Car.
+
+
+## In the Car
+Show the title screen without the "Wanderlust" text or the "Press Enter to Start" text.
+
+Generate three lists of pieces of dialog; generate 50 separate lines of dialog for each list.  Whenever we use these one of these lists, we pick an item from it randomly, without any repeats throughout a run of the game.
+
+"Insults" are one-sentence insults towards the person you're talking to.
+"Blands" are one-sentence bland statements about the weather, the car, or things you see on the road.
+"Truths" are one-sentence fairly deep truths the character says.
+
+In this section, we repeat this cycle four times:
+1. The companion says a line of dialog from the Blands.
+2. The player is given three options for how to respond, arranged randomly: one of the Insults, one of the Blands, or one of the Truths. These three items are presented in random order. Selecting an Insult gives -100 points and results in a "sad trombone" sound; selecting a Bland gives 0 points; selecting a Truth gives +200 points and results in a "ta-da!" sound.
+
+Whenever possible, put dialog boxes at the top of the screen so they don't block the car.
+
+After this cycle is done four times, automatically proceed to the first minigame.
 
 ## Minigames
 In the Minigames phase, we play three minigames, chosen from the subsections below, with no repeats.
@@ -129,7 +155,7 @@ When the player achieves four successes, they win the minigame and receive a 1,0
 
 When the player achieves three failures, they lose the minigame and receive no bonus.  The game plays a "sad trombone" sound.
 
-Either way, the game then proceeds to the post-minigame screen, which includes:
+Either way, the game then proceeds to the post-minigame screen, which shuts off any background music, and which includes:
 1. A message to the player — "Great job!" if they won, "Too bad!" if they lost.
 2. A piece of dialog from the character associated with winning or losing the minigame, as appropriate — these are different for each minigame.
 3. The instructions "Press Enter to Continue".
@@ -141,7 +167,7 @@ Note: for debugging purposes, each minigame has a "query string name".  If a gam
 ### Catch That Chicken
 Query string name is "chicken".
 
-This minigame's background music is "Bluegrass in the Year 20XX", available at https://www.youtube.com/watch?v=fTBnJ-LhDSA.
+This minigame's background music is music/chicken_bgm.mp3.
 
 Introductory dialog:
 Farmer Lucky (Jason): "Thanks for stopping at my farm — all my chickens are running loose! Can you help me catch them? Just don't hit any skulls — press the enter key to jump!"
@@ -156,7 +182,7 @@ Occasionally there are cow skulls along the ground.  They don't move, so they ap
 
 If the player presses Enter, the running figure jumps up high enough to easily clear a cow skull.
 
-For the background, use the image at https://thumbs.dreamstime.com/b/pixelated-idyllic-farm-scene-red-barn-golden-field-charming-pixel-art-depiction-nestled-sun-drenched-under-bright-summer-359321595.jpg?w=992 -- scale it larger than the canvas and move it towards the left very slowly, in parallax; loop the image horizontally.
+For the background, use image/farm_background.jpg -- scale it larger than the canvas and move it towards the left very slowly, in parallax; loop the image horizontally.
 Use the sprites in /images/sprites/chicken.png -- specifically the first row -- to depict a running chicken.  That first row has sixteen images of the chicken, each one approximately square.  Shrink the chickens by 50%; onscreen they should appear as half the size of the sprites on file.
 Use /images/cow-skull.png for the cow skulls.
 To show the character running, use the sprites in row 4 of run.png (in the selected character sprite directory) that show the character running to the right.
@@ -183,14 +209,14 @@ Farmer Lucky (Jason): You have failed this farm. Never return here again.
 ### Mathemagic!
 Query string name is "math".
 
-This minigame's background music is "Big Giant Circles - The Glory Days: Houston'", available at https://www.youtube.com/watch?v=ALq1ENqfu8E.
+This minigame's background music is music/math_bgm.mp3
 
 Introductory dialog:
 Mr. Bergemot (Peter): Well if it isn't our favorite former mathlete! Welcome back to your old school — wanna see if you've still got what it takes?
  
 The game screen shows Peter standing in front of a chalkboard.
 
-Via dialog, Mr. Bergemot (Peter) asks the player a simple arithmetic question for which the answer is a nonnegative number.
+Via dialog, Mr. Bergemot (Peter) asks the player an arithmetic question for which the answer is a nonnegative integer.  Put another way, no question should have an answer that is a negative number or a fraction.
 
 Then additional screen text reads "Type in your answer and press enter."
 
@@ -213,12 +239,12 @@ Mr. Bergemot (Peter): That's too bad.  *sigh*  Really I blame myself.
 ### Karaoke Night
 Query string name is "karaoke".
 
-This minigame's background music is "Total Eclipse of the Heart [8 Bit Tribute to Bonnie Tyler]", available at https://www.youtube.com/watch?v=YwjK3XrXIpY.
+This minigame's background music is music/karaoke_bgm.mp3.
 
 Introductory dialog:
 Lord Karaoke (Velvet): It's Karaoke Night at Tappers! Sure, you can come up and sing, just make sure you hit all the notes on-key!  Use the up and down buttons to adjust your pitch!
 
-The game screen shows a single musical staff with a G-clef five horizontal lines.  The player controls a gold diamond that sits on the left side of the staff, starting at G.
+The game screen shows a single musical staff with a G-clef and five horizontal lines.  (Download the pixel-art G-clef from https://art.pixilart.com/2954095ce6859c5.png .) The player controls a gold diamond that sits on the left side of the staff, starting at G.
 
 If they player hits the "up" key, the diamond goes up a note.
 If they player hits the "down" key, the diamond goes up a note.
@@ -242,6 +268,14 @@ You can access this section directly by setting the query parameter "minigame=co
 
 This section opens with a title card: "The Confrontation" and "Press Enter to Continue".
 
+Before play starts:
+[Companion's First Name]([Companion's First Name]): Well, maybe we shouldn't be friends any more!
+
+When play starts:
+Use the music at music/fighting_theme.mp3 as background music.
+
+In that dialog, the character name is the first name of the companion, not their full name.
+
 This section is a single-player 2D fighting game.
 
 It includes a player character (represented using the selected cast member's sprites) and an AI enemy (represnted using the companion's sprites).
@@ -252,7 +286,7 @@ The player character punches with the "a" key; use the appropriate row of sprite
 
 The player character kicks with the "s" key; use the appropriate row of sprites in 1h_backslash.png to depict this.
 
-Both attacks are implemented with hitboxes.
+Both attacks are implemented with hitboxes.  Use standard 8-bit sound effects for punching and kicking.
 
 A punch or kick is always aimed in the direction the character is currently facing.
 
@@ -266,14 +300,93 @@ Use images/gas_station.webp for the background.
 
 When the player wins or loses, play the "ta-da!" sound or the "sad trombone" sound and show "Press Enter to Continue".
 
-Before play starts:
-[Companion's First Name]([Companion's First Name]): Well, maybe we shouldn't be friends any more!
+At that point, when the player presses enter, continue to Separate Ways.
 
-In that dialog, the character name is the first name of the companion, not their full name.
+## Separate Ways
+You can access this section directly by setting the query parameter "minigame=separate".
 
-At that point, when the player presses enter, continue to the closing credits.
+The background music of this section is available in music/karaoke_bgm.mp3.
+
+Alternate between Companion Sits and Player Sits (defined below), spending five seconds on each.
+
+The first time we see each screen, display it without panning and without zooming.
+
+The second time we see each screen, zoom in a little on the sprite (making sure the sprites scale appropriately), and pan very very slowly to the left.
+
+The third time we see each screen, zoom in a little bit more on the sprite (again making sure the sprites scale appropriately), and pan very very slowly to the right.
+
+The sprites should scale up as much as the background does.
+
+The background image should *always* fill the whole canvas; if this means the sprite is not in the center of the screen, that is okay.
+
+After showing each screen three times, go to a black screen and the text "Press Enter to Continue".
+
+At any point the user may press Enter to stop the music, clear the screen, and move on to the dialog in On Your Own?
+
+### Companion Sits
+The background image is images/companion_alone.gif, sized so it will fill the whole canvas, even during the initial viewing.
+
+Place the player's companion sitting on the rocks at the bottom of the image.  Use the leftmost sprite in the fourth row of sit.png -- (x,y) should be (253, 477).
+
+## Player Sits
+The same as screen 1, except:
+1. Use images/player_alone.gif as the background, sized so it will fill the whole canvas, even during the initial viewing.
+2. Use the player sprite, placed among bushes at the bottom left of the screen -- (x,y) should be (48, 253)
+
+
+## On Your Own?
+You can access this section directly by setting the query parameter "minigame=alone".
+
+This is the same as The Confrontation, except:
+1. There is different opening dialog.
+2. The opponent AI does not use the companion's sprites, but rather, color-inverted versions of the player's sprites.
+3. You can reach this screen directly with "minigame=own"
+4. After this screen, you proceed to the Together Again.
+5. Use the images/rainy-pixel-city-stockcake.jpg for the background.
+
+Here is the introductory dialog for this section (note that the player is talking to a version of themselves):
+
+[?????]([Player's First Name]){silhouette}: Hehehehhe.  Hee hee hee.
+[?????]([Player's First Name]){silhouette}: Now you are finally on your own.
+[?????]([Player's First Name]){silhouette}: And I will tell you what I really think of you.
+[Player's First Name]([Player's First Name]): Who... who is that?
+[?????]([Player's First Name]){silhouette}: Don't you recognize me?
+[?????]([Player's First Name]){silhouette}: Don't you recognize the wrenching inner conflicts you feel in the dead of night?
+[?????]([Player's First Name]){silhouette}: The nagging doubts that creep around your every act?
+[?????]([Player's First Name]){silhouette}: I have been here the whole time, [Player's First Name].  It is I...
+[SHADOW]([Player's First Name]){inverted}: YOUR SHADOW!!!
+
+## Together Again
+You can access this section directly by setting the query parameter "minigame=reunited". (If this happens, default the traveler to Peter.)
+
+This screen has this background music: https://www.youtube.com/watch?v=xM83zj395tQ
+
+Display the Companion Sits screen, without panning.
+
+Have the player walk onscreen (use the fourth row of sprites in walk.png) and sit next to the companion (use the first sprite in the fourth row of sit.png).
+
+[Player's First Name]([Player's First Name]){top}: I'm sorry I fought with you.
+[Companion's First Name]([Companion's First Name]){top}: I'm sorry too.
+[Player's First Name]([Player's First Name]){top}: Can we be friends again?
+[Companion's First Name]([Companion's First Name]){top}: Yes we can!
+[Player's First Name]([Player's First Name]){top}: YAY!
+
+## Closing Interview
+This screen has this background music: https://www.youtube.com/watch?v=vNijKv1Ac6k
+
+Show the title screen again, without the "Wanderlust" title.
+
+[Player's First Name]([Player's First Name]){top}: We had a crazy trip.
+[Companion's First Name]([Companion's First Name]){top}: It challenged our friendship.
+[Player's First Name]([Player's First Name]){top}: It was a crazy time.
+[Companion's First Name]([Companion's First Name]){top}: But we learned a lot about ourselves.
+[Player's First Name]([Player's First Name]){top}: I gained [score] points worth of self-knowledge!
 
 ## Closing Credits
+First, show a blank screen.  Then add five random screen captures from this run through the game, one by one, presented like they're polaroid pictures scattered randomly on the screen, but each "photo" should remain mostly visible.  If there are not five screen captures available, repeats are okay.  If no screen captures are available, skip directly to scrolling the credits.
+
+When all photos appear, fade them all to 30% opacity and roll credits.
+
 This section should scroll credits fairly quickly, in white Nintendo font against a black background.
 
 This is the text it should depict:
@@ -298,7 +411,7 @@ The Velvet Duke
 Presented By
 Wayward Improvised Theatre & Videogaming Concern
 
-The background music should be the DuckTales "Moon" theme, available [here](https://www.youtube.com/watch?v=KF32DRg9opA). Download it as a media file and play it in the game.
+The background music should be music/moon.mp3.
 
 In this section, the player can click "Enter" to return to the title screen.
 

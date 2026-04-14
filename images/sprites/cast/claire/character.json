@@ -51,20 +51,6 @@
       "recolor": "",
       "name": "Curly short (dark brown)"
     },
-    "dress": {
-      "itemId": "dress_sash",
-      "subId": null,
-      "variant": "teal",
-      "recolor": "",
-      "name": "Sash dress (teal)"
-    },
-    "vest": {
-      "itemId": "dress_bodice",
-      "subId": null,
-      "variant": "bluegray",
-      "recolor": "",
-      "name": "Bodice (bluegray)"
-    },
     "legs": {
       "itemId": "legs_pants",
       "subId": null,
@@ -111,7 +97,7 @@
     "1h_backslash": false,
     "1h_halfslash": false
   },
-  "url": "https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/#sex=female&head=Human_Female_amber&expression=Neutral_light&body=Body_Color_light&shoes=Revised_Boots_brown&eyebrows=Thin_Eyebrows_black&clothes=Cardigan_black&hair=Curly_short_dark%20brown&dress=Sash_dress_teal&vest=Bodice_bluegray&legs=Pants_blue&eyes=Eye_Color_green",
+  "url": "https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/#sex=female&head=Human_Female_amber&expression=Neutral_light&body=Body_Color_light&shoes=Revised_Boots_brown&eyebrows=Thin_Eyebrows_black&clothes=Cardigan_black&hair=Curly_short_dark%20brown&legs=Pants_blue&eyes=Eye_Color_green",
   "layers": [
     {
       "itemId": "body",
@@ -205,27 +191,6 @@
       ]
     },
     {
-      "itemId": "dress_sash",
-      "name": "Sash dress (teal)",
-      "variant": "teal",
-      "recolors": null,
-      "zPos": 30,
-      "layerNum": 1,
-      "yPos": 0,
-      "isCustom": false,
-      "needsRecolor": false,
-      "fileName": "dress/sash/female/spellcast/teal.png",
-      "supportedAnimations": [
-        "spellcast",
-        "thrust",
-        "walk",
-        "slash",
-        "shoot",
-        "hurt",
-        "idle"
-      ]
-    },
-    {
       "itemId": "torso_clothes_longsleeve2_cardigan",
       "name": "Cardigan (black)",
       "variant": "",
@@ -254,27 +219,6 @@
         "combat_idle",
         "backslash",
         "halfslash"
-      ]
-    },
-    {
-      "itemId": "dress_bodice",
-      "name": "Bodice (bluegray)",
-      "variant": "bluegray",
-      "recolors": null,
-      "zPos": 45,
-      "layerNum": 1,
-      "yPos": 0,
-      "isCustom": false,
-      "needsRecolor": false,
-      "fileName": "dress/bodice/female/spellcast/bluegray.png",
-      "supportedAnimations": [
-        "spellcast",
-        "thrust",
-        "walk",
-        "slash",
-        "shoot",
-        "hurt",
-        "idle"
       ]
     },
     {
@@ -537,44 +481,6 @@
       "urls": [
         "https://opengameart.org/content/lpc-hair",
         "https://opengameart.org/content/lpc-expanded-sit-run-jump-more"
-      ]
-    },
-    {
-      "fileName": "dress/sash/female/jump/teal.png",
-      "file": "dress/sash",
-      "notes": "adapted to v3 bases and recolored by bluecarrot16",
-      "authors": [
-        "bluecarrot16",
-        "Thane Brimhall (pennomi)",
-        "laetissima",
-        "Matthew Krohn (makrohn)"
-      ],
-      "licenses": [
-        "CC-BY-SA 3.0",
-        "GPL 3.0"
-      ],
-      "urls": [
-        "https://opengameart.org/content/lpc-2-characters"
-      ]
-    },
-    {
-      "fileName": "dress/bodice/female/jump/bluegray.png",
-      "file": "dress/bodice",
-      "notes": "original princess.xcf by Sharm, extended to all poses by makrohn, edited to v3 bases and animation cleanup by bluecarrot16",
-      "authors": [
-        "bluecarrot16",
-        "Matthew Krohn (makrohn)",
-        "Lanea Zimmerman (Sharm)"
-      ],
-      "licenses": [
-        "OGA-BY 3.0",
-        "CC-BY-SA 3.0",
-        "GPL 3.0"
-      ],
-      "urls": [
-        "https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles",
-        "https://opengameart.org/content/lpc-dress-in-combat-poses",
-        "http://opengameart.org/content/lpc-clothing-updates"
       ]
     },
     {
