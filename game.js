@@ -93,13 +93,20 @@ onYourOwnBgImg.src = 'images/rainy-pixel-city-stockcake.jpg';
 const stationWagonRawImg = new Image();
 stationWagonRawImg.src = 'images/station_wagon_raw.png';
 
-const companionSitsBg = new Image();
-companionSitsBg.src = 'images/companion_alone.gif';
-const playerSitsBg = new Image();
-playerSitsBg.src = 'images/player_alone.gif';
+const companionSitsBg = document.createElement('video');
+companionSitsBg.src = 'images/companion_alone.mp4';
+companionSitsBg.loop = true;
+companionSitsBg.muted = true;
+
+const playerSitsBg = document.createElement('video');
+playerSitsBg.src = 'images/player_alone.mp4';
+playerSitsBg.loop = true;
+playerSitsBg.muted = true;
 
 const countryRoadImg = new Image();
 countryRoadImg.src = 'images/country_road.png';
+const gClefImg = new Image();
+gClefImg.src = 'images/g-clef.png';
 
 const slashSprites = {};
 const idleSprites = {};
@@ -207,6 +214,56 @@ if (minigameOverride === 'confrontation') {
 
 let creditsY = canvas.height;
 let creditsFinished = false;
+let screenCaptures = [];
+
+function getCurrentBackground() {
+    switch (currentPhase) {
+        case PHASES.DEPARTURE_CUTSCENE:
+            return departureBgImg;
+        case PHASES.MINIGAME_PLAY:
+            const gameType = minigameOrder[currentMinigameIndex];
+            if (gameType === 'chicken') return farmBgImg;
+            return null;
+        case PHASES.CONFRONTATION_PLAY:
+            const isShadowFight = fightingState.ai && fightingState.ai.isShadow;
+            return isShadowFight ? onYourOwnBgImg : confrontationBgImg;
+        case PHASES.SEPARATE_WAYS:
+            if (typeof separateWaysState !== 'undefined') {
+                const elapsed = Date.now() - separateWaysState.startTime;
+                const currentCycle = Math.floor(elapsed / 5000);
+                return (currentCycle % 2 === 0) ? companionSitsBg : playerSitsBg;
+            }
+            return null;
+        case PHASES.TOGETHER_AGAIN:
+            return companionSitsBg;
+        default:
+            return null;
+    }
+}
+
+function captureScreen() {
+    try {
+        const dataURL = canvas.toDataURL();
+        const img = new Image();
+        img.src = dataURL;
+        screenCaptures.push(img);
+        if (screenCaptures.length > 10) {
+            screenCaptures.shift();
+        }
+    } catch (e) {
+        console.warn("Could not capture screen (likely CORS/tainted canvas), using background fallback");
+        const bg = getCurrentBackground();
+        if (bg && bg.src) {
+            const img = new Image();
+            img.src = bg.src;
+            // Only add if it's an image; videos won't work as polaroids easily
+            if (!(bg instanceof HTMLVideoElement)) {
+                screenCaptures.push(img);
+                if (screenCaptures.length > 10) screenCaptures.shift();
+            }
+        }
+    }
+}
 let cutsceneStartTime = 0;
 const CUTSCENE_DURATION = 6000;
 
@@ -259,6 +316,7 @@ class AudioManager {
             MATH_BGM: new Audio('music/math_bgm.mp3'),
             KARAOKE_BGM: new Audio('music/karaoke_bgm.mp3'),
             FIGHT_BGM: new Audio('music/fighting_theme.mp3'),
+            IN_THE_CAR: new Audio('music/in_the_car.mp3'),
             TOGETHER_BGM: new Audio('music/together_again.mp3'),
             INTERVIEW_BGM: new Audio('music/closing_interview.mp3'),
             SUCCESS: new Audio('music/success.mp3'),
@@ -340,6 +398,8 @@ window.addEventListener('mousedown', (e) => {
     if (currentPhase === PHASES.INTRO) {
         currentPhase = PHASES.TITLE;
         audio.play('CHICAGO', 12);
+        companionSitsBg.play().catch(e => console.log("Video play failed", e));
+        playerSitsBg.play().catch(e => console.log("Video play failed", e));
     } else if (currentPhase === PHASES.CHOOSE_TRAVELLER) {
         const rect = canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -427,7 +487,7 @@ window.addEventListener('keydown', (e) => {
     } else if (currentPhase === PHASES.ON_YOUR_OWN) {
         if (e.key === 'Enter') startFightingGame(PHASES.TOGETHER_AGAIN, true);
     } else if (currentPhase === PHASES.CLOSING_CREDITS) {
-        if (e.key === 'Enter') { currentPhase = PHASES.TITLE; currentMinigameIndex = 0; score = 0; audio.play('CHICAGO', 12); }
+        if (e.key === 'Enter') { currentPhase = PHASES.TITLE; currentMinigameIndex = 0; score = 0; audio.play('CHICAGO', 12); creditsStartTime = 0; }
     }
 });
 
@@ -442,7 +502,7 @@ function startInTheCar() {
     inTheCarState.usedBlands.clear();
     inTheCarState.usedTruths.clear();
     inTheCarState.waitingForResponse = false;
-    audio.stop();
+    audio.play('IN_THE_CAR', 45);
     nextCarCycle();
 }
 
@@ -515,19 +575,24 @@ function drawInTheCar() {
     
     if (inTheCarState.waitingForResponse) {
         const boxY = 180;
-        const boxH = 160;
+        const boxH = 220;
         ctx.fillStyle = COLORS.BLACK;
         ctx.fillRect(50, boxY, 700, boxH);
         ctx.strokeStyle = COLORS.WHITE;
         ctx.lineWidth = 4;
         ctx.strokeRect(50, boxY, 700, boxH);
         
+        ctx.fillStyle = COLORS.SELECTION_YELLOW;
+        ctx.font = '12px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.fillText("How do you respond?", 400, boxY + 30);
+
         ctx.fillStyle = COLORS.WHITE;
         ctx.font = '10px "Press Start 2P"';
         ctx.textAlign = 'left';
         
         inTheCarState.options.forEach((opt, i) => {
-            const y = boxY + 40 + i * 40;
+            const y = boxY + 70 + i * 50;
             if (i === inTheCarState.selectedIndex) {
                 ctx.fillStyle = COLORS.SELECTION_YELLOW;
                 ctx.fillText("> ", 70, y);
@@ -535,9 +600,12 @@ function drawInTheCar() {
                 ctx.fillStyle = COLORS.WHITE;
             }
             
-            // Wrap option text if needed
+            // Wrap option text and show all lines
             const wrapped = wrapText(opt.text, 600);
-            ctx.fillText(wrapped[0].split('\n')[0], 100, y);
+            const lines = wrapped[0].split('\n');
+            lines.forEach((line, j) => {
+                ctx.fillText(line, 100, y + j * 15);
+            });
         });
     }
 }
@@ -545,6 +613,7 @@ function drawInTheCar() {
 let minigameState = {};
 
 function startMinigame() {
+    captureScreen();
     const gameType = minigameOrder[currentMinigameIndex];
     if (selectedIndex === undefined || selectedIndex === null) selectedIndex = 5; // Default to Peter
     minigameState = {
@@ -634,6 +703,7 @@ function endMinigame() {
 
 let fightingState = {};
 function startFightingGame(nextPhase, isShadow = false) {
+    captureScreen();
     if (selectedIndex === undefined) selectedIndex = 5;
     const playerChar = CAST[selectedIndex].name;
     const partnerName = PARTNER_PAIRS[playerChar];
@@ -781,7 +851,7 @@ function startTogetherAgain() {
 
 function startClosingInterview() {
     currentPhase = PHASES.CLOSING_INTERVIEW;
-    audio.play('INTERVIEW_BGM');
+    audio.play('INTERVIEW_BGM', 39);
     if (selectedIndex === undefined) selectedIndex = 5;
     const playerFirstName = CAST[selectedIndex].name.split(' ')[0];
     const partnerName = PARTNER_PAIRS[CAST[selectedIndex].name];
@@ -789,7 +859,7 @@ function startClosingInterview() {
     const partnerActor = CAST.find(c => c.name === partnerName).actor;
 
     let dialogs = [
-        [playerFirstName, CAST[selectedIndex].actor, "We had a crazy trip.", 'top'],
+        [playerFirstName, CAST[selectedIndex].actor, "We had a meaningful trip.", 'top'],
         [partnerFirstName, partnerActor, "It challenged our friendship.", 'top'],
         [playerFirstName, CAST[selectedIndex].actor, "It was a crazy time.", 'top'],
         [partnerFirstName, partnerActor, "But we learned a lot about ourselves.", 'top'],
@@ -809,7 +879,12 @@ function startClosingInterview() {
     nextDialog();
 }
 
+let lastCaptureTime = 0;
 function gameLoop(time) {
+    if (Date.now() - lastCaptureTime > 30000 && currentPhase !== PHASES.INTRO && currentPhase !== PHASES.TITLE && currentPhase !== PHASES.CLOSING_CREDITS) {
+        captureScreen();
+        lastCaptureTime = Date.now();
+    }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     switch (currentPhase) {
         case PHASES.INTRO: drawIntro(); break;
@@ -1066,7 +1141,11 @@ function drawMinigameMap() {
 function drawMinigamePlay() {
     const gameType = minigameOrder[currentMinigameIndex];
     
-    // UI elements common to all minigames
+    if (gameType === 'chicken') drawChickenGame(); 
+    else if (gameType === 'math') drawMathGame(); 
+    else if (gameType === 'karaoke') drawKaraokeGame();
+
+    // UI elements common to all minigames (drawn last to be on top)
     ctx.fillStyle = COLORS.WHITE; ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'left'; 
     ctx.fillText(`Score: ${score}`, 20, 30);
     
@@ -1089,10 +1168,6 @@ function drawMinigamePlay() {
             ctx.strokeStyle = COLORS.RED; ctx.lineWidth = 2; ctx.strokeRect(fx - 10, 15, 20, 20); 
         }
     }
-
-    if (gameType === 'chicken') drawChickenGame(); 
-    else if (gameType === 'math') drawMathGame(); 
-    else if (gameType === 'karaoke') drawKaraokeGame();
 }
 
 // PROTECTED START 
@@ -1243,10 +1318,14 @@ function drawKaraokeGame() {
         ctx.beginPath(); ctx.moveTo(50, y); ctx.lineTo(750, y); ctx.stroke(); 
     }
     
-    // G-clef (placeholder text for now as per pixel art rule)
-    ctx.font = '60px Arial';
-    ctx.fillStyle = COLORS.WHITE;
-    ctx.fillText('∮', 60, staffTop + 100);
+    // G-clef
+    if (gClefImg.complete) {
+        ctx.drawImage(gClefImg, 60, staffTop - 30, 60, 180);
+    } else {
+        ctx.font = '60px Arial';
+        ctx.fillStyle = COLORS.WHITE;
+        ctx.fillText('∮', 60, staffTop + 100);
+    }
 
     // Pitch logic: notes can be on lines or in gaps
     // Pitch 0 is below bottom line, Pitch 1 is bottom line, etc.
@@ -1370,6 +1449,12 @@ function drawConfrontationPlay() {
         ctx.fillStyle = COLORS.WHITE; ctx.font = '30px "Press Start 2P"'; ctx.textAlign = 'center';
         ctx.fillText(fightingState.won ? 'YOU WIN!' : 'YOU LOSE!', canvas.width / 2, canvas.height / 2);
         ctx.font = '16px "Press Start 2P"'; ctx.fillText('Press Enter to Continue', canvas.width / 2, canvas.height / 2 + 50);
+    } else {
+        // Show attack instruction
+        ctx.fillStyle = COLORS.WHITE;
+        ctx.font = '10px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.fillText("Use the 'a' and 's' keys to attack!", canvas.width / 2, canvas.height - 30);
     }
 }
 
@@ -1388,68 +1473,90 @@ function drawSeparateWays() {
     }
 
     const index = currentCycle % 2; // 0: Companion, 1: Player
-    const zoomCycles = Math.floor(currentCycle / 2); // 0, 1, 2
+    const zoomIteration = Math.floor(currentCycle / 2); // 0, 1, 2
     const bg = index === 0 ? companionSitsBg : playerSitsBg;
     
-    if (bg.complete) {
-        let zoom = 1;
-        let panX = 0;
+    if (bg.readyState >= 2 || bg.complete) {
+        const W = canvas.width;
+        const H = canvas.height;
+        
+        // Initial zoom to fill screen
+        // companion_alone.gif is 540x540, player_alone.gif is 450x300
+        const bgW = (index === 0) ? 540 : 450;
+        const bgH = (index === 0) ? 540 : 300;
+        const s0 = Math.max(W / bgW, H / bgH);
+
+        let zoom = s0;
+        let panXOffset = 0;
         const progress = (elapsed % cycleDuration) / cycleDuration;
 
-        if (zoomCycles === 1) {
-            zoom = 1.3;
-            panX = progress * 40; // Camera moves right, so background pans left
-        } else if (zoomCycles === 2) {
-            zoom = 1.6;
-            panX = -progress * 40; // Camera moves left, so background pans right
-        }
-
-        ctx.save();
-        
-        // Character position in original image coords
+        // Character position in original image coords (the gif coords)
         let charX, charY;
-        const partnerName = PARTNER_PAIRS[CAST[selectedIndex].name];
-        const partnerActor = CAST.find(c => c.name === partnerName).actor.toLowerCase();
-        const playerActor = CAST[selectedIndex].actor.toLowerCase();
-        
         if (index === 0) {
             charX = 253; charY = 477;
         } else {
             charX = 48; charY = 453;
         }
 
-        // Center zoom on character
-        const centerX = charX + 32;
-        const centerY = charY + 32;
-        
-        const W = canvas.width;
-        const H = canvas.height;
-        
-        // Target point in image coords, including pan
-        let targetX = centerX + panX;
-        let targetY = centerY;
-        
-        // Clamp targetX and targetY to ensure background image (W x H) always fills canvas (W x H)
-        const halfVisibleW = W / (2 * zoom);
-        const minX = halfVisibleW;
-        const maxX = W - halfVisibleW;
-        targetX = Math.max(minX, Math.min(maxX, targetX));
-        
-        const halfVisibleH = H / (2 * zoom);
-        const minY = halfVisibleH;
-        const maxY = H - halfVisibleH;
-        targetY = Math.max(minY, Math.min(maxY, targetY));
+        let targetX, targetY;
 
+        if (zoomIteration === 0) {
+            // First time: centered on background, no pan, no extra zoom
+            targetX = bgW / 2;
+            targetY = bgH / 2;
+        } else if (zoomIteration === 1) {
+            // Second time: zoom in 50%, pan left, sprite at 300% (s0 * 1.5)
+            zoom = s0 * 1.5;
+            panXOffset = -progress * 40; // Camera moves left
+            // Centered on sprite but shifted to keep sprite in lower left
+            targetX = charX + 32 + W / (4 * zoom) + panXOffset;
+            targetY = charY + 32 - H / (4 * zoom);
+        } else {
+            // Third time: zoom in another 80% (total 2.7x), pan right, sprite at 540% (s0 * 2.7)
+            zoom = s0 * 2.7;
+            panXOffset = progress * 40; // Camera moves right
+            targetX = charX + 32 + W / (4 * zoom) + panXOffset;
+            targetY = charY + 32 - H / (4 * zoom);
+        }
+
+        // Clamp targetY so we never see above or below the background image
+        const halfVisibleH = (H / 2) / zoom;
+        targetY = Math.max(halfVisibleH, Math.min(bgH - halfVisibleH, targetY));
+
+        ctx.save();
         ctx.translate(W / 2, H / 2);
         ctx.scale(zoom, zoom);
         ctx.translate(-targetX, -targetY);
         
-        ctx.drawImage(bg, 0, 0, W, H);
+        // Mirrored tiling: draw center, left, and right
+        // Center
+        ctx.drawImage(bg, 0, 0, bgW, bgH);
         
+        // Right tile (mirrored)
+        ctx.save();
+        ctx.translate(2 * bgW, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(bg, 0, 0, bgW, bgH);
+        ctx.restore();
+
+        // Left tile (mirrored)
+        ctx.save();
+        ctx.translate(-bgW, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(bg, -bgW, 0, bgW, bgH);
+        ctx.restore();
+        
+        const partnerName = PARTNER_PAIRS[CAST[selectedIndex].name];
+        const partnerActor = CAST.find(c => c.name === partnerName).actor.toLowerCase();
+        const playerActor = CAST[selectedIndex].actor.toLowerCase();
         const sprite = index === 0 ? sitSprites[partnerActor] : sitSprites[playerActor];
+        
         if (sprite && sprite.complete) {
             const frame = 0;
-            drawPixelatedImage(sprite, frame * 64, 3 * 64, 64, 64, charX, charY, 64, 64);
+            // Draw sprite at 2x base size (relative to original image units)
+            // (charX, charY) is the anchor point. Sprite is 64x64.
+            // At s0 zoom, 128x128 sprite is 200%.
+            drawPixelatedImage(sprite, frame * 64, 3 * 64, 64, 64, charX - 32, charY - 64, 128, 128);
         }
         
         ctx.restore();
@@ -1457,7 +1564,7 @@ function drawSeparateWays() {
 }
 
 function drawTogetherAgain() {
-    if (companionSitsBg.complete) {
+    if (companionSitsBg.readyState >= 2 || companionSitsBg.complete) {
         ctx.drawImage(companionSitsBg, 0, 0, canvas.width, canvas.height);
     }
 
@@ -1468,7 +1575,8 @@ function drawTogetherAgain() {
     // Companion sitting
     const sitSprite = sitSprites[partnerActor];
     if (sitSprite && sitSprite.complete) {
-        drawPixelatedImage(sitSprite, 0, 3 * 64, 64, 64, 253, 430, 128, 128);
+        // Draw companion at (253, 430), centered horizontally (32*2) and anchored at feet (64*2)
+        drawPixelatedImage(sitSprite, 0, 3 * 64, 64, 64, 253 - 64, 430 - 128, 128, 128);
     }
 
     // Player walking and sitting
@@ -1477,7 +1585,7 @@ function drawTogetherAgain() {
         const walkSprite = walkSprites[playerActor];
         if (walkSprite && walkSprite.complete) {
             const frame = Math.floor(Date.now() / 150) % 6;
-            drawPixelatedImage(walkSprite, frame * 64, 3 * 64, 64, 64, togetherAgainState.playerX, 430, 128, 128);
+            drawPixelatedImage(walkSprite, frame * 64, 3 * 64, 64, 64, togetherAgainState.playerX - 64, 453 - 128, 128, 128);
         }
         if (togetherAgainState.playerX >= 230) {
             togetherAgainState.state = 'sitting';
@@ -1496,7 +1604,7 @@ function drawTogetherAgain() {
     } else {
         const playerSit = sitSprites[playerActor];
         if (playerSit && playerSit.complete) {
-            drawPixelatedImage(playerSit, 0, 3 * 64, 64, 64, 230, 430, 128, 128);
+            drawPixelatedImage(playerSit, 0, 3 * 64, 64, 64, 230 - 64, 453 - 128, 128, 128);
         }
     }
 }
@@ -1505,8 +1613,75 @@ function drawClosingInterview() {
     drawTitle(false); // Title screen background
 }
 
+let creditsStartTime = 0;
+let polaroids = [];
+
 function drawCredits() {
-    ctx.fillStyle = COLORS.BLACK; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (creditsStartTime === 0) {
+        creditsStartTime = Date.now();
+        polaroids = [];
+        // Prepare 5 polaroids
+        if (screenCaptures.length > 0) {
+            for (let i = 0; i < 5; i++) {
+                const img = screenCaptures[Math.floor(Math.random() * screenCaptures.length)];
+                polaroids.push({
+                    img: img,
+                    x: 50 + Math.random() * 500,
+                    y: 50 + Math.random() * 300,
+                    rotation: (Math.random() - 0.5) * 0.4,
+                    time: i * 1500 // Show one every 1.5 seconds
+                });
+            }
+        }
+    }
+
+    const elapsed = Date.now() - creditsStartTime;
+    const allPhotosShownTime = 5 * 1500 + 1000;
+
+    ctx.fillStyle = COLORS.BLACK;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (elapsed < allPhotosShownTime + 2000) {
+        // Show polaroids
+        polaroids.forEach(p => {
+            if (elapsed > p.time) {
+                ctx.save();
+                ctx.translate(p.x + 100, p.y + 100);
+                ctx.rotate(p.rotation);
+                
+                // Polaroid frame
+                ctx.fillStyle = COLORS.WHITE;
+                ctx.fillRect(-110, -110, 220, 240);
+                
+                // Photo
+                ctx.drawImage(p.img, -100, -100, 200, 150);
+                
+                ctx.restore();
+            }
+        });
+        
+        if (elapsed > allPhotosShownTime) {
+            // Fade effect could be handled here if we wanted a transition
+        }
+        return; // Wait for photos before rolling credits
+    }
+
+    // Roll credits
+    ctx.save();
+    if (screenCaptures.length > 0) {
+        ctx.globalAlpha = 0.3;
+        polaroids.forEach(p => {
+            ctx.save();
+            ctx.translate(p.x + 100, p.y + 100);
+            ctx.rotate(p.rotation);
+            ctx.fillStyle = COLORS.WHITE;
+            ctx.fillRect(-110, -110, 220, 240);
+            ctx.drawImage(p.img, -100, -100, 200, 150);
+            ctx.restore();
+        });
+    }
+    ctx.restore();
+
     const CREDITS_TEXT = [
         "Wanderlust", "", 
         "Director & Tech", "Lindsey McGowen", "", 
@@ -1515,12 +1690,19 @@ function drawCredits() {
         "Claire Biddiscombe", "Gilbert El-Dick", "Jason Summers", 
         "Krystal Merrells", "Patrice Forbes", "Peter Rogers", 
         "Sam Allen", "The Velvet Duke", "",
-        "Presented By", "Wayward Improvised Theatre &", "Videogaming Concern"
+        "Special Thanks to", "Annika Bolden (pinkies up!)", "",
+        "Presented By", "Wayward Improvised Theatre & Videogaming Concern"
     ];
     ctx.fillStyle = COLORS.WHITE; ctx.textAlign = 'center'; ctx.font = '16px "Press Start 2P"';
     CREDITS_TEXT.forEach((line, i) => { 
         const y = creditsY + i * 40; 
-        if (y > -40 && y < canvas.height + 40) ctx.fillText(line, canvas.width / 2, y); 
+        if (y > -40 && y < canvas.height + 40) {
+            // Drop shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillText(line, canvas.width / 2 + 2, y + 2);
+            ctx.fillStyle = COLORS.WHITE;
+            ctx.fillText(line, canvas.width / 2, y); 
+        }
     });
     if (!creditsFinished) { 
         creditsY -= 2.5; 

@@ -1,5 +1,5 @@
 {
-  "exportTimestamp": "2026-04-09T06-07-59",
+  "exportTimestamp": "2026-04-16T05-28-08",
   "bodyType": "male",
   "standardAnimations": {
     "exported": [
@@ -31,17 +31,17 @@
   "frameCounts": {},
   "performance": {
     "exportKind": "splitAnimations",
-    "totalMs": 621.5,
+    "totalMs": 597,
     "phasesMs": {
-      "render_composite_extractAnimationFromCanvas": 2.1,
-      "drawAndSlice": 6.7,
-      "pngEncode": 559.9,
-      "zipFile": 3.2,
-      "staticFiles": 2.3
+      "render_composite_extractAnimationFromCanvas": 1.6,
+      "drawAndSlice": 8.6,
+      "pngEncode": 548.9,
+      "zipFile": 2.3,
+      "staticFiles": 0.4
     },
     "counters": {
       "pngEncodeCount": 17,
-      "totalPngBytes": 380168,
+      "totalPngBytes": 407789,
       "drawAndSliceCount": 17,
       "zipFileEntryCount": 17,
       "renderExtractAnimationFromCanvasCalls": 17,
@@ -50,6 +50,6 @@
       "extractFramesFromAnimationBatchCount": 0,
       "renderSliceCanvasForCustomAnimCalls": 0
     },
-    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
   }
 }

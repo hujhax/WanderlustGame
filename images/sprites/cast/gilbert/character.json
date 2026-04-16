@@ -33,8 +33,8 @@
     "eyebrows": {
       "itemId": "eyebrows_thick",
       "subId": null,
-      "variant": "raven",
-      "recolor": "",
+      "variant": "",
+      "recolor": "raven",
       "name": "Thick Eyebrows (raven)"
     },
     "head": {
@@ -50,6 +50,13 @@
       "variant": "green",
       "recolor": "",
       "name": "Shades (green)"
+    },
+    "body": {
+      "itemId": "body",
+      "subId": null,
+      "variant": "",
+      "recolor": "amber",
+      "name": "Body Color (amber)"
     },
     "eyes": {
       "itemId": "heads_human_male",
@@ -90,8 +97,39 @@
     "1h_backslash": false,
     "1h_halfslash": false
   },
-  "url": "https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/#sex=male&expression=Happy_Alt_amber&clothes=Longsleeve_2_Buttoned_green&legs=Cuffed_Pants_tan&shoes=Basic_Shoes_leather&eyebrows=Thick_Eyebrows_raven&head=Human_Male_amber&facial_eyes=Shades_green&eyes=Eye_Color_brown",
+  "url": "https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/#sex=male&expression=Happy_Alt_amber&clothes=Longsleeve_2_Buttoned_green&legs=Cuffed_Pants_tan&shoes=Basic_Shoes_leather&eyebrows=Thick_Eyebrows_raven&head=Human_Male_amber&facial_eyes=Shades_green&body=Body_Color_amber&eyes=Eye_Color_brown",
   "layers": [
+    {
+      "itemId": "body",
+      "name": "Body Color (amber)",
+      "variant": "",
+      "recolors": {
+        "body": "amber"
+      },
+      "zPos": 10,
+      "layerNum": 1,
+      "yPos": 0,
+      "isCustom": false,
+      "needsRecolor": false,
+      "fileName": "body/bodies/male/spellcast.png",
+      "supportedAnimations": [
+        "spellcast",
+        "thrust",
+        "walk",
+        "slash",
+        "shoot",
+        "hurt",
+        "climb",
+        "idle",
+        "jump",
+        "sit",
+        "emote",
+        "run",
+        "combat_idle",
+        "backslash",
+        "halfslash"
+      ]
+    },
     {
       "itemId": "feet_shoes_basic",
       "name": "Basic Shoes (leather)",
@@ -247,14 +285,16 @@
     {
       "itemId": "eyebrows_thick",
       "name": "Thick Eyebrows (raven)",
-      "variant": "raven",
-      "recolors": null,
+      "variant": "",
+      "recolors": {
+        "eyebrows": "raven"
+      },
       "zPos": 106,
       "layerNum": 1,
       "yPos": 0,
       "isCustom": false,
       "needsRecolor": false,
-      "fileName": "eyes/eyebrows/thick/adult/spellcast/raven.png",
+      "fileName": "eyes/eyebrows/thick/adult/spellcast.png",
       "supportedAnimations": [
         "spellcast",
         "thrust",
@@ -385,7 +425,7 @@
       ]
     },
     {
-      "fileName": "eyes/eyebrows/thick/adult/jump/raven.png",
+      "fileName": "eyes/eyebrows/thick/adult/jump.png",
       "file": "eyes/eyebrows/thick",
       "notes": "",
       "authors": [
@@ -433,6 +473,39 @@
       ],
       "urls": [
         "https://opengameart.org/content/lpc-base-character-expressions"
+      ]
+    },
+    {
+      "fileName": "body/bodies/male/jump.png",
+      "file": "body/bodies/male",
+      "notes": "see details at https://opengameart.org/content/lpc-character-bases; 'Thick' Male Revised Run/Climb by JaidynReiman (based on ElizaWy's LPC Revised)",
+      "authors": [
+        "bluecarrot16",
+        "JaidynReiman",
+        "Benjamin K. Smith (BenCreating)",
+        "Evert",
+        "Eliza Wyatt (ElizaWy)",
+        "TheraHedwig",
+        "MuffinElZangano",
+        "Durrani",
+        "Johannes Sjölund (wulax)",
+        "Stephen Challener (Redshrike)"
+      ],
+      "licenses": [
+        "OGA-BY 3.0",
+        "CC-BY-SA 3.0",
+        "GPL 3.0"
+      ],
+      "urls": [
+        "https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles",
+        "https://opengameart.org/content/lpc-medieval-fantasy-character-sprites",
+        "https://opengameart.org/content/lpc-male-jumping-animation-by-durrani",
+        "https://opengameart.org/content/lpc-runcycle-and-diagonal-walkcycle",
+        "https://opengameart.org/content/lpc-revised-character-basics",
+        "https://opengameart.org/content/lpc-be-seated",
+        "https://opengameart.org/content/lpc-runcycle-for-male-muscular-and-pregnant-character-bases-with-modular-heads",
+        "https://opengameart.org/content/lpc-jump-expanded",
+        "https://opengameart.org/content/lpc-character-bases"
       ]
     }
   ]

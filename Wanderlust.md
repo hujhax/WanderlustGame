@@ -117,17 +117,21 @@ Also, the player may press enter at any time in this phase to proceed to In the 
 ## In the Car
 Show the title screen without the "Wanderlust" text or the "Press Enter to Start" text.
 
+Use this music for the background music: https://www.youtube.com/watch?v=FGoWAmAoDUg, starting at the 45-second mark.
+
 Generate three lists of pieces of dialog; generate 50 separate lines of dialog for each list.  Whenever we use these one of these lists, we pick an item from it randomly, without any repeats throughout a run of the game.
 
 "Insults" are one-sentence insults towards the person you're talking to.
-"Blands" are one-sentence bland statements about the weather, the car, or things you see on the road.
-"Truths" are one-sentence fairly deep truths the character says.
+"Blands" are one-sentence bland statements about things you might see on a long drive.
+"Truths" are one-sentence fairly deep truths the character says about how they feel about themselves or how they view the world.
 
 In this section, we repeat this cycle four times:
 1. The companion says a line of dialog from the Blands.
 2. The player is given three options for how to respond, arranged randomly: one of the Insults, one of the Blands, or one of the Truths. These three items are presented in random order. Selecting an Insult gives -100 points and results in a "sad trombone" sound; selecting a Bland gives 0 points; selecting a Truth gives +200 points and results in a "ta-da!" sound.
 
 Whenever possible, put dialog boxes at the top of the screen so they don't block the car.
+
+Make sure the full text of each choice is visible.  Above the three choices, show the text "How do you respond?"
 
 After this cycle is done four times, automatically proceed to the first minigame.
 
@@ -244,7 +248,7 @@ This minigame's background music is music/karaoke_bgm.mp3.
 Introductory dialog:
 Lord Karaoke (Velvet): It's Karaoke Night at Tappers! Sure, you can come up and sing, just make sure you hit all the notes on-key!  Use the up and down buttons to adjust your pitch!
 
-The game screen shows a single musical staff with a G-clef and five horizontal lines.  (Download the pixel-art G-clef from https://art.pixilart.com/2954095ce6859c5.png .) The player controls a gold diamond that sits on the left side of the staff, starting at G.
+The game screen shows a single musical staff with a G-clef and five horizontal lines.  (Download the pixel-art G-clef from https://art.pixilart.com/2954095ce6859c5.png and display it in white, at the proper height on the music staff.) The player controls a gold diamond that sits on the left side of the staff, starting at G.
 
 If they player hits the "up" key, the diamond goes up a note.
 If they player hits the "down" key, the diamond goes up a note.
@@ -263,19 +267,90 @@ Lord Karaoke (Velvet): Killer performance! Your next round of drinks is on me!
 If the player lost:
 Lord Karaoke (Velvet): You have failed karaoke night.  Leave here, and take your dishonor with you.
 
+### Fromagerie Frenzy! (Formerly Supermarket Sweep)
+You can reach this game directly with the query parameter `?minigame=cheese`.
+
+The opening screen shows a market stall (use images/market-stall.jpg) on the left side of the screen, against a dark background.
+
+For background music, download and use the music from https://www.youtube.com/watch?v=utAcawM33uk.
+
+Opening Dialog:
+Mme. Tremblay (Claire): Welcome to the fromagerie!
+Mme. Tremblay (Claire): Alas, we have a bit of a crisis. As you know, tomorrow is Cheese Day...
+Mme. Tremblay (Claire): ... and we have to prep all our at-least-three-cheese gift baskets today!
+Mme. Tremblay (Claire): Can you help?
+Mme. Tremblay (Claire): Just go to the cheese chutes and exchange pairs of cheeses to produce rows and columns of three identical cheeses.
+Mme. Tremblay (Claire): If you get stuck, press the red button and you can eat one cheese — but I wouldn't recommend doing that more than twice!
+
+
+This is a match-three game.  
+
+The game screen shows these items from left-to-right: (1) a market stall (use images/market-stall.jpg); (2) a green, vertical progress bar; (3) an 8x8 play field.
+
+In the eight by eight grid, each square has one of eight different types of cheese. 
+
+Use the cheese pixel art from this page:
+https://www.shutterstock.com/image-vector/cheese-assortment-pixel-art-set-round-2218999381
+
+Standard match-three-game rules apply.  The player clicks pairs of horizontally- or verically-adjacent cheeses to exchange them.  If the player creates rows or columns of at least three identical cheeses, they disappear (with a "chomp" sound), all the cheeses above it move down a square, and new random cheeses fill in the top squares.  If an exchange would not create a scoring group of cheeses, the game rejects the exchange by switching the selected cheeses, then switching them back, and playing a short alarm sound.
+
+Instructions say "Click two adjacent cheeses to exchange their positions.  Generate groups of three cheeses to win!"
+
+A green vertical progress bar sits next to the play field.  The bar represents 500 "cheese points".  When the bar fills up, add one success, give the player 100 actual points, and reset the progress bar to zero.
+
+Above the progress bar is a square, red "eat" button.  If the player presses the "eat" button, they collect one failure, and the next cheese they press disappears from the grid with a 'chomp' sound.  (And all the cheeses above move down.)
+
+Cheese points are awarded as follows:
+* 3 adjacent cheeses: 100
+* 4 adjacent cheeses: 200
+* any score involving > 4 cheeses: 400
+
+If the player gets four successes, they win.  The dialog when the player wins:
+Mme. Tremblay (Claire): Hooray! The at-least-three-cheese gift baskets are saved!
+Mme. Tremblay (Claire): It's a Cheese Day miracle!
+
+If the player gets three failures, they lose. The dialog when the player loses:
+Mme. Tremblay (Claire): Alas, you have succumbed to the Temptation of the Cheese.
+Mme. Tremblay (Claire): Do not weep, weary traveler. It has claimed prouder souls than yours.
+
+
 ## The Confrontation
 You can access this section directly by setting the query parameter "minigame=confrontation".
 
 This section opens with a title card: "The Confrontation" and "Press Enter to Continue".
 
-Before play starts:
-[Companion's First Name]([Companion's First Name]): Well, maybe we shouldn't be friends any more!
-
-When play starts:
 Use the music at music/fighting_theme.mp3 as background music.
 
-In that dialog, the character name is the first name of the companion, not their full name.
+The player has a list of three "success responses", which the game will use in random order, and no repeats, on each playthrough:
+1. So what?  I really like [minigame name].
+2. I don't take like it when people don't want me to be *good* at something.
+3. Yeah, whatever. You're just jealous.
 
+The player has a list of three "failure responses", which the game will use in random order, and no repeats, on each playthrough:
+1. Seriously? I already feel so bad about this.
+2. Maybe if you'd *helped*, I might have done better!
+3. I'm not your employee, [Companion's First Name].
+
+Before play starts:
+[Companion's First Name]([Companion's First Name]): I am so frustrated with this trip!
+[Player's First Name]([Player's First Name]): Okay, fine. Here we go...
+
+For each of the minigames the player played:
+If the player won the minigame:
+[Companion's First Name]([Companion's First Name]): I resented how good you were at [minigame name]!
+[Player's First Name]([Player's First Name]): [success response]
+
+If the player lost the minigame:
+[Companion's First Name]([Companion's First Name]): How could you screw up [minigame name]!
+[Player's First Name]([Player's First Name]): [failure response]
+
+After covering the three minigames:
+[Companion's First Name]([Companion's First Name]): Well, maybe we shouldn't be friends any more!
+[Player's First Name]([Player's First Name]): Maybe we shouldn't!
+[Companion's First Name]([Companion's First Name]): I grow tired of using words to handle this.
+[Player's First Name]([Player's First Name]): TO THE BATTLEDOME!
+
+When play starts:
 This section is a single-player 2D fighting game.
 
 It includes a player character (represented using the selected cast member's sprites) and an AI enemy (represnted using the companion's sprites).
@@ -289,6 +364,8 @@ The player character kicks with the "s" key; use the appropriate row of sprites 
 Both attacks are implemented with hitboxes.  Use standard 8-bit sound effects for punching and kicking.
 
 A punch or kick is always aimed in the direction the character is currently facing.
+
+An onscreen instruction should say "Use the 'a' and 's' keys to attack!"
 
 Use the combat.png sprites when a character is standing still.
 
@@ -309,29 +386,31 @@ The background music of this section is available in music/karaoke_bgm.mp3.
 
 Alternate between Companion Sits and Player Sits (defined below), spending five seconds on each.
 
-The first time we see each screen, display it without panning and without zooming.
+Tile the background horizontally; each tile should be the horizontal mirror of its neighbor.
 
-The second time we see each screen, zoom in a little on the sprite (making sure the sprites scale appropriately), and pan very very slowly to the left.
+We should never see above or below the background.
 
-The third time we see each screen, zoom in a little bit more on the sprite (again making sure the sprites scale appropriately), and pan very very slowly to the right.
+The first time we see each screen, display it without panning and zoomed just enough to make the background fill the screen.  The background should be centered on the canvas this time.  The sprite draws at 200% size, at coordinates specified below.
 
-The sprites should scale up as much as the background does.
+The second time we see each screen, zoom in 50%, centered on the sprite, and pan very very slowly to the left.  The sprite draws at 300% size.
 
-The background image should *always* fill the whole canvas; if this means the sprite is not in the center of the screen, that is okay.
+The third time we see each screen, zoom in another 80%, centered on the sprite, and pan very very slowly to the right.  The sprite draws at 540% size.
+
+Even though the zoom is centered on the sprite, the sprite should stay towards the lower left corner of the screen on the second and third iterations.
 
 After showing each screen three times, go to a black screen and the text "Press Enter to Continue".
 
 At any point the user may press Enter to stop the music, clear the screen, and move on to the dialog in On Your Own?
 
 ### Companion Sits
-The background image is images/companion_alone.gif, sized so it will fill the whole canvas, even during the initial viewing.
+The background image is images/companion_alone.gif, sized so it will fill the whole canvas during the initial viewing.
 
 Place the player's companion sitting on the rocks at the bottom of the image.  Use the leftmost sprite in the fourth row of sit.png -- (x,y) should be (253, 477).
 
 ## Player Sits
 The same as screen 1, except:
-1. Use images/player_alone.gif as the background, sized so it will fill the whole canvas, even during the initial viewing.
-2. Use the player sprite, placed among bushes at the bottom left of the screen -- (x,y) should be (48, 253)
+1. Use images/player_alone.gif as the background, sized so it will fill the whole canvas during the initial viewing.
+2. Use the player sprite, placed among bushes at the bottom left of the screen -- (x,y) should be (48, 453)
 
 
 ## On Your Own?
@@ -361,9 +440,11 @@ You can access this section directly by setting the query parameter "minigame=re
 
 This screen has this background music: https://www.youtube.com/watch?v=xM83zj395tQ
 
-Display the Companion Sits screen, without panning.
+Display the Companion Sits screen, without panning.  The companion should again be at (x,y) = (253, 430).
 
-Have the player walk onscreen (use the fourth row of sprites in walk.png) and sit next to the companion (use the first sprite in the fourth row of sit.png).
+Have the player walk onscreen (use the fourth row of sprites in walk.png) and sit next to the companion (use the first sprite in the fourth row of sit.png) at (x,y) = (230, 453).
+
+Both sprites should draw onscreen at 2x size.
 
 [Player's First Name]([Player's First Name]){top}: I'm sorry I fought with you.
 [Companion's First Name]([Companion's First Name]){top}: I'm sorry too.
@@ -372,22 +453,22 @@ Have the player walk onscreen (use the fourth row of sprites in walk.png) and si
 [Player's First Name]([Player's First Name]){top}: YAY!
 
 ## Closing Interview
-This screen has this background music: https://www.youtube.com/watch?v=vNijKv1Ac6k
+This screen has this background music: music/closing_interview.mp3, at the 39-second mark.
 
 Show the title screen again, without the "Wanderlust" title.
 
-[Player's First Name]([Player's First Name]){top}: We had a crazy trip.
+[Player's First Name]([Player's First Name]){top}: We had a meaningful trip.
 [Companion's First Name]([Companion's First Name]){top}: It challenged our friendship.
 [Player's First Name]([Player's First Name]){top}: It was a crazy time.
 [Companion's First Name]([Companion's First Name]){top}: But we learned a lot about ourselves.
 [Player's First Name]([Player's First Name]){top}: I gained [score] points worth of self-knowledge!
 
 ## Closing Credits
-First, show a blank screen.  Then add five random screen captures from this run through the game, one by one, presented like they're polaroid pictures scattered randomly on the screen, but each "photo" should remain mostly visible.  If there are not five screen captures available, repeats are okay.  If no screen captures are available, skip directly to scrolling the credits.
+First, show a blank screen.  Then add five random screen captures from this run through the game, one by one, presented like they're polaroid pictures scattered randomly on the screen, but each "photo" should remain mostly visible.  The photos should not overlap.  If there are not five screen captures available, repeats are okay.  If no screen captures are available, skip directly to scrolling the credits.
 
 When all photos appear, fade them all to 30% opacity and roll credits.
 
-This section should scroll credits fairly quickly, in white Nintendo font against a black background.
+This section should scroll credits fairly quickly, in white Nintendo font against a black background, with a faint drop shadow.
 
 This is the text it should depict:
 Wanderlust
@@ -408,8 +489,13 @@ Peter Rogers
 Sam Allen
 The Velvet Duke
 
+Special Thanks to
+Annika Bolden (pinkies up!)
+
 Presented By
-Wayward Improvised Theatre & Videogaming Concern
+Wayward Improvised Theatre
+& Videogaming Concern
+
 
 The background music should be music/moon.mp3.
 
