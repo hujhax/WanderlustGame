@@ -323,7 +323,7 @@ Use the music at music/fighting_theme.mp3 as background music.
 
 The player has a list of three "success responses", which the game will use in random order, and no repeats, on each playthrough:
 1. So what?  I really like [minigame name].
-2. I don't take like it when people don't want me to be *good* at something.
+2. I don't like it when people don't want me to be *good* at something.
 3. Yeah, whatever. You're just jealous.
 
 The player has a list of three "failure responses", which the game will use in random order, and no repeats, on each playthrough:
