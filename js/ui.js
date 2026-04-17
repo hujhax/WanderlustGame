@@ -134,3 +134,13 @@ function drawInTheCar() {
         });
     }
 }
+
+function drawNextDay() {
+    ctx.fillStyle = COLORS.BLACK; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = COLORS.WHITE; ctx.font = '32px "Press Start 2P"'; ctx.textAlign = 'center';
+    ctx.fillText("The next day...", canvas.width / 2, canvas.height / 2);
+    ctx.font = '16px "Press Start 2P"';
+    if (Math.floor(Date.now() / 500) % 2 === 0) {
+        ctx.fillText('Press Enter to Continue', canvas.width / 2, canvas.height / 2 + 100);
+    }
+}

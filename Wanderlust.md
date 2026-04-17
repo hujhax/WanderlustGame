@@ -39,12 +39,16 @@ Mr. Willis (Jason): Hello world!
 
 You would display Jason's head shot in the square, label it "Mr. Willis", and set the dialog block to "Hello world!"
 
+Note that you should not combine multiple dialog prompts into a single dialog box; each new prompt should kick off a new dialog box, even if there are multiple dialog prompts from the same character.
+
 "style" is an optional tag, and it can take the values "silhouette", "inverted", and "top".
 "silhouette" means, instead of drawing the head shot, you draw a black silhouette of the head shot.
 "inverted" means you use the appropriate head shot from /images/cast/inverted.
 "top" means you draw the whole dialog display at the top of the screen and not the bottom.
 
 In "silhouette" mode, the square behind the head shot is gray.  In all other modes (including default), it's black.
+
+When a dialog box is visible, remove any "Press Enter to Continue" prompt from the screen until the dialog is done.
 
 
 
@@ -270,7 +274,7 @@ Lord Karaoke (Velvet): You have failed karaoke night.  Leave here, and take your
 ### Fromagerie Frenzy! (Formerly Supermarket Sweep)
 You can reach this game directly with the query parameter `?minigame=cheese`.
 
-The opening screen shows a market stall (use images/market-stall.jpg) on the left side of the screen, against a dark background.
+The opening screen shows a market stall (use images/market_stall.png) on the left side of the screen, against a dark background.
 
 For background music, download and use the music from https://www.youtube.com/watch?v=utAcawM33uk.
 
@@ -285,14 +289,20 @@ Mme. Tremblay (Claire): If you get stuck, press the red button and you can eat o
 
 This is a match-three game.  
 
-The game screen shows these items from left-to-right: (1) a market stall (use images/market-stall.jpg); (2) a green, vertical progress bar; (3) an 8x8 play field.
+The game screen shows these items from left-to-right: (1) a market stall (use images/market_stall.png); (2) a green, vertical progress bar; (3) an 8x8 play field.
 
 In the eight by eight grid, each square has one of eight different types of cheese. 
 
 Use the cheese pixel art from this page:
 https://www.shutterstock.com/image-vector/cheese-assortment-pixel-art-set-round-2218999381
 
-Standard match-three-game rules apply.  The player clicks pairs of horizontally- or verically-adjacent cheeses to exchange them.  If the player creates rows or columns of at least three identical cheeses, they disappear (with a "chomp" sound), all the cheeses above it move down a square, and new random cheeses fill in the top squares.  If an exchange would not create a scoring group of cheeses, the game rejects the exchange by switching the selected cheeses, then switching them back, and playing a short alarm sound.
+Standard match-three-game rules apply.  The player clicks pairs of horizontally- or verically-adjacent cheeses to exchange them.  If the player creates rows or columns of at least three identical cheeses, draw a little box around them, and quickly fade them to zero opacity (with a "chomp" sound).  Then, all the cheeses above them move down to replenish the empty spots, and new random cheeses fill in the top squares.
+
+If an exchange would not create a scoring group of cheeses, the game rejects the exchange by switching the selected cheeses, then switching them back, and playing a short alarm sound.
+
+When you switch two cheeses, animate switching their positions.
+
+When a cheese moves down in the gameboard, animate it wobbling a bit as it falls, and then steadying itself when it lands into place.
 
 Instructions say "Click two adjacent cheeses to exchange their positions.  Generate groups of three cheeses to win!"
 
@@ -304,6 +314,7 @@ Cheese points are awarded as follows:
 * 3 adjacent cheeses: 100
 * 4 adjacent cheeses: 200
 * any score involving > 4 cheeses: 400
+* any chain reaction involving multiple scores: +100 her additional score
 
 If the player gets four successes, they win.  The dialog when the player wins:
 Mme. Tremblay (Claire): Hooray! The at-least-three-cheese gift baskets are saved!
@@ -319,17 +330,27 @@ You can access this section directly by setting the query parameter "minigame=co
 
 This section opens with a title card: "The Confrontation" and "Press Enter to Continue".
 
-Use the music at music/fighting_theme.mp3 as background music.
+Use the music at music/fighting_theme.mp3 as background music, starting at the 30-second mark.
 
 The player has a list of three "success responses", which the game will use in random order, and no repeats, on each playthrough:
 1. So what?  I really like [minigame name].
 2. I don't like it when people don't want me to be *good* at something.
-3. Yeah, whatever. You're just jealous.
+3. Yeah, whatever, [Companion's First Name]. You're just jealous.
 
 The player has a list of three "failure responses", which the game will use in random order, and no repeats, on each playthrough:
 1. Seriously? I already feel so bad about this.
 2. Maybe if you'd *helped*, I might have done better!
 3. I'm not your employee, [Companion's First Name].
+
+The companion has a list of three "success responses", which the game will use in random order, and no repeats, on each playthrough:
+1. I resented how good you were at [minigame name]!
+2. You just *had* to show off at [minigame name], didn't you?
+3. What was up with [minigame name]? Why couldn't we stop to do something *I'd* be good at?
+
+The companion has a list of three "failure responses", which the game will use in random order, and no repeats, on each playthrough:
+1. How could you screw up [minigame name]!
+2. [Player's First Name], I was counting on you to win at [minigame name]!
+3. I was really disappointed in how you did at [minigame name].
 
 Before play starts:
 [Companion's First Name]([Companion's First Name]): I am so frustrated with this trip!
@@ -337,12 +358,12 @@ Before play starts:
 
 For each of the minigames the player played:
 If the player won the minigame:
-[Companion's First Name]([Companion's First Name]): I resented how good you were at [minigame name]!
-[Player's First Name]([Player's First Name]): [success response]
+[Companion's First Name]([Companion's First Name]): [random success response]
+[Player's First Name]([Player's First Name]): [random success response]
 
 If the player lost the minigame:
-[Companion's First Name]([Companion's First Name]): How could you screw up [minigame name]!
-[Player's First Name]([Player's First Name]): [failure response]
+[Companion's First Name]([Companion's First Name]): [random failure response]
+[Player's First Name]([Player's First Name]): [random failure response]
 
 After covering the three minigames:
 [Companion's First Name]([Companion's First Name]): Well, maybe we shouldn't be friends any more!
@@ -373,7 +394,7 @@ Both characters have health bars.
 
 The AI should move towards the player and attack randomly.
 
-Use images/gas_station.webp for the background.
+Use images/battledome.webp for the background.
 
 When the player wins or loses, play the "ta-da!" sound or the "sad trombone" sound and show "Press Enter to Continue".
 
@@ -384,6 +405,8 @@ You can access this section directly by setting the query parameter "minigame=se
 
 The background music of this section is available in music/karaoke_bgm.mp3.
 
+A title card reads "The next day..." before we go to the Companion Sits screen.  This screen should force loading the companion_alone.mp3 and player_alone.mp4 backgrounds if they're not yet loaded.
+
 Alternate between Companion Sits and Player Sits (defined below), spending five seconds on each.
 
 Tile the background horizontally; each tile should be the horizontal mirror of its neighbor.
@@ -392,11 +415,10 @@ We should never see above or below the background.
 
 The first time we see each screen, display it without panning and zoomed just enough to make the background fill the screen.  The background should be centered on the canvas this time.  The sprite draws at 200% size, at coordinates specified below.
 
-The second time we see each screen, zoom in 50%, centered on the sprite, and pan very very slowly to the left.  The sprite draws at 300% size.
+The second time we see each screen, zoom in 50%, centered on the sprite.  The sprite draws at 300% size.
 
-The third time we see each screen, zoom in another 80%, centered on the sprite, and pan very very slowly to the right.  The sprite draws at 540% size.
+The third time we see each screen, zoom in another 80%, centered on the sprite.  The sprite draws at 540% size.
 
-Even though the zoom is centered on the sprite, the sprite should stay towards the lower left corner of the screen on the second and third iterations.
 
 After showing each screen three times, go to a black screen and the text "Press Enter to Continue".
 
@@ -407,10 +429,20 @@ The background image is images/companion_alone.gif, sized so it will fill the wh
 
 Place the player's companion sitting on the rocks at the bottom of the image.  Use the leftmost sprite in the fourth row of sit.png -- (x,y) should be (253, 477).
 
+The second and third times we see this screen, we pan very, very slowly to the right (the camera pans left, so the background pans right).
+
+Even though the zoom is centered on the sprite, the sprite should stay towards the lower left corner of the screen on the second and third iterations.
+
+
 ## Player Sits
 The same as screen 1, except:
 1. Use images/player_alone.gif as the background, sized so it will fill the whole canvas during the initial viewing.
-2. Use the player sprite, placed among bushes at the bottom left of the screen -- (x,y) should be (48, 453)
+2. Use the player sprite, placed among bushes at the bottom right of the screen -- use the leftmost sprite in the *second* row of sit.png -- (x,y) should be (371, 230)
+
+The second and third times we see this screen, we pan very, very slowly to the left (the camera pans right, so the background pans left).
+
+Even though the zoom is centered on the sprite, the sprite should stay towards the lower right corner of the screen on the second and third iterations.
+
 
 
 ## On Your Own?
@@ -419,9 +451,12 @@ You can access this section directly by setting the query parameter "minigame=al
 This is the same as The Confrontation, except:
 1. There is different opening dialog.
 2. The opponent AI does not use the companion's sprites, but rather, color-inverted versions of the player's sprites.
-3. You can reach this screen directly with "minigame=own"
+3. You can reach this screen directly with "minigame=own"ss
 4. After this screen, you proceed to the Together Again.
-5. Use the images/rainy-pixel-city-stockcake.jpg for the background.
+5. Use the images/on_your_own_bg.jpg for the background.
+
+
+When the introductory dialog starts, stop the background music.
 
 Here is the introductory dialog for this section (note that the player is talking to a version of themselves):
 
@@ -466,7 +501,7 @@ Show the title screen again, without the "Wanderlust" title.
 ## Closing Credits
 First, show a blank screen.  Then add five random screen captures from this run through the game, one by one, presented like they're polaroid pictures scattered randomly on the screen, but each "photo" should remain mostly visible.  The photos should not overlap.  If there are not five screen captures available, repeats are okay.  If no screen captures are available, skip directly to scrolling the credits.
 
-When all photos appear, fade them all to 30% opacity and roll credits.
+When all photos appear, begin scrolling.  The credits should appear below the collection of photos.
 
 This section should scroll credits fairly quickly, in white Nintendo font against a black background, with a faint drop shadow.
 

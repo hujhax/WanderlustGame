@@ -11,17 +11,17 @@ function startFightingGame(nextPhase, isShadow = false) {
     const playerFirstName = CAST[selectedIndex].firstName;
 
     const startFight = () => {
-        currentPhase = PHASES.MINIGAME_PLAY; // Using PLAY as a generic active state for render loop switch simplification if needed, but actually switch to PHASES.THE_CONFRONTATION or PHASES.ON_YOUR_OWN
-        currentPhase = nextPhase === PHASES.TOGETHER_AGAIN ? PHASES.ON_YOUR_OWN : PHASES.THE_CONFRONTATION;
+        currentPhase = PHASES.CONFRONTATION_PLAY;
         fightingState = {
             player: { actor: CAST[selectedIndex].actor.toLowerCase(), x: 100, y: 400, health: 100, facing: 1, state: 'idle', frame: 0, attacking: 0, attackType: null, isShadow: false },
             ai: { actor: (isShadow ? CAST[selectedIndex].actor : partner.actor).toLowerCase(), x: 600, y: 400, health: 100, facing: -1, state: 'idle', frame: 0, attacking: 0, attackType: null, isShadow: isShadow },
             gameOver: false, won: false, nextPhase: nextPhase
         };
-        audio.play('FIGHT_BGM');
+        audio.play('FIGHT_BGM', 30);
     };
 
     if (isShadow) {
+        audio.stop();
         let dialogs = [
             ["?????", playerFirstName, "Hehehehhe. Hee hee hee.", 'silhouette'],
             ["?????", playerFirstName, "Now you are finally on your own.", 'silhouette'],
@@ -40,24 +40,42 @@ function startFightingGame(nextPhase, isShadow = false) {
         };
         nextDialog();
     } else {
-        // Confrontation opening with performance review
         let dialogs = [
             [partnerFirstName, partnerActor, "I am so frustrated with this trip!", null],
             [playerFirstName, CAST[selectedIndex].actor, "Okay, fine. Here we go...", null]
         ];
 
-        // Add review for each minigame
-        const successes = [...CONFRONTATION_RESPONSES.SUCCESS].sort(() => Math.random() - 0.5);
-        const failures = [...CONFRONTATION_RESPONSES.FAILURE].sort(() => Math.random() - 0.5);
-        let sIdx = 0, fIdx = 0;
+        // Prepare randomized response lists
+        const pSuccesses = [...CONFRONTATION_RESPONSES.PLAYER_SUCCESS].sort(() => Math.random() - 0.5);
+        const pFailures = [...CONFRONTATION_RESPONSES.PLAYER_FAILURE].sort(() => Math.random() - 0.5);
+        const cSuccesses = [...CONFRONTATION_RESPONSES.COMPANION_SUCCESS].sort(() => Math.random() - 0.5);
+        const cFailures = [...CONFRONTATION_RESPONSES.COMPANION_FAILURE].sort(() => Math.random() - 0.5);
+        
+        let psIdx = 0, pfIdx = 0, csIdx = 0, cfIdx = 0;
 
         playedMinigames.forEach(mg => {
+            const mgTitle = mg.name === 'chicken' ? 'CATCH THAT CHICKEN' : 
+                          mg.name === 'math' ? 'MATHEMAGIC!' : 
+                          mg.name === 'karaoke' ? 'KARAOKE NIGHT' : 'FROMAGERIE FRENZY!';
+
             if (mg.won) {
-                dialogs.push([partnerFirstName, partnerActor, "I resented how good you were at " + mg.name + "!", null]);
-                dialogs.push([playerFirstName, CAST[selectedIndex].actor, successes[sIdx++].replace('[minigame name]', mg.name), null]);
+                // Companion success response
+                dialogs.push([partnerFirstName, partnerActor, cSuccesses[csIdx++]
+                    .replace('[minigame name]', mgTitle)
+                    .replace('[Player\'s First Name]', playerFirstName), null]);
+                // Player success response
+                dialogs.push([playerFirstName, CAST[selectedIndex].actor, pSuccesses[psIdx++]
+                    .replace('[minigame name]', mgTitle)
+                    .replace('[Companion\'s First Name]', partnerFirstName), null]);
             } else {
-                dialogs.push([partnerFirstName, partnerActor, "How could you screw up " + mg.name + "!", null]);
-                dialogs.push([playerFirstName, CAST[selectedIndex].actor, failures[fIdx++].replace('[Companion\'s First Name]', partnerFirstName), null]);
+                // Companion failure response
+                dialogs.push([partnerFirstName, partnerActor, cFailures[cfIdx++]
+                    .replace('[minigame name]', mgTitle)
+                    .replace('[Player\'s First Name]', playerFirstName), null]);
+                // Player failure response
+                dialogs.push([playerFirstName, CAST[selectedIndex].actor, pFailures[pfIdx++]
+                    .replace('[minigame name]', mgTitle)
+                    .replace('[Companion\'s First Name]', partnerFirstName), null]);
             }
         });
 
@@ -75,31 +93,73 @@ function startFightingGame(nextPhase, isShadow = false) {
     }
 }
 
-function handleFightingInput(key) {
-    if (fightingState.gameOver) return;
+function updateFighting() {
+    if (!fightingState.player || fightingState.gameOver) return;
+
     const p = fightingState.player;
-    if (key === 'ArrowLeft') { p.x -= 10; p.facing = -1; p.state = 'walk_left'; }
-    else if (key === 'ArrowRight') { p.x += 10; p.facing = 1; p.state = 'walk_right'; }
-    else if (key === 'a') { performAttack(p, 'punch'); }
-    else if (key === 's') { performAttack(p, 'kick'); }
+    const ai = fightingState.ai;
+
+    // Player attacks (using keysJustPressed for immediate response)
+    if (keysJustPressed.has('a')) performAttack(p, 'punch');
+    else if (keysJustPressed.has('s')) performAttack(p, 'kick');
+
+    // Player movement
+    let isMoving = false;
+    if (keysPressed.has('ArrowLeft')) { 
+        p.x -= 5; p.facing = -1; 
+        if (p.attacking <= 0) p.state = 'walk_left'; 
+        isMoving = true; 
+    } else if (keysPressed.has('ArrowRight')) { 
+        p.x += 5; p.facing = 1; 
+        if (p.attacking <= 0) p.state = 'walk_right'; 
+        isMoving = true; 
+    }
+    if (!isMoving && p.attacking <= 0) p.state = 'idle';
+
+    // AI logic
+    const dist = p.x - ai.x;
+    ai.facing = dist > 0 ? 1 : -1;
+    if (Math.abs(dist) > 70) { 
+        ai.x += ai.facing * 2.5; 
+        if (ai.attacking <= 0) ai.state = ai.facing > 0 ? 'walk_right' : 'walk_left'; 
+    } else {
+        if (ai.attacking <= 0) ai.state = 'idle';
+        if (Math.random() < 0.03 && ai.attacking <= 0) performAttack(ai, Math.random() < 0.5 ? 'punch' : 'kick');
+    }
+
+    // Process attacks for both
+    [p, ai].forEach(char => {
+        if (char.attacking > 0) {
+            char.attacking--;
+            if (char.attacking === 15) { // Hit frame
+                const other = (char === p) ? ai : p;
+                const hitDist = Math.abs((char.x + (char.facing * 60)) - other.x);
+                if (hitDist < 60) { 
+                    other.health = Math.max(0, other.health - (char.attackType === 'punch' ? 5 : 10)); 
+                }
+            }
+            if (char.attacking === 0) char.state = 'idle';
+        }
+    });
+
+    // Check game over (with !fightingState.gameOver check to play sound once)
+    if (!fightingState.gameOver && (p.health <= 0 || ai.health <= 0)) {
+        fightingState.gameOver = true;
+        fightingState.won = p.health > 0;
+        audio.stop();
+        audio.playSFX(fightingState.won ? 'TADA' : 'SAD_TROMBONE');
+    }
+}
+
+function handleFightingInput(key) {
+    // This is now handled in updateFighting for better responsiveness
+    return;
 }
 
 function performAttack(char, type) {
     if (char.attacking > 0) return;
     char.state = type; char.attacking = 30; char.attackType = type; char.frame = 0;
     audio.playSFX(type);
-}
-
-function updateAI() {
-    if (fightingState.gameOver) return;
-    const ai = fightingState.ai, p = fightingState.player;
-    const dist = p.x - ai.x;
-    ai.facing = dist > 0 ? 1 : -1;
-    if (Math.abs(dist) > 80) { ai.x += ai.facing * 3; ai.state = dist > 0 ? 'walk_right' : 'walk_left'; }
-    else {
-        ai.state = 'idle';
-        if (Math.random() < 0.05) performAttack(ai, Math.random() < 0.5 ? 'punch' : 'kick');
-    }
 }
 
 function drawConfrontationTitle() {
@@ -119,18 +179,21 @@ function drawOnYourOwnTitle() {
 function drawConfrontationPlay() {
     const isShadowFight = fightingState.ai && fightingState.ai.isShadow;
     const bg = isShadowFight ? onYourOwnBgImg : confrontationBgImg;
-    if (bg.complete) ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
-    else { ctx.fillStyle = '#333'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+    
+    if (bg.complete && bg.naturalWidth > 0) {
+        ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = '#333'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
     
     if (!fightingState.player || !fightingState.ai) return;
-    updateAI();
 
     // Health bars
     ctx.fillStyle = COLORS.RED; ctx.fillRect(50, 50, 300, 20); ctx.fillRect(450, 50, 300, 20);
     ctx.fillStyle = COLORS.GREEN; ctx.fillRect(50, 50, 3 * fightingState.player.health, 20);
     ctx.fillRect(450 + 3 * (100 - fightingState.ai.health), 50, 3 * fightingState.ai.health, 20);
 
-    [fightingState.player, fightingState.ai].forEach((char, i) => {
+    [fightingState.player, fightingState.ai].forEach((char) => {
         let sprite = combatSprites[char.actor], row = char.facing === 1 ? 3 : 1, frames = 1;
         if (char.state.startsWith('walk')) { sprite = walkSprites[char.actor]; frames = 6; }
         else if (char.state === 'punch') { sprite = halfSlashSprites[char.actor]; frames = 6; }
@@ -140,22 +203,7 @@ function drawConfrontationPlay() {
             char.frame = (char.frame + 0.1) % frames;
             drawPixelatedImage(sprite, Math.floor(char.frame) * 64, row * 64, 64, 64, char.x, char.y, 128, 128, char.isShadow ? 'inverted' : null);
         }
-        
-        if (char.attacking > 0) {
-            char.attacking--;
-            if (char.attacking === 15) { // Hit frame
-                const other = (char === fightingState.player) ? fightingState.ai : fightingState.player;
-                const hitDist = Math.abs((char.x + (char.facing * 60)) - other.x);
-                if (hitDist < 50) { other.health = Math.max(0, other.health - (char.attackType === 'punch' ? 5 : 10)); }
-            }
-            if (char.attacking === 0) char.state = 'idle';
-        }
     });
-
-    if (fightingState.player.health <= 0 || fightingState.ai.health <= 0) {
-        fightingState.gameOver = true; fightingState.won = fightingState.player.health > 0;
-        audio.stop(); audio.playSFX(fightingState.won ? 'TADA' : 'SAD_TROMBONE');
-    }
 
     if (fightingState.gameOver) {
         ctx.fillStyle = COLORS.WHITE; ctx.font = '30px "Press Start 2P"'; ctx.textAlign = 'center';

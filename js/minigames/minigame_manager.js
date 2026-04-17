@@ -8,7 +8,8 @@ function startMinigame() {
         gameOver: false, won: false, playerY: 480, isJumping: false, jumpVel: 0, frame: 0,
         distance: 0, question: "", answer: "", timer: 10, lastTimerUpdate: Date.now(), difficulty: 1,
         // Cheese specific
-        grid: [], selected: null, swapTarget: null, swapTime: 0, progress: 0, eatMode: false, matches: []
+        grid: [], visualGrid: [], selected: null, swapTarget: null, swapTime: 0, progress: 0, eatMode: false, matches: [],
+        fadingMatches: [], chainLevel: 0
     };
 
     if (gameType === 'chicken') {

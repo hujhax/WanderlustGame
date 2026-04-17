@@ -48,30 +48,54 @@ function drawSeparateWays() {
     if (bg.readyState >= 2 || bg.complete) {
         const W = canvas.width, H = canvas.height;
         const bgW = (index === 0) ? 540 : 450, bgH = (index === 0) ? 540 : 300;
-        const s0 = Math.max(W / bgW, H / bgH);
+        
+        // Ensure background fills height, width is handled by mirrored tiling
+        const s0 = H / bgH;
 
         let zoom = s0, panXOffset = 0, progress = (elapsed % cycleDuration) / cycleDuration;
-        let charX = (index === 0) ? 253 : 48, charY = (index === 0) ? 477 : 453;
-        let targetX, targetY;
+        let charX, charY;
 
-        if (zoomIteration === 0) { targetX = bgW / 2; targetY = bgH / 2; }
-        else if (zoomIteration === 1) {
-            zoom = s0 * 1.5; panXOffset = -progress * 40;
-            targetX = charX + 32 + W / (4 * zoom) + panXOffset; targetY = charY + 32 - H / (4 * zoom);
-        } else {
-            zoom = s0 * 2.7; panXOffset = progress * 40;
-            targetX = charX + 32 + W / (4 * zoom) + panXOffset; targetY = charY + 32 - H / (4 * zoom);
+        if (index === 0) { // Companion Sits
+            charX = 253; charY = 477;
+            // Background pans right: camera moves left
+            if (zoomIteration > 0) panXOffset = -progress * 40;
+        } else { // Player Sits
+            charX = 371; charY = 270;
+            // Background pans left: camera moves right
+            if (zoomIteration > 0) panXOffset = progress * 40;
         }
 
+        let targetX, targetY;
+
+        if (zoomIteration === 0) { 
+            targetX = bgW / 2; 
+            targetY = bgH / 2; 
+        }
+        else {
+            if (zoomIteration === 1) zoom = s0 * 1.5;
+            else zoom = s0 * 2.7;
+
+            // Positioning logic:
+            // Companion (index 0): sprite stays lower-left -> camera target moves right and up
+            // Player (index 1): sprite stays lower-right -> camera target moves left and up
+            const xDir = (index === 0) ? 1 : -1;
+            targetX = charX + xDir * (W / 4) / zoom + panXOffset;
+            targetY = charY - (H / 4) / zoom;
+        }
+
+        // Clamp targetY so we never see above or below the background image
         const halfVisibleH = (H / 2) / zoom;
         targetY = Math.max(halfVisibleH, Math.min(bgH - halfVisibleH, targetY));
 
         ctx.save();
-        ctx.translate(W / 2, H / 2); ctx.scale(zoom, zoom); ctx.translate(-targetX, -targetY);
+        ctx.translate(W / 2, H / 2);
+        ctx.scale(zoom, zoom);
+        ctx.translate(-targetX, -targetY);
         
+        // Mirrored tiling: draw center, left, and right
         ctx.drawImage(bg, 0, 0, bgW, bgH);
         ctx.save(); ctx.translate(2 * bgW, 0); ctx.scale(-1, 1); ctx.drawImage(bg, 0, 0, bgW, bgH); ctx.restore();
-        ctx.save(); ctx.translate(-bgW, 0); ctx.scale(-1, 1); ctx.drawImage(bg, -bgW, 0, bgW, bgH); ctx.restore();
+        ctx.save(); ctx.scale(-1, 1); ctx.drawImage(bg, 0, 0, bgW, bgH); ctx.restore();
         
         const partnerName = PARTNER_PAIRS[CAST[selectedIndex].name];
         const partnerActor = CAST.find(c => c.name === partnerName).actor.toLowerCase();
@@ -79,25 +103,38 @@ function drawSeparateWays() {
         const sprite = index === 0 ? sitSprites[partnerActor] : sitSprites[playerActor];
         
         if (sprite && sprite.complete) {
-            drawPixelatedImage(sprite, 0, 3 * 64, 64, 64, charX - 32, charY - 64, 128, 128);
+            // Draw sprite at 128x128 (2x base size). charX is center, charY is at feet.
+            // Row 3 for Companion (4th row), Row 1 for Player (2nd row)
+            const row = (index === 0) ? 3 : 1;
+            drawPixelatedImage(sprite, 0, row * 64, 64, 64, charX - 64, charY - 128, 128, 128);
         }
+        
         ctx.restore();
     }
+}
+
+function startTogetherAgain() {
+    currentPhase = PHASES.TOGETHER_AGAIN;
+    togetherAgainState = { startTime: Date.now(), playerX: -100, state: 'walking' };
+    audio.play('TOGETHER_BGM');
 }
 
 function drawTogetherAgain() {
     if (companionSitsBg.readyState >= 2 || companionSitsBg.complete) ctx.drawImage(companionSitsBg, 0, 0, canvas.width, canvas.height);
 
     const partnerName = PARTNER_PAIRS[CAST[selectedIndex].name], partnerActor = CAST.find(c => c.name === partnerName).actor.toLowerCase(), playerActor = CAST[selectedIndex].actor.toLowerCase();
+    
+    // Companion sitting at (253, 470)
     const sitSprite = sitSprites[partnerActor];
-    if (sitSprite && sitSprite.complete) drawPixelatedImage(sitSprite, 0, 3 * 64, 64, 64, 253 - 64, 430 - 128, 128, 128);
+    if (sitSprite && sitSprite.complete) drawPixelatedImage(sitSprite, 0, 3 * 64, 64, 64, 253 - 64, 470 - 128, 128, 128);
 
     if (togetherAgainState.state === 'walking') {
         togetherAgainState.playerX += 2;
         const walkSprite = walkSprites[playerActor];
         if (walkSprite && walkSprite.complete) {
             const frame = Math.floor(Date.now() / 150) % 6;
-            drawPixelatedImage(walkSprite, frame * 64, 3 * 64, 64, 64, togetherAgainState.playerX - 64, 453 - 128, 128, 128);
+            // Player walks at y=490
+            drawPixelatedImage(walkSprite, frame * 64, 3 * 64, 64, 64, togetherAgainState.playerX - 64, 490 - 128, 128, 128);
         }
         if (togetherAgainState.playerX >= 230) {
             togetherAgainState.state = 'sitting';
@@ -114,26 +151,73 @@ function drawTogetherAgain() {
         }
     } else {
         const playerSit = sitSprites[playerActor];
-        if (playerSit && playerSit.complete) drawPixelatedImage(playerSit, 0, 3 * 64, 64, 64, 230 - 64, 453 - 128, 128, 128);
+        if (playerSit && playerSit.complete) {
+            // Player sits at (230, 490)
+            drawPixelatedImage(playerSit, 0, 3 * 64, 64, 64, 230 - 64, 490 - 128, 128, 128);
+        }
     }
+}
+
+function startClosingInterview() {
+    currentPhase = PHASES.CLOSING_INTERVIEW;
+    audio.play('INTERVIEW_BGM', 39);
+    if (selectedIndex === undefined) selectedIndex = 5;
+    const playerFirstName = CAST[selectedIndex].firstName;
+    const partnerName = PARTNER_PAIRS[CAST[selectedIndex].name];
+    const partner = CAST.find(c => c.name === partnerName);
+    const partnerFirstName = partner.firstName;
+    const partnerActor = partner.actor;
+
+    let dialogs = [
+        [playerFirstName, CAST[selectedIndex].actor, "We had a meaningful trip.", 'top'],
+        [partnerFirstName, partnerActor, "It challenged our friendship.", 'top'],
+        [playerFirstName, CAST[selectedIndex].actor, "It was a crazy time.", 'top'],
+        [partnerFirstName, partnerActor, "But we learned a lot about ourselves.", 'top'],
+        [playerFirstName, CAST[selectedIndex].actor, "I gained " + score + " points worth of self-knowledge!", 'top']
+    ];
+
+    let currentD = 0;
+    const nextDialog = () => {
+        if (currentD < dialogs.length) {
+            const d = dialogs[currentD++];
+            showDialog(d[0], d[1], d[2], nextDialog, d[3]);
+        } else {
+            currentPhase = PHASES.CLOSING_CREDITS;
+            creditsY = canvas.height; creditsFinished = false; audio.play('MOON');
+        }
+    };
+    nextDialog();
 }
 
 function drawClosingInterview() { drawTitle(false); }
 
 function drawCredits() {
     if (creditsStartTime === 0) {
-        creditsStartTime = Date.now(); polaroids = [];
+        creditsStartTime = Date.now();
+        polaroids = [];
         if (screenCaptures.length > 0) {
+            // Fixed slots to prevent overlap
+            const slots = [
+                {x: 50, y: 40}, {x: 300, y: 30}, {x: 550, y: 50},
+                {x: 175, y: 310}, {x: 425, y: 290}
+            ];
             for (let i = 0; i < 5; i++) {
                 const img = screenCaptures[Math.floor(Math.random() * screenCaptures.length)];
-                polaroids.push({ img, x: 50 + Math.random() * 500, y: 50 + Math.random() * 300, rotation: (Math.random() - 0.5) * 0.4, time: i * 1500 });
+                const slot = slots[i];
+                polaroids.push({
+                    img,
+                    x: slot.x,
+                    y: slot.y,
+                    rotation: (Math.random() - 0.5) * 0.3,
+                    time: i * 1200
+                });
             }
         }
     }
-    const elapsed = Date.now() - creditsStartTime, allPhotosShownTime = 5 * 1500 + 1000;
+    const elapsed = Date.now() - creditsStartTime, allPhotosShownTime = 5 * 1200 + 1000;
     ctx.fillStyle = COLORS.BLACK; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (elapsed < allPhotosShownTime + 2000) {
+    if (elapsed < allPhotosShownTime) {
         polaroids.forEach(p => {
             if (elapsed > p.time) {
                 ctx.save(); ctx.translate(p.x + 100, p.y + 100); ctx.rotate(p.rotation);
@@ -144,28 +228,35 @@ function drawCredits() {
         return;
     }
 
-    ctx.save(); if (screenCaptures.length > 0) {
-        ctx.globalAlpha = 0.3;
+    // Scrolling phase
+    ctx.save();
+    if (screenCaptures.length > 0) {
+        ctx.globalAlpha = 0.3; // Fade photos slightly so text is readable
         polaroids.forEach(p => {
             ctx.save(); ctx.translate(p.x + 100, p.y + 100); ctx.rotate(p.rotation);
             ctx.fillStyle = COLORS.WHITE; ctx.fillRect(-110, -110, 220, 240);
             ctx.drawImage(p.img, -100, -100, 200, 150); ctx.restore();
         });
-    } ctx.restore();
+    }
+    ctx.restore();
 
     const CREDITS_TEXT = [
         "Wanderlust", "", "Director & Tech", "Lindsey McGowen", "", "Assistant Director & Understudy", "Leichelle Little", "", "Cast",
         "Claire Biddiscombe", "Gilbert El-Dick", "Jason Summers", "Krystal Merrells", "Patrice Forbes", "Peter Rogers", "Sam Allen", "The Velvet Duke", "",
-        "Special Thanks to", "Annika Bolden (pinkies up!)", "", "Presented By", "Wayward Improvised Theatre & Videogaming Concern"
+        "Special Thanks to", "Annika Bolden (pinkies up!)", "", "Presented By", "Wayward Improvised Theatre", "& Videogaming Concern"
     ];
     ctx.fillStyle = COLORS.WHITE; ctx.textAlign = 'center'; ctx.font = '16px "Press Start 2P"';
     CREDITS_TEXT.forEach((line, i) => { 
         const y = creditsY + i * 40; 
         if (y > -40 && y < canvas.height + 40) {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; ctx.fillText(line, canvas.width / 2 + 2, y + 2);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctx.fillText(line, canvas.width / 2 + 2, y + 2);
             ctx.fillStyle = COLORS.WHITE; ctx.fillText(line, canvas.width / 2, y); 
         }
     });
-    if (!creditsFinished) { creditsY -= 2.5; if (creditsY < -(CREDITS_TEXT.length * 40)) creditsFinished = true; }
-    else { ctx.font = '16px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.fillText('Click Enter to Replay', canvas.width / 2, canvas.height / 2); }
+    if (!creditsFinished) { 
+        creditsY -= 3.5; // Scroll "fairly quickly"
+        if (creditsY < -(CREDITS_TEXT.length * 40)) creditsFinished = true; 
+    } else { 
+        ctx.font = '16px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.fillText('Click Enter to Replay', canvas.width / 2, canvas.height / 2); 
+    }
 }

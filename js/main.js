@@ -9,6 +9,7 @@ let playedMinigames = []; // Tracks {name, won} for confrontation
 
 let currentPhase = PHASES.INTRO;
 let keysPressed = new Set();
+let keysJustPressed = new Set();
 let creditsY = canvas.height;
 let creditsFinished = false;
 let screenCaptures = [];
@@ -52,10 +53,10 @@ function preloadAssets() {
     farmBgImg.src = 'images/backgrounds/farm_background.jpg';
     wagonImg.src = 'images/elements/station_wagon.png';
     departureBgImg.src = 'images/backgrounds/departure_bg.jpg';
-    confrontationBgImg.src = 'images/backgrounds/gas_station.webp';
-    onYourOwnBgImg.src = 'images/backgrounds/rainy-pixel-city-stockcake.jpg';
+    confrontationBgImg.src = 'images/backgrounds/battledome.webp';
+    onYourOwnBgImg.src = 'images/backgrounds/on_your_own_bg.jpg';
     stationWagonRawImg.src = 'images/elements/station_wagon.png';
-    marketStallImg.src = 'images/backgrounds/market-stall.jpg';
+    marketStallImg.src = 'images/backgrounds/market_stall.png';
     gClefImg.src = 'images/elements/g-clef.png';
     countryRoadImg.src = 'images/elements/country_road.png';
 
@@ -130,13 +131,15 @@ function gameLoop() {
         case PHASES.MINIGAME_POST: drawMinigamePost(); break;
         case PHASES.THE_CONFRONTATION: drawConfrontationTitle(); break;
         case PHASES.ON_YOUR_OWN: drawOnYourOwnTitle(); break;
-        case PHASES.CONFRONTATION_PLAY: drawConfrontationPlay(); break;
+        case PHASES.CONFRONTATION_PLAY: updateFighting(); drawConfrontationPlay(); break;
+        case PHASES.NEXT_DAY: drawNextDay(); break;
         case PHASES.SEPARATE_WAYS: drawSeparateWays(); break;
         case PHASES.TOGETHER_AGAIN: drawTogetherAgain(); break;
         case PHASES.CLOSING_INTERVIEW: drawClosingInterview(); break;
         case PHASES.CLOSING_CREDITS: drawCredits(); break;
     }
     if (currentDialog) drawDialogBox();
+    keysJustPressed.clear();
     requestAnimationFrame(gameLoop);
 }
 
@@ -162,6 +165,7 @@ window.addEventListener('mousedown', (e) => {
 });
 
 window.addEventListener('keydown', (e) => {
+    if (!keysPressed.has(e.key)) keysJustPressed.add(e.key);
     keysPressed.add(e.key);
     if (e.key === '>') {
         const phases = Object.values(PHASES), idx = phases.indexOf(currentPhase);
@@ -211,8 +215,10 @@ window.addEventListener('keydown', (e) => {
     } else if (currentPhase === PHASES.THE_CONFRONTATION || currentPhase === PHASES.ON_YOUR_OWN) {
         if (e.key === 'Enter') currentPhase = PHASES.CONFRONTATION_PLAY;
     } else if (currentPhase === PHASES.CONFRONTATION_PLAY) {
-        if (fightingState.gameOver) { if (e.key === 'Enter') { audio.stop(); if (fightingState.nextPhase === PHASES.SEPARATE_WAYS) { currentPhase = PHASES.SEPARATE_WAYS; separateWaysState.startTime = Date.now(); audio.play('KARAOKE_BGM'); } else { startTogetherAgain(); } } }
+        if (fightingState.gameOver) { if (e.key === 'Enter') { audio.stop(); if (fightingState.nextPhase === PHASES.SEPARATE_WAYS) { currentPhase = PHASES.NEXT_DAY; } else { startTogetherAgain(); } } }
         else handleFightingInput(e.key);
+    } else if (currentPhase === PHASES.NEXT_DAY) {
+        if (e.key === 'Enter') { currentPhase = PHASES.SEPARATE_WAYS; separateWaysState.startTime = Date.now(); audio.play('KARAOKE_BGM'); }
     } else if (currentPhase === PHASES.SEPARATE_WAYS) { if (e.key === 'Enter') startFightingGame(PHASES.TOGETHER_AGAIN, true); }
     else if (currentPhase === PHASES.CLOSING_CREDITS) { if (e.key === 'Enter') { currentPhase = PHASES.TITLE; currentMinigameIndex = 0; score = 0; playedMinigames = []; audio.play('CHICAGO', 12); creditsStartTime = 0; } }
 });
@@ -226,7 +232,7 @@ const minigameOverride = urlParams.get('minigame');
 if (minigameOverride) {
     selectedIndex = 5;
     if (minigameOverride === 'confrontation') currentPhase = PHASES.THE_CONFRONTATION;
-    else if (minigameOverride === 'separate') { currentPhase = PHASES.SEPARATE_WAYS; separateWaysState.startTime = Date.now(); audio.play('KARAOKE_BGM'); }
+    else if (minigameOverride === 'separate') { currentPhase = PHASES.NEXT_DAY; }
     else if (minigameOverride === 'alone' || minigameOverride === 'own') startFightingGame(PHASES.TOGETHER_AGAIN, true);
     else if (minigameOverride === 'reunited') startTogetherAgain();
     else if (['chicken', 'math', 'karaoke', 'cheese'].includes(minigameOverride)) { minigameOrder = [minigameOverride]; currentPhase = PHASES.MINIGAME_MAP; }

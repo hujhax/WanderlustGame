@@ -27,6 +27,7 @@ const PHASES = {
     MINIGAME_POST: 'MINIGAME_POST',
     IN_THE_CAR: 'IN_THE_CAR',
     THE_CONFRONTATION: 'THE_CONFRONTATION',
+    NEXT_DAY: 'NEXT_DAY',
     SEPARATE_WAYS: 'SEPARATE_WAYS',
     ON_YOUR_OWN: 'ON_YOUR_OWN',
     TOGETHER_AGAIN: 'TOGETHER_AGAIN',
@@ -53,15 +54,25 @@ const PARTNER_PAIRS = {
 };
 
 const CONFRONTATION_RESPONSES = {
-    SUCCESS: [
-        "So what? I really like [minigame name].",
-        "I don't take like it when people don't want me to be *good* at something.",
-        "Yeah, whatever. You're just jealous."
+    PLAYER_SUCCESS: [
+        "So what?  I really like [minigame name].",
+        "I don't like it when people don't want me to be *good* at something.",
+        "Yeah, whatever, [Companion's First Name]. You're just jealous."
     ],
-    FAILURE: [
+    PLAYER_FAILURE: [
         "Seriously? I already feel so bad about this.",
         "Maybe if you'd *helped*, I might have done better!",
         "I'm not your employee, [Companion's First Name]."
+    ],
+    COMPANION_SUCCESS: [
+        "I resented how good you were at [minigame name]!",
+        "You just *had* to show off at [minigame name], didn't you?",
+        "What was up with [minigame name]? Why couldn't we stop to do something *I'd* be good at?"
+    ],
+    COMPANION_FAILURE: [
+        "How could you screw up [minigame name]!",
+        "[Player's First Name], I was counting on you to win at [minigame name]!",
+        "I was really disappointed in how you did at [minigame name]."
     ]
 };
 
