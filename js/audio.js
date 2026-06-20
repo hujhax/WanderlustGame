@@ -8,7 +8,9 @@ class AudioManager {
             CHICKEN_BGM: new Audio('music/chicken_bgm.mp3'),
             MATH_BGM: new Audio('music/math_bgm.mp3'),
             KARAOKE_BGM: new Audio('music/karaoke_bgm.mp3'),
-            CHEESE_BGM: new Audio('music/cheese_bgm.mp3'), // Placeholder for new track
+            CHEESE_BGM: new Audio('music/cheese_bgm.mp3'),
+            BUMP_BGM: new Audio('music/bump_bgm.mp3'),
+            FISH_BGM: new Audio('music/fishing_bgm.mp3'),
             FIGHT_BGM: new Audio('music/fighting_theme.mp3'),
             IN_THE_CAR: new Audio('music/in_the_car.mp3'),
             TOGETHER_BGM: new Audio('music/together_again.mp3'),
@@ -64,6 +66,14 @@ class AudioManager {
             osc.type = 'triangle'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(50, now + 0.05);
             gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.05);
             osc.start(now); osc.stop(now + 0.05);
+        } else if (name === 'engine') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(50 + Math.random() * 20, now);
+            gain.gain.setValueAtTime(0.02, now); gain.gain.linearRampToValueAtTime(0.02, now + 0.1);
+            osc.start(now); osc.stop(now + 0.1);
+        } else if (name === 'screech') {
+            osc.type = 'square'; osc.frequency.setValueAtTime(1000 + Math.random() * 500, now);
+            gain.gain.setValueAtTime(0.01, now); gain.gain.linearRampToValueAtTime(0, now + 0.1);
+            osc.start(now); osc.stop(now + 0.1);
         } else if (name === 'TADA') {
             [440, 554, 659, 880].forEach((f, i) => {
                 const o = this.audioCtx.createOscillator(); o.connect(gain); o.frequency.setValueAtTime(f, now + i * 0.1); o.start(now + i * 0.1); o.stop(now + i * 0.1 + 0.2);

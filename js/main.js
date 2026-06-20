@@ -4,7 +4,7 @@ const ctx = canvas.getContext('2d');
 let selectedIndex = 0;
 let score = 0;
 let currentMinigameIndex = 0;
-let minigameOrder = ['chicken', 'math', 'karaoke', 'cheese'].sort(() => Math.random() - 0.5).slice(0, 3);
+let minigameOrder = ['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish'].sort(() => Math.random() - 0.5).slice(0, 3);
 let playedMinigames = []; // Tracks {name, won} for confrontation
 
 let currentPhase = PHASES.INTRO;
@@ -40,6 +40,21 @@ const stationWagonRawImg = new Image();
 const marketStallImg = new Image();
 const gClefImg = new Image();
 const countryRoadImg = new Image();
+const bumperCarLotImg = new Image();
+const greenCarImg = new Image();
+const coinImg = new Image();
+const fishingBgImg = new Image();
+const fishingMaskImg = new Image();
+const fishingBoatImg = new Image();
+const fishingBoatLargeImg = new Image();
+const fishImages = {
+    cod: new Image(),
+    walleye: new Image(),
+    'rainbow trout': new Image(),
+    boot: new Image(),
+    'soda can': new Image(),
+    accordion: new Image()
+};
 
 const slashSprites = {}, idleSprites = {}, walkSprites = {}, runSprites = {}, jumpSprites = {}, sitSprites = {}, combatSprites = {}, halfSlashSprites = {}, backSlashSprites = {};
 
@@ -59,6 +74,25 @@ function preloadAssets() {
     marketStallImg.src = 'images/backgrounds/market_stall.png';
     gClefImg.src = 'images/elements/g-clef.png';
     countryRoadImg.src = 'images/elements/country_road.png';
+    bumperCarLotImg.src = 'images/backgrounds/bumper-car-lot.png';
+    greenCarImg.src = 'images/sprites/cars/PixelWheels_Ferrari_Green.png';
+    const redCarImg = new Image(); redCarImg.src = 'images/sprites/cars/PixelWheels_Ferrari_Red.png';
+    const yellowCarImg = new Image(); yellowCarImg.src = 'images/sprites/cars/PixelWheels_Ferrari_Yellow.png';
+    const purpleCarImg = new Image(); purpleCarImg.src = 'images/sprites/cars/PixelWheels_Ferrari_Purple.png';
+    const whiteCarImg = new Image(); whiteCarImg.src = 'images/sprites/cars/PixelWheels_Ferrari_White.png';
+    window.carImgs = { green: greenCarImg, red: redCarImg, yellow: yellowCarImg, purple: purpleCarImg, white: whiteCarImg };
+    coinImg.src = 'images/sprites/coin.png';
+
+    fishingBgImg.src = 'images/backgrounds/fishing-bg.png';
+    fishingMaskImg.src = 'images/backgrounds/fishing-bg-mask.png';
+    fishingBoatImg.src = 'images/sprites/fishing-boat.png';
+    fishingBoatLargeImg.src = 'images/elements/fishing/fishing-boat.webp';
+    fishImages.cod.src = 'images/elements/fishing/cod.jpg';
+    fishImages.walleye.src = 'images/elements/fishing/walleye.webp';
+    fishImages['rainbow trout'].src = 'images/elements/fishing/rainbow-trout.png';
+    fishImages.boot.src = 'images/elements/fishing/boot.jpg';
+    fishImages['soda can'].src = 'images/elements/fishing/soda-can.jpg';
+    fishImages.accordion.src = 'images/elements/fishing/accordion.jpg';
 
     CAST.forEach(c => {
         c.img = new Image(); c.img.src = c.imgPath;
@@ -168,10 +202,42 @@ window.addEventListener('keydown', (e) => {
     if (!keysPressed.has(e.key)) keysJustPressed.add(e.key);
     keysPressed.add(e.key);
     if (e.key === '>') {
-        const phases = Object.values(PHASES), idx = phases.indexOf(currentPhase);
-        currentPhase = phases[(idx + 1) % phases.length]; audio.stop();
-        if (currentPhase === PHASES.DEPARTURE_CUTSCENE) cutsceneStartTime = Date.now();
-        if (currentPhase === PHASES.TOGETHER_AGAIN && selectedIndex === undefined) selectedIndex = 5;
+        const phases = Object.values(PHASES);
+        const idx = phases.indexOf(currentPhase);
+        let nextPhase = phases[(idx + 1) % phases.length];
+        
+        // Special case: Fighting games share a 'PLAY' phase
+        if (currentPhase === PHASES.CONFRONTATION_PLAY && fightingState.nextPhase) {
+            nextPhase = fightingState.nextPhase;
+            // If next is Separate Ways, we actually want to go to the 'Next Day' title card first
+            if (nextPhase === PHASES.SEPARATE_WAYS) nextPhase = PHASES.NEXT_DAY;
+        }
+
+        audio.stop();
+        currentDialog = null; // Clear any active dialog
+
+        // Handle specific initializations
+        if (nextPhase === PHASES.IN_THE_CAR) {
+            startInTheCar();
+        } else if (nextPhase === PHASES.DEPARTURE_CUTSCENE) {
+            currentPhase = nextPhase;
+            cutsceneStartTime = Date.now();
+            audio.play('CHICAGO', 30);
+        } else if (nextPhase === PHASES.THE_CONFRONTATION) {
+            startFightingGame(PHASES.SEPARATE_WAYS);
+        } else if (nextPhase === PHASES.ON_YOUR_OWN) {
+            startFightingGame(PHASES.TOGETHER_AGAIN, true);
+        } else if (nextPhase === PHASES.TOGETHER_AGAIN) {
+            if (selectedIndex === undefined) selectedIndex = 5;
+            startTogetherAgain();
+        } else if (nextPhase === PHASES.CLOSING_INTERVIEW) {
+            startClosingInterview();
+        } else if (nextPhase === PHASES.TITLE) {
+            currentPhase = nextPhase;
+            audio.play('CHICAGO', 12);
+        } else {
+            currentPhase = nextPhase;
+        }
         return;
     }
     if (currentDialog) {
@@ -235,7 +301,9 @@ if (minigameOverride) {
     else if (minigameOverride === 'separate') { currentPhase = PHASES.NEXT_DAY; }
     else if (minigameOverride === 'alone' || minigameOverride === 'own') startFightingGame(PHASES.TOGETHER_AGAIN, true);
     else if (minigameOverride === 'reunited') startTogetherAgain();
-    else if (['chicken', 'math', 'karaoke', 'cheese'].includes(minigameOverride)) { minigameOrder = [minigameOverride]; currentPhase = PHASES.MINIGAME_MAP; }
+    else if (minigameOverride === 'interview') startClosingInterview();
+    else if (minigameOverride === 'credits') { currentPhase = PHASES.CLOSING_CREDITS; creditsY = canvas.height; creditsFinished = false; audio.play('MOON'); }
+    else if (['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish'].includes(minigameOverride)) { minigameOrder = [minigameOverride]; currentPhase = PHASES.MINIGAME_MAP; }
 }
 
 preloadAssets();

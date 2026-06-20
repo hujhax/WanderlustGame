@@ -59,23 +59,11 @@ function startFightingGame(nextPhase, isShadow = false) {
                           mg.name === 'karaoke' ? 'KARAOKE NIGHT' : 'FROMAGERIE FRENZY!';
 
             if (mg.won) {
-                // Companion success response
-                dialogs.push([partnerFirstName, partnerActor, cSuccesses[csIdx++]
-                    .replace('[minigame name]', mgTitle)
-                    .replace('[Player\'s First Name]', playerFirstName), null]);
-                // Player success response
-                dialogs.push([playerFirstName, CAST[selectedIndex].actor, pSuccesses[psIdx++]
-                    .replace('[minigame name]', mgTitle)
-                    .replace('[Companion\'s First Name]', partnerFirstName), null]);
+                dialogs.push([partnerFirstName, partnerActor, cSuccesses[csIdx++ % cSuccesses.length].replace('[minigame name]', mgTitle).replace('[Player\'s First Name]', playerFirstName), null]);
+                dialogs.push([playerFirstName, CAST[selectedIndex].actor, pSuccesses[psIdx++ % pSuccesses.length].replace('[minigame name]', mgTitle).replace('[Companion\'s First Name]', partnerFirstName), null]);
             } else {
-                // Companion failure response
-                dialogs.push([partnerFirstName, partnerActor, cFailures[cfIdx++]
-                    .replace('[minigame name]', mgTitle)
-                    .replace('[Player\'s First Name]', playerFirstName), null]);
-                // Player failure response
-                dialogs.push([playerFirstName, CAST[selectedIndex].actor, pFailures[pfIdx++]
-                    .replace('[minigame name]', mgTitle)
-                    .replace('[Companion\'s First Name]', partnerFirstName), null]);
+                dialogs.push([partnerFirstName, partnerActor, cFailures[cfIdx++ % cFailures.length].replace('[minigame name]', mgTitle).replace('[Player\'s First Name]', playerFirstName), null]);
+                dialogs.push([playerFirstName, CAST[selectedIndex].actor, pFailures[pfIdx++ % pFailures.length].replace('[minigame name]', mgTitle).replace('[Companion\'s First Name]', partnerFirstName), null]);
             }
         });
 
@@ -99,66 +87,64 @@ function updateFighting() {
     const p = fightingState.player;
     const ai = fightingState.ai;
 
-    // Player attacks (using keysJustPressed for immediate response)
+    // Use keysJustPressed for instantaneous attack triggering
     if (keysJustPressed.has('a')) performAttack(p, 'punch');
     else if (keysJustPressed.has('s')) performAttack(p, 'kick');
 
-    // Player movement
+    // Continuous movement polling
     let isMoving = false;
     if (keysPressed.has('ArrowLeft')) { 
-        p.x -= 5; p.facing = -1; 
+        p.x -= 7; p.facing = -1; 
         if (p.attacking <= 0) p.state = 'walk_left'; 
         isMoving = true; 
     } else if (keysPressed.has('ArrowRight')) { 
-        p.x += 5; p.facing = 1; 
+        p.x += 7; p.facing = 1; 
         if (p.attacking <= 0) p.state = 'walk_right'; 
         isMoving = true; 
     }
     if (!isMoving && p.attacking <= 0) p.state = 'idle';
 
-    // AI logic
+    // AI logic (simplified physics)
     const dist = p.x - ai.x;
     ai.facing = dist > 0 ? 1 : -1;
     if (Math.abs(dist) > 70) { 
-        ai.x += ai.facing * 2.5; 
+        ai.x += ai.facing * 4; 
         if (ai.attacking <= 0) ai.state = ai.facing > 0 ? 'walk_right' : 'walk_left'; 
     } else {
         if (ai.attacking <= 0) ai.state = 'idle';
-        if (Math.random() < 0.03 && ai.attacking <= 0) performAttack(ai, Math.random() < 0.5 ? 'punch' : 'kick');
+        if (Math.random() < 0.05 && ai.attacking <= 0) performAttack(ai, Math.random() < 0.5 ? 'punch' : 'kick');
     }
 
-    // Process attacks for both
+    // Process attacks and collisions
     [p, ai].forEach(char => {
         if (char.attacking > 0) {
             char.attacking--;
-            if (char.attacking === 15) { // Hit frame
+            if (char.attacking === 8) { // Hit frame
                 const other = (char === p) ? ai : p;
                 const hitDist = Math.abs((char.x + (char.facing * 60)) - other.x);
-                if (hitDist < 60) { 
-                    other.health = Math.max(0, other.health - (char.attackType === 'punch' ? 5 : 10)); 
+                if (hitDist < 70) { 
+                    other.health = Math.max(0, other.health - (char.attackType === 'punch' ? 10 : 15)); 
                 }
             }
             if (char.attacking === 0) char.state = 'idle';
         }
     });
 
-    // Check game over (with !fightingState.gameOver check to play sound once)
+    // Single-trigger game over logic
     if (!fightingState.gameOver && (p.health <= 0 || ai.health <= 0)) {
         fightingState.gameOver = true;
         fightingState.won = p.health > 0;
         audio.stop();
         audio.playSFX(fightingState.won ? 'TADA' : 'SAD_TROMBONE');
+        p.state = 'idle'; ai.state = 'idle'; // Stop animations
     }
 }
 
-function handleFightingInput(key) {
-    // This is now handled in updateFighting for better responsiveness
-    return;
-}
+function handleFightingInput(key) { return; }
 
 function performAttack(char, type) {
     if (char.attacking > 0) return;
-    char.state = type; char.attacking = 30; char.attackType = type; char.frame = 0;
+    char.state = type; char.attacking = 15; char.attackType = type; char.frame = 0;
     audio.playSFX(type);
 }
 
@@ -180,8 +166,12 @@ function drawConfrontationPlay() {
     const isShadowFight = fightingState.ai && fightingState.ai.isShadow;
     const bg = isShadowFight ? onYourOwnBgImg : confrontationBgImg;
     
+    // Maintain Aspect Ratio and check image state
     if (bg.complete && bg.naturalWidth > 0) {
-        ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+        const scale = Math.max(canvas.width / bg.naturalWidth, canvas.height / bg.naturalHeight);
+        const w = bg.naturalWidth * scale, h = bg.naturalHeight * scale;
+        const x = (canvas.width - w) / 2, y = (canvas.height - h) / 2;
+        ctx.drawImage(bg, x, y, w, h);
     } else {
         ctx.fillStyle = '#333'; ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
@@ -193,14 +183,15 @@ function drawConfrontationPlay() {
     ctx.fillStyle = COLORS.GREEN; ctx.fillRect(50, 50, 3 * fightingState.player.health, 20);
     ctx.fillRect(450 + 3 * (100 - fightingState.ai.health), 50, 3 * fightingState.ai.health, 20);
 
+    // Characters
     [fightingState.player, fightingState.ai].forEach((char) => {
         let sprite = combatSprites[char.actor], row = char.facing === 1 ? 3 : 1, frames = 1;
         if (char.state.startsWith('walk')) { sprite = walkSprites[char.actor]; frames = 6; }
         else if (char.state === 'punch') { sprite = halfSlashSprites[char.actor]; frames = 6; }
         else if (char.state === 'kick') { sprite = backSlashSprites[char.actor]; frames = 6; }
 
-        if (sprite && sprite.complete) {
-            char.frame = (char.frame + 0.1) % frames;
+        if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+            if (!fightingState.gameOver) char.frame = (char.frame + 0.2) % frames;
             drawPixelatedImage(sprite, Math.floor(char.frame) * 64, row * 64, 64, 64, char.x, char.y, 128, 128, char.isShadow ? 'inverted' : null);
         }
     });

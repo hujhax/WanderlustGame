@@ -124,17 +124,17 @@ function drawTogetherAgain() {
 
     const partnerName = PARTNER_PAIRS[CAST[selectedIndex].name], partnerActor = CAST.find(c => c.name === partnerName).actor.toLowerCase(), playerActor = CAST[selectedIndex].actor.toLowerCase();
     
-    // Companion sitting at (253, 470)
+    // Companion sitting at (253, 430)
     const sitSprite = sitSprites[partnerActor];
-    if (sitSprite && sitSprite.complete) drawPixelatedImage(sitSprite, 0, 3 * 64, 64, 64, 253 - 64, 470 - 128, 128, 128);
+    if (sitSprite && sitSprite.complete) drawPixelatedImage(sitSprite, 0, 3 * 64, 64, 64, 253 - 64, 430 - 128, 128, 128);
 
     if (togetherAgainState.state === 'walking') {
         togetherAgainState.playerX += 2;
         const walkSprite = walkSprites[playerActor];
         if (walkSprite && walkSprite.complete) {
             const frame = Math.floor(Date.now() / 150) % 6;
-            // Player walks at y=490
-            drawPixelatedImage(walkSprite, frame * 64, 3 * 64, 64, 64, togetherAgainState.playerX - 64, 490 - 128, 128, 128);
+            // Player walks at y=453
+            drawPixelatedImage(walkSprite, frame * 64, 3 * 64, 64, 64, togetherAgainState.playerX - 64, 453 - 128, 128, 128);
         }
         if (togetherAgainState.playerX >= 230) {
             togetherAgainState.state = 'sitting';
@@ -152,8 +152,8 @@ function drawTogetherAgain() {
     } else {
         const playerSit = sitSprites[playerActor];
         if (playerSit && playerSit.complete) {
-            // Player sits at (230, 490)
-            drawPixelatedImage(playerSit, 0, 3 * 64, 64, 64, 230 - 64, 490 - 128, 128, 128);
+            // Player sits at (230, 453)
+            drawPixelatedImage(playerSit, 0, 3 * 64, 64, 64, 230 - 64, 453 - 128, 128, 128);
         }
     }
 }
@@ -196,28 +196,23 @@ function drawCredits() {
         creditsStartTime = Date.now();
         polaroids = [];
         if (screenCaptures.length > 0) {
-            // Fixed slots to prevent overlap
-            const slots = [
-                {x: 50, y: 40}, {x: 300, y: 30}, {x: 550, y: 50},
-                {x: 175, y: 310}, {x: 425, y: 290}
-            ];
             for (let i = 0; i < 5; i++) {
                 const img = screenCaptures[Math.floor(Math.random() * screenCaptures.length)];
-                const slot = slots[i];
                 polaroids.push({
                     img,
-                    x: slot.x,
-                    y: slot.y,
-                    rotation: (Math.random() - 0.5) * 0.3,
-                    time: i * 1200
+                    x: 50 + Math.random() * 500,
+                    y: 50 + Math.random() * 300,
+                    rotation: (Math.random() - 0.5) * 0.4,
+                    time: i * 800
                 });
             }
         }
     }
-    const elapsed = Date.now() - creditsStartTime, allPhotosShownTime = 5 * 1200 + 1000;
+    const elapsed = Date.now() - creditsStartTime;
+    const allPhotosShownTime = (screenCaptures.length > 0) ? (5 * 800 + 500) : 0;
     ctx.fillStyle = COLORS.BLACK; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (elapsed < allPhotosShownTime) {
+    if (screenCaptures.length > 0 && elapsed < allPhotosShownTime) {
         polaroids.forEach(p => {
             if (elapsed > p.time) {
                 ctx.save(); ctx.translate(p.x + 100, p.y + 100); ctx.rotate(p.rotation);
@@ -228,34 +223,49 @@ function drawCredits() {
         return;
     }
 
-    // Scrolling phase
+    // Scrolling phase - Polaroids and text move together
+    const scrollProgress = creditsY - canvas.height;
+
     ctx.save();
-    if (screenCaptures.length > 0) {
-        ctx.globalAlpha = 0.3; // Fade photos slightly so text is readable
-        polaroids.forEach(p => {
-            ctx.save(); ctx.translate(p.x + 100, p.y + 100); ctx.rotate(p.rotation);
-            ctx.fillStyle = COLORS.WHITE; ctx.fillRect(-110, -110, 220, 240);
-            ctx.drawImage(p.img, -100, -100, 200, 150); ctx.restore();
-        });
-    }
+    polaroids.forEach(p => {
+        ctx.save(); 
+        ctx.translate(p.x + 100, p.y + 100 + scrollProgress); 
+        ctx.rotate(p.rotation);
+        ctx.fillStyle = COLORS.WHITE; ctx.fillRect(-110, -110, 220, 240);
+        ctx.drawImage(p.img, -100, -100, 200, 150); 
+        ctx.restore();
+    });
     ctx.restore();
 
     const CREDITS_TEXT = [
         "Wanderlust", "", "Director & Tech", "Lindsey McGowen", "", "Assistant Director & Understudy", "Leichelle Little", "", "Cast",
-        "Claire Biddiscombe", "Gilbert El-Dick", "Jason Summers", "Krystal Merrells", "Patrice Forbes", "Peter Rogers", "Sam Allen", "The Velvet Duke", "",
+        "Claire Biddiscombe", "Gilbert El-Dick", "Jason Summers", "Krystal Merrells", "Patrice Forbes", "Peter Rogers", "Sam Adams", "The Velvet Duke", "",
         "Special Thanks to", "Annika Bolden (pinkies up!)", "", "Presented By", "Wayward Improvised Theatre", "& Videogaming Concern"
     ];
+
     ctx.fillStyle = COLORS.WHITE; ctx.textAlign = 'center'; ctx.font = '16px "Press Start 2P"';
+    // Position credits slightly below the photos
+    const textBaseY = 100;
+
     CREDITS_TEXT.forEach((line, i) => { 
-        const y = creditsY + i * 40; 
+        const y = creditsY + textBaseY + i * 40; 
         if (y > -40 && y < canvas.height + 40) {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctx.fillText(line, canvas.width / 2 + 2, y + 2);
-            ctx.fillStyle = COLORS.WHITE; ctx.fillText(line, canvas.width / 2, y); 
+            ctx.fillText(line, canvas.width / 2, y); 
         }
     });
+
+    // Animated chicken at the end
+    const chickenY = creditsY + textBaseY + CREDITS_TEXT.length * 40 + 50;
+    if (chickenY > -64 && chickenY < canvas.height + 64) {
+        if (chickenSheetImg.complete) {
+            const frame = Math.floor(Date.now() / 150) % 16;
+            ctx.drawImage(chickenSheetImg, frame * 128, 0, 128, 128, canvas.width / 2 - 64, chickenY, 128, 128);
+        }
+    }
+
     if (!creditsFinished) { 
-        creditsY -= 3.5; // Scroll "fairly quickly"
-        if (creditsY < -(CREDITS_TEXT.length * 40)) creditsFinished = true; 
+        creditsY -= 2.0; // Fairly slow scroll
+        if (chickenY < -100) creditsFinished = true; 
     } else { 
         ctx.font = '16px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.fillText('Click Enter to Replay', canvas.width / 2, canvas.height / 2); 
     }

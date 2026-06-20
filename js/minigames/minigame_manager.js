@@ -9,7 +9,15 @@ function startMinigame() {
         distance: 0, question: "", answer: "", timer: 10, lastTimerUpdate: Date.now(), difficulty: 1,
         // Cheese specific
         grid: [], visualGrid: [], selected: null, swapTarget: null, swapTime: 0, progress: 0, eatMode: false, matches: [],
-        fadingMatches: [], chainLevel: 0
+        fadingMatches: [], chainLevel: 0,
+        // Bump specific
+        car: { x: 400, y: 300, speed: 0, angle: 0, targetAngle: 0 },
+        coin: { x: 0, y: 0 },
+        otherCars: [],
+        // Fish specific
+        boat: { x: 400, y: 300, gridX: 5, gridY: 5, angle: 0 },
+        fishCenters: [],
+        fishWindow: null
     };
 
     if (gameType === 'chicken') {
@@ -39,11 +47,21 @@ function startMinigame() {
         showDialog('Mme. Tremblay', 'Claire', "Welcome to the fromagerie! Alas, we have a bit of a crisis. As you know, tomorrow is Cheese Day... and we have to prep all our at-least-three-cheese gift baskets today! Can you help? Just go to the cheese chutes and exchange pairs of cheeses to produce rows and columns of three identical cheeses. If you get stuck, press the red button and you can eat one cheese — but I wouldn't recommend doing that more than twice!", () => {
             currentPhase = PHASES.MINIGAME_PLAY; initCheeseGrid();
         });
+    } else if (gameType === 'bump') {
+        audio.play('BUMP_BGM');
+        showDialog('Charlene', 'Krystal', "Welcome to Bump World, where bumper cars are our whole world. You'll have the green car. Get out there and try to catch the coin four times! But watch out. The red car is gunning for it, too, and all the other cars will get in the way.", () => {
+            currentPhase = PHASES.MINIGAME_PLAY; initBumpGame();
+        });
+    } else if (gameType === 'fish') {
+        audio.play('FISH_BGM');
+        showDialog('Blair the Stylish Pirate', 'Patrice', "Yarr, welcome to me lake, matey. I'm old friends with your parents, so I'll let you borrow the ol' sloop and catch FOUR FISH. But don't ye be bringing up the hook empty! Do that too many times and ye'll have to WALK THE PLANK. Red squares have more fish, but they're harder to catch. Blue squares are easier, but you're as like to get a boot or a can as a fine flounder. Get out there and try yer best!", () => {
+            currentPhase = PHASES.MINIGAME_PLAY; initFishGame();
+        });
     }
 }
 
-function success() {
-    minigameState.successes++; score += 100; audio.playSFX('SUCCESS');
+function success(points = 100) {
+    minigameState.successes++; score += points; audio.playSFX('SUCCESS');
     if (minigameState.successes >= 4) { minigameState.won = true; score += 1000; audio.playSFX('TADA'); endMinigame(); }
 }
 
@@ -59,6 +77,15 @@ function endMinigame() {
     else if (minigameState.type === 'math') { actor = 'Peter'; char = 'Mr. Bergemot'; msg = minigameState.won ? "Wow! You're still a top-tier mathlete!" : "That's too bad. *sigh* Really I blame myself."; }
     else if (minigameState.type === 'karaoke') { actor = 'Velvet'; char = 'Lord Karaoke'; msg = minigameState.won ? "Killer performance! Your next round of drinks is on me!" : "You have failed karaoke night. Leave here, and take your dishonor with you."; }
     else if (minigameState.type === 'cheese') { actor = 'Claire'; char = 'Mme. Tremblay'; msg = minigameState.won ? "Hooray! The at-least-three-cheese gift baskets are saved! It's a Cheese Day miracle!" : "Alas, you have succumbed to the Temptation of the Cheese. Do not weep, weary traveler. It has claimed prouder souls than yours."; }
+    else if (minigameState.type === 'bump') { actor = 'Krystal'; char = 'Charlene'; msg = minigameState.won ? "Congratulations. Here are four Bump Tickets, redeemable for a small plush toy." : "Eh, you failed. Honestly? No big."; }
+    else if (minigameState.type === 'fish') { 
+        actor = 'Patrice'; char = 'Blair the Stylish Pirate'; 
+        if (minigameState.won) {
+            msg = `I knew ye had it in ye! Three cheers for ${CAST[selectedIndex].firstName}!`;
+        } else {
+            msg = `Bah! Only ${minigameState.successes} fish?! A PIRATE'S CURSE UPON YE!`;
+        }
+    }
     showDialog(char, actor, msg, null);
 }
 
@@ -68,7 +95,7 @@ function drawMinigameMap() {
     ctx.fillText(`Stop #${currentMinigameIndex + 1}`, canvas.width / 2, 80);
     const gameType = minigameOrder[currentMinigameIndex];
     ctx.font = '30px "Press Start 2P"';
-    const titles = { chicken: 'CATCH THAT CHICKEN', math: 'MATHEMAGIC!', karaoke: 'KARAOKE NIGHT', cheese: 'FROMAGERIE FRENZY!' };
+    const titles = { chicken: 'CATCH THAT CHICKEN', math: 'MATHEMAGIC!', karaoke: 'KARAOKE NIGHT', cheese: 'FROMAGERIE FRENZY!', bump: 'BUMPERTOWN!', fish: 'OBLIGATORY FISHING MINIGAME' };
     ctx.fillText(titles[gameType], canvas.width / 2, 140);
     if (canadaMapImg.complete && canadaMapImg.naturalWidth > 0) {
         ctx.imageSmoothingEnabled = false; const imgWidth = 500; const imgHeight = 300;
@@ -91,6 +118,8 @@ function drawMinigamePlay() {
     else if (gameType === 'math') drawMathGame(); 
     else if (gameType === 'karaoke') drawKaraokeGame(); 
     else if (gameType === 'cheese') drawCheeseGame();
+    else if (gameType === 'bump') drawBumpGame();
+    else if (gameType === 'fish') drawFishGame();
     
     // UI elements common to all minigames (drawn last to be on top)
     ctx.textAlign = 'left';
@@ -122,5 +151,7 @@ function handleMinigameInput(key) {
     } else if (state.type === 'karaoke') {
         if (key === 'ArrowUp') { state.diamondPos = Math.min(8, state.diamondPos + 1); audio.playSFX('ui'); }
         else if (key === 'ArrowDown') { state.diamondPos = Math.max(0, state.diamondPos - 1); audio.playSFX('ui'); }
+    } else if (state.type === 'fish') {
+        handleFishInput(key);
     }
 }

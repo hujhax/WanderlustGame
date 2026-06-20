@@ -27,6 +27,7 @@ const PHASES = {
     MINIGAME_POST: 'MINIGAME_POST',
     IN_THE_CAR: 'IN_THE_CAR',
     THE_CONFRONTATION: 'THE_CONFRONTATION',
+    CONFRONTATION_PLAY: 'CONFRONTATION_PLAY',
     NEXT_DAY: 'NEXT_DAY',
     SEPARATE_WAYS: 'SEPARATE_WAYS',
     ON_YOUR_OWN: 'ON_YOUR_OWN',
@@ -42,7 +43,7 @@ const CAST = [
     { name: 'Krystal Merrells', firstName: 'Krystal', actor: 'Krystal', imgPath: 'images/cast/krystal.png' },
     { name: 'Patrice Forbes', firstName: 'Patrice', actor: 'Patrice', imgPath: 'images/cast/patrice.png' },
     { name: 'Peter Rogers', firstName: 'Peter', actor: 'Peter', imgPath: 'images/cast/peter.png' },
-    { name: 'Sam Allen', firstName: 'Sam', actor: 'Sam', imgPath: 'images/cast/sam.png' },
+    { name: 'Sam Adams', firstName: 'Sam', actor: 'Sam', imgPath: 'images/cast/sam.png' },
     { name: 'The Velvet Duke', firstName: 'Velvet', actor: 'Velvet', imgPath: 'images/cast/velvet.png' }
 ];
 
@@ -50,7 +51,7 @@ const PARTNER_PAIRS = {
     'Jason Summers': 'Peter Rogers', 'Peter Rogers': 'Jason Summers',
     'Patrice Forbes': 'Gilbert El-Dick', 'Gilbert El-Dick': 'Patrice Forbes',
     'The Velvet Duke': 'Claire Biddiscombe', 'Claire Biddiscombe': 'The Velvet Duke',
-    'Sam Allen': 'Krystal Merrells', 'Krystal Merrells': 'Sam Allen'
+    'Sam Adams': 'Krystal Merrells', 'Krystal Merrells': 'Sam Adams'
 };
 
 const CONFRONTATION_RESPONSES = {

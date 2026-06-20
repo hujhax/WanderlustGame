@@ -1,4 +1,4 @@
-﻿# Wanderlust
+# Wanderlust
 
 # General
 Wanderlust is a video game that uses NES-style pixel-art graphics and chiptune-style music and sound effects.
@@ -244,6 +244,48 @@ If the player lost:
 Mr. Bergemot (Peter): That's too bad.  *sigh*  Really I blame myself.
 
 
+### Bumpertown! (Population Bump)
+Query string name is "bump".
+
+For this minigame's background music, download the music from https://www.youtube.com/watch?v=eyZ4QSwqpNc.
+
+Introductory dialog:
+Charlene (Krystal): Welcome to Bump World, where bumper cars are our whole world.
+Charlene (Krystal): You'll have the green car.
+Charlene (Krystal): Get out there and try to catch the coin four times!
+Charlene (Krystal): But watch out. The red car is gunning for it, too, and all the other cars will get in the way.
+
+This is a driving game on an isometric playing field.
+
+Use the background image at images/backgrounds/bumper-car-lot.png.  Limit the cars to the central gray section of the image, i.e., the part that has rgb = (101,101,101); the cars cannot go past the edges of this section.
+
+Scale up all sprites by 30% on this minigame.
+
+The player drives the car in images/sprites/cars/PixelWheels_Ferrari_Green.png.  Use the leftmost column of sprites.  Pick the row based on which direction the car is going.  Note that row 1 shows the car going north, and each subsequent row turns the car 22.5° clockwise.
+
+The player uses arrow keys: left and right to steer, up to accelerate, and down to brake.  Generate appropriate engine and tire-screen 8-bit sounds accordingly.
+
+At the start of play, a coin (use the sprite sheet from images/sprites/coin.png, noting that the sprites are different widths) appears randomly on the playing field.
+
+If the player drives their car over the coin, register a success and give the player 200 points; the coin disappears and reappears on another random spot on the play field.
+
+There is also a red car (PixelWheels_Ferrari_Red.png) trying to catch the coins. If the red car drives their car over the coin, register a failure and give the player -100 points; the coin disappears and reappears on another random spot on the play field.
+
+There are four white cars (PixelWheels_Ferrari_White.png) that either drive randomly (80% of the time) or try to run into the nearest other car (20% of the time).  If a white car drives over a coin, nothing happens.
+
+These are bumper cars: make sure they all collide like bumper cars, including the NPC cars.  A car should skid pretty far when another car hits it.
+
+If the player gets four successes, they win!
+If the player gets three losses, they lose!
+
+
+Post-minigame dialog:
+If the player won:
+Charlene (Krystal): Congratulations. Here are four Bump Tickets, redeemable for a small plush toy.
+If the player lost:
+Charlene (Krystal): Eh, you failed. Honestly? No big.
+
+
 ### Karaoke Night
 Query string name is "karaoke".
 
@@ -323,6 +365,153 @@ Mme. Tremblay (Claire): It's a Cheese Day miracle!
 If the player gets three failures, they lose. The dialog when the player loses:
 Mme. Tremblay (Claire): Alas, you have succumbed to the Temptation of the Cheese.
 Mme. Tremblay (Claire): Do not weep, weary traveler. It has claimed prouder souls than yours.
+
+
+
+### Obligatory Fishing Minigame
+You can reach this game directly with the query parameter `?minigame=fish`.
+
+For background music, download and use the music from https://www.youtube.com/watch?v=qmLEEXqU_Ek.
+
+Opening Dialog:
+Blair the Stylish Pirate (Patrice): Yarr, welcome to me lake, matey.
+Blair the Stylish Pirate (Patrice): I'm old friends with your parents, so I'll let you borrow the ol' sloop and catch FOUR FISH
+Blair the Stylish Pirate (Patrice): But don't ye be bringing up the hook empty!
+Blair the Stylish Pirate (Patrice): Do that too many times and ye'll have to WALK THE PLANK
+Blair the Stylish Pirate (Patrice): Deep waters have more fish, but they're harder to catch.
+Blair the Stylish Pirate (Patrice): Coastal waters are easier, but you're as like to get a boot or a can as a fine flounder.
+Blair the Stylish Pirate (Patrice): Get out there and try yer best!
+
+For the main screen, use this background image: images/backgrounds/fishing-bg.png.
+
+Note that the lake in the image contains these three colors:
+deep water: #0f4c85
+normal water: #1d69a5
+shallow water: #2e89b5
+
+These are approximate values; consider any color within plus or minus 10 of red, green, or blue to be the same as those values.
+
+The should start in the center of the screen.
+
+The boat cannot leave the lake -- i.e. it can only reach parts of the image whose color is deep water, normal water, or shallow water.
+
+The player navigates their boat around the lake.  (Find the boat sprites at images/sprites/fishing-boat.png -- there are four sprites in a row, facing north, south, east, and west.  Each one is 465 pixels wide.)
+
+Place the player's sprite in the boat.  Use the second column of the player's sit.png file in images/sprites/cast -- those show the sprite to use for north, west, south, and east, from top to bottom.
+
+Treat the lake as a discrete grid of locations.  The player uses the arrow keys to move their boat from one location to the other. The boat always faces the direction of the last arrow key.
+
+When the user hits the enter key, open the Fishing Window.  The Fishing Window is a black square superimposed over most of the screen.  In the square is a large ship image (use /images/elements/fishing/fishing-boat.webp), an image of what they caught, and a description of what they caught.
+
+When we bring up this window, we compute (1) whether the player caught anything, and (2) whether what they caught was a fish.  These are randomly determined, with probabilities determined by the color of the square the boat was on.
+
+If the color is "deep water", (1) the odds they caught anything are 20% and (2) the odds that what they caught was a fish are 100%.
+
+If the color is "normal water", (1) the odds they caught anything are 50% and (2) the odds that what they caught was a fish are 100%.
+
+If the color is "shallow water", (1) the odds they caught anything are 100% and (2) the odds that what they caught was a fish are 20%.
+
+There are three types of fish the player might catch:
+1. Cod - images/elements/fishing/cod.jpg
+2. Walleye - images/elements/fishing/walleye.webp
+2. Rainbow Trout - images/elements/fishing/rainbow-trout.png
+
+There are three types of trash the player might catch:
+1. Boot - images/elements/fishing/boot.jpg
+2. Soda Can - images/elements/fishing/soda-can.jpg
+2. Accordion - images/elements/fishing/accordion.jpg
+
+If the player didn't catch anything:
+1. The image of what they caught is a large red "X".
+2. The title of what they caught is "NOTHING!"
+3. The user gets a failure.
+4. This dialog comes up:
+Blair the Stylish Pirate (Patrice): Yarr, ye cast ye hook and ye got back bupkus! I'd call that a fail.
+
+If the player caught something, and what they caught was a fish, pick one of the three fish at random:
+1. The image of what they caught is the fish image
+2. The title of what they caught is the fish name
+3. The user gets a success.
+4. This dialog comes up:
+Blair the Stylish Pirate (Patrice): Amazing fishing! That be a fine [fish name]!
+
+If the player caught something, and what they caught was not a fish, pick one of the three trash at random:
+1. The image of what they caught is the trash image
+2. The title of what they caught is the trash name
+3. The user gets neither a success nor a failure.
+4. This dialog comes up:
+Blair the Stylish Pirate (Patrice): Bah, another curséd [trash name]. Try again, matey!
+
+If the player gets four successes, they win after the dialog response to the fourth success.  The dialog when the player wins:
+Blair the Stylish Pirate (Patrice): I knew ye had it in ye! Three cheers for [Player's First Name]!
+
+If the player gets three failures, they lose. The dialog when the player loses:
+Blair the Stylish Pirate (Patrice): Bah! Only [number of successes] fish?!
+Blair the Stylish Pirate (Patrice): A PIRATE'S CURSE UPON YE!
+
+If the player has not won or lost at this point, then the Fishing Dialog goes away and the player resumes moving their boat around the lake.
+
+
+## Bob's Intense Mini-Golf
+Query string name is "karaoke".
+
+This minigame's background music is music/karaoke_bgm.mp3.
+
+Introductory dialog:
+Bob Golf (Gil): Welcome to the most INTENSE mini-golf course in ALL OF CANADA.
+Bob Golf (Gil): Every hole is a par 3. If you make the hole in three strokes, that's a success!
+Bob Golf (Gil): But if you don't, that's a FAILURE.
+Bob Golf (Gil): Get three failures, and you're KNOCKED OUT.
+Bob Golf (Gil): Can't take the golf heat? Then GET OUT of the GOLF KITCHEN!
+
+The game screen shows the map of the current hole.  Above the map, we see the usual success/failure/score indicators, a hole label ("Hole #[number]: [Hole Name]"), a stroke indicator ("Stroke #[number]"), and a progress bar labeled "power".
+
+Here are the hole names, in order:
+1. The Bunny Slope
+1. Z-Time
+1. The D-D-D-DROP!
+1. The Unholy Asterisk
+1. Do U Know the Shortcut?
+1. O NOOOOO
+
+
+Below the map, we see instructions: "Click and drag to aim your shot; press SPACE to start the wind-up, and SPACE again to hit the ball."
+
+There are six holes.  The maps are in the images/elements/golf/greens subdirectory, with filenames golf_[x].png.  Each has a corresponding "info" image file called images/elements/golf/info/golf_[x].png.  That info file includes:
+
+1. The starting position of the ball, in blue
+2. The position of the hole, in red
+3. Any walls, in green.
+4. Elevation changes are noted in white (high elevation) and black (low elevation); if the ball drops from a white zone to a black zone, it lands with a "thunk" noise and its velocity changes appropriately.
+5. Water hazards, in orange. If a ball goes into a water hazard, there is a "splash" noise and the next stroke starts from the previous starting position
+
+Process the golf_[x]info.png files as you generate code to generate machine-readable data for each hole.  (i.e., don't process the info images while running the app.)
+
+Gameplay works as follows:
+1. Place a small white circle at the ball's location.
+2. Place a small "aiming arrow" next to the ball; this arrow always starts a short distance away from the ball, and always points away from the ball; the user can click and drag to rotate the arrow.
+3. When the user hits the spacebar, start the power bar moving.  You will cycle through filling up and depleting the progress bar.  It should move faster at the 'full' end.  It should have a color gradient from blue (low end) to red (high end).
+4. When the user hits the spacebar a second time, lock the power bar in place.
+5. Remove the aiming arrow from the screen
+6. Move the ball in the direction of the aiming arrow at a speed indicated by the power bar.
+7. Steadily decelerate the ball until it stops.
+
+The power bar indicates how far the ball will ultimately travel when struck.  It ranges from 10 pixels (minimum) to 1000 pixels (maximum), and varies linearly from one extreme to the other.
+
+If the ball gets within 20 pixels of the hole at a reasonable speed, it drops in the hole (provide 8-bit sound effects for a "clunk" and a short burst of applause).  If the ball is going too fast when it gets within 20 pixels of the hole, the ball continues, diverted some random angle (between -15° and 15°) from its original direction.
+
+If the ball drops in the hole, we register a success.  If there are four successes, the player wins and the minigame is over.  If not, move on to the next hole.
+If the ball does not drop in the hole, increase the stroke number.  If the stroke number has reached four, we register a failure.  If there are three failures, the player loses and the minigame is over.  If not, move on to the next hole.
+
+If the player gets four successes, they win.  The dialog when the player wins:
+Bob Golf (Gil): Whoa! Four successes!
+Bob Golf (Gil): You stared into the abyss of golf and did. not. blink.
+Bob Golf (Gil): Great job!
+
+If the player gets three failures, they lose. The dialog when the player loses:
+Bob Golf (Gil): *sigh*
+Bob Golf (Gil): Not everybody is cut out to handle the high-stakes world of miniature golf.
+
 
 
 ## The Confrontation
@@ -488,6 +677,7 @@ Both sprites should draw onscreen at 2x size.
 [Player's First Name]([Player's First Name]){top}: YAY!
 
 ## Closing Interview
+Access this directly via "?minigame=interview"
 This screen has this background music: music/closing_interview.mp3, at the 39-second mark.
 
 Show the title screen again, without the "Wanderlust" title.
@@ -499,11 +689,13 @@ Show the title screen again, without the "Wanderlust" title.
 [Player's First Name]([Player's First Name]){top}: I gained [score] points worth of self-knowledge!
 
 ## Closing Credits
-First, show a blank screen.  Then add five random screen captures from this run through the game, one by one, presented like they're polaroid pictures scattered randomly on the screen, but each "photo" should remain mostly visible.  The photos should not overlap.  If there are not five screen captures available, repeats are okay.  If no screen captures are available, skip directly to scrolling the credits.
+Access this directly via "?minigame=credits"
 
-When all photos appear, begin scrolling.  The credits should appear below the collection of photos.
+First, show a blank screen.  Then add five random screen captures from this run through the game, one by one, presented like they're polaroid pictures scattered randomly on the screen, but each "photo" should remain mostly visible.  If there are not five screen captures available, repeats are okay.  If no screen captures are available, skip directly to scrolling the credits.
 
-This section should scroll credits fairly quickly, in white Nintendo font against a black background, with a faint drop shadow.
+When all photos appear, begin scrolling.  The photos scroll up and off the screen; the credits scroll in from the bottom, slightly below the photos.
+
+This section should scroll credits fairly slowly, in white Nintendo font against a black background.
 
 This is the text it should depict:
 Wanderlust
@@ -521,7 +713,7 @@ Jason Summers
 Krystal Merrells
 Patrice Forbes
 Peter Rogers
-Sam Allen
+Sam Adams
 The Velvet Duke
 
 Special Thanks to
@@ -530,6 +722,8 @@ Annika Bolden (pinkies up!)
 Presented By
 Wayward Improvised Theatre
 & Videogaming Concern
+
+Below this, add a centered chicken from /images/sprites/chicken.png -- animate using the first row of sprites.
 
 
 The background music should be music/moon.mp3.
