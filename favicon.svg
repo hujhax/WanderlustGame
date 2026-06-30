@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" width="32" height="32">
+  <!-- Upper body/roof (Gold/Yellow) -->
+  <rect x="0" y="0" width="80" height="15" fill="#DAA520" />
+  <!-- Body (Wood panel brown) -->
+  <rect x="0" y="15" width="120" height="40" fill="#8B4513" />
+  <!-- Left Wheel (Black) -->
+  <rect x="15" y="50" width="20" height="10" fill="#000000" />
+  <!-- Right Wheel (Black) -->
+  <rect x="85" y="50" width="20" height="10" fill="#000000" />
+  <!-- Window 1 (Sky Blue) -->
+  <rect x="5" y="5" width="30" height="10" fill="#87CEEB" />
+  <!-- Window 2 (Sky Blue) -->
+  <rect x="40" y="5" width="30" height="10" fill="#87CEEB" />
+</svg>

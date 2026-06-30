@@ -8,9 +8,12 @@ class AudioManager {
             CHICKEN_BGM: new Audio('music/chicken_bgm.mp3'),
             MATH_BGM: new Audio('music/math_bgm.mp3'),
             KARAOKE_BGM: new Audio('music/karaoke_bgm.mp3'),
+            GOLF_BGM: new Audio('music/golf_bgm.mp3'),
             CHEESE_BGM: new Audio('music/cheese_bgm.mp3'),
             BUMP_BGM: new Audio('music/bump_bgm.mp3'),
             FISH_BGM: new Audio('music/fishing_bgm.mp3'),
+            JEOPARDY_INTRO_BGM: new Audio('music/jeopardy_intro_bgm.mp3'),
+            JEOPARDY_BGM: new Audio('music/jeopardy_bgm.mp3'),
             FIGHT_BGM: new Audio('music/fighting_theme.mp3'),
             IN_THE_CAR: new Audio('music/in_the_car.mp3'),
             TOGETHER_BGM: new Audio('music/together_again.mp3'),
@@ -27,6 +30,9 @@ class AudioManager {
         this.audioCtx = null;
     }
     play(trackName, startTime = 0) {
+        if (this.currentTrack === this.tracks[trackName] && !this.currentTrack.paused) {
+            return;
+        }
         if (this.currentTrack) {
             this.currentTrack.pause();
             this.currentTrack.currentTime = 0;
@@ -83,6 +89,38 @@ class AudioManager {
             osc.type = 'sawtooth'; osc.frequency.setValueAtTime(220, now); osc.frequency.linearRampToValueAtTime(110, now + 1);
             gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 1);
             osc.start(now); osc.stop(now + 1);
+        } else if (name === 'thunk') {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(120, now); osc.frequency.linearRampToValueAtTime(60, now + 0.15);
+            gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+            osc.start(now); osc.stop(now + 0.15);
+        } else if (name === 'splash') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.25);
+            gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            osc.start(now); osc.stop(now + 0.25);
+            const osc2 = this.audioCtx.createOscillator();
+            const gain2 = this.audioCtx.createGain();
+            osc2.type = 'triangle'; osc2.frequency.setValueAtTime(450, now); osc2.frequency.linearRampToValueAtTime(80, now + 0.2);
+            osc2.connect(gain2); gain2.connect(this.audioCtx.destination);
+            gain2.gain.setValueAtTime(0.15, now); gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            osc2.start(now); osc2.stop(now + 0.2);
+        } else if (name === 'clunk') {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(180, now); osc.frequency.linearRampToValueAtTime(120, now + 0.12);
+            gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+            osc.start(now); osc.stop(now + 0.12);
+        } else if (name === 'applause') {
+            gain.gain.setValueAtTime(0.05, now);
+            for (let i = 0; i < 20; i++) {
+                const o = this.audioCtx.createOscillator();
+                const g = this.audioCtx.createGain();
+                o.connect(g); g.connect(this.audioCtx.destination);
+                o.type = 'sawtooth';
+                const t = now + i * 0.04 + Math.random() * 0.02;
+                o.frequency.setValueAtTime(300 + Math.random() * 600, t);
+                g.gain.setValueAtTime(0.05, t);
+                g.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+                o.start(t); o.stop(t + 0.06);
+            }
+            osc.start(now); osc.stop(now + 0.01); // DUMMY OSC START/STOP
         } else {
             osc.type = 'square'; osc.frequency.setValueAtTime(150, now);
             gain.gain.setValueAtTime(0.05, now); gain.gain.linearRampToValueAtTime(0, now + 0.05);

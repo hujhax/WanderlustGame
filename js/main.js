@@ -4,7 +4,7 @@ const ctx = canvas.getContext('2d');
 let selectedIndex = 0;
 let score = 0;
 let currentMinigameIndex = 0;
-let minigameOrder = ['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish'].sort(() => Math.random() - 0.5).slice(0, 3);
+let minigameOrder = ['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish', 'golf', 'jeopardy', 'goose'].sort(() => Math.random() - 0.5).slice(0, 3);
 let playedMinigames = []; // Tracks {name, won} for confrontation
 
 let currentPhase = PHASES.INTRO;
@@ -26,6 +26,7 @@ let polaroids = [];
 
 // Image Objects
 const canadaMapImg = new Image();
+const golfGreenImgs = [];
 const cloudImg = new Image();
 const chickenSheetImg = new Image();
 const skullImg = new Image();
@@ -94,19 +95,29 @@ function preloadAssets() {
     fishImages['soda can'].src = 'images/elements/fishing/soda-can.jpg';
     fishImages.accordion.src = 'images/elements/fishing/accordion.jpg';
 
+    for (let i = 1; i <= 6; i++) {
+        const space = (i !== 5) ? " " : "";
+        golfGreenImgs[i] = new Image();
+        golfGreenImgs[i].src = `images/elements/golf/greens/golf_${space}${i}.png`;
+    }
+
     CAST.forEach(c => {
         c.img = new Image(); c.img.src = c.imgPath;
-        c.invertedImg = new Image(); c.invertedImg.src = c.imgPath.replace('images/cast/', 'images/cast/inverted/');
-        const actor = c.actor.toLowerCase();
-        slashSprites[actor] = new Image(); slashSprites[actor].src = `images/sprites/cast/${actor}/standard/slash.png`;
-        idleSprites[actor] = new Image(); idleSprites[actor].src = `images/sprites/cast/${actor}/standard/idle.png`;
-        walkSprites[actor] = new Image(); walkSprites[actor].src = `images/sprites/cast/${actor}/standard/walk.png`;
-        runSprites[actor] = new Image(); runSprites[actor].src = `images/sprites/cast/${actor}/standard/run.png`;
-        jumpSprites[actor] = new Image(); jumpSprites[actor].src = `images/sprites/cast/${actor}/standard/jump.png`;
-        sitSprites[actor] = new Image(); sitSprites[actor].src = `images/sprites/cast/${actor}/standard/sit.png`;
-        combatSprites[actor] = new Image(); combatSprites[actor].src = `images/sprites/cast/${actor}/standard/combat.png`;
-        halfSlashSprites[actor] = new Image(); halfSlashSprites[actor].src = `images/sprites/cast/${actor}/standard/1h_halfslash.png`;
-        backSlashSprites[actor] = new Image(); backSlashSprites[actor].src = `images/sprites/cast/${actor}/standard/1h_backslash.png`;
+        if (!c.noSprites) {
+            c.invertedImg = new Image(); c.invertedImg.src = c.imgPath.replace('images/cast/', 'images/cast/inverted/');
+        }
+        if (!c.noSprites) {
+            const actor = c.actor.toLowerCase();
+            slashSprites[actor] = new Image(); slashSprites[actor].src = `images/sprites/cast/${actor}/standard/slash.png`;
+            idleSprites[actor] = new Image(); idleSprites[actor].src = `images/sprites/cast/${actor}/standard/idle.png`;
+            walkSprites[actor] = new Image(); walkSprites[actor].src = `images/sprites/cast/${actor}/standard/walk.png`;
+            runSprites[actor] = new Image(); runSprites[actor].src = `images/sprites/cast/${actor}/standard/run.png`;
+            jumpSprites[actor] = new Image(); jumpSprites[actor].src = `images/sprites/cast/${actor}/standard/jump.png`;
+            sitSprites[actor] = new Image(); sitSprites[actor].src = `images/sprites/cast/${actor}/standard/sit.png`;
+            combatSprites[actor] = new Image(); combatSprites[actor].src = `images/sprites/cast/${actor}/standard/combat.png`;
+            halfSlashSprites[actor] = new Image(); halfSlashSprites[actor].src = `images/sprites/cast/${actor}/standard/1h_halfslash.png`;
+            backSlashSprites[actor] = new Image(); backSlashSprites[actor].src = `images/sprites/cast/${actor}/standard/1h_backslash.png`;
+        }
     });
 }
 
@@ -118,9 +129,9 @@ const playerSitsBg = document.createElement('video');
 playerSitsBg.src = 'images/backgrounds/player_alone.mp4';
 playerSitsBg.loop = true; playerSitsBg.muted = true;
 
-function showDialog(character, actor, text, callback, style = null) {
+function showDialog(character, actor, text, callback, style = null, illustration = null) {
     const castMember = CAST.find(c => c.actor === actor);
-    currentDialog = { name: character, castMember, fullText: text, chunks: wrapText(text, 400), chunkIndex: 0, style };
+    currentDialog = { name: character, castMember, fullText: text, chunks: wrapText(text, 400), chunkIndex: 0, style, illustration };
     dialogCallback = callback;
 }
 
@@ -195,6 +206,20 @@ window.addEventListener('mousedown', (e) => {
     } else if (currentPhase === PHASES.MINIGAME_PLAY && minigameState.type === 'cheese') {
         const rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
         handleCheeseClick(x, y);
+    } else if (currentPhase === PHASES.MINIGAME_PLAY && minigameState.type === 'golf') {
+        handleGolfMouseDown(e);
+    }
+});
+
+window.addEventListener('mousemove', (e) => {
+    if (currentPhase === PHASES.MINIGAME_PLAY && minigameState && minigameState.type === 'golf') {
+        handleGolfMouseMove(e);
+    }
+});
+
+window.addEventListener('mouseup', (e) => {
+    if (currentPhase === PHASES.MINIGAME_PLAY && minigameState && minigameState.type === 'golf') {
+        handleGolfMouseUp(e);
     }
 });
 
@@ -303,7 +328,7 @@ if (minigameOverride) {
     else if (minigameOverride === 'reunited') startTogetherAgain();
     else if (minigameOverride === 'interview') startClosingInterview();
     else if (minigameOverride === 'credits') { currentPhase = PHASES.CLOSING_CREDITS; creditsY = canvas.height; creditsFinished = false; audio.play('MOON'); }
-    else if (['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish'].includes(minigameOverride)) { minigameOrder = [minigameOverride]; currentPhase = PHASES.MINIGAME_MAP; }
+    else if (['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish', 'golf', 'jeopardy', 'goose'].includes(minigameOverride)) { minigameOrder = [minigameOverride]; currentPhase = PHASES.MINIGAME_MAP; }
 }
 
 preloadAssets();

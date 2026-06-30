@@ -1,4 +1,4 @@
-# Wanderlust
+﻿anderlust
 
 # General
 Wanderlust is a video game that uses NES-style pixel-art graphics and chiptune-style music and sound effects.
@@ -14,7 +14,7 @@ For debug purposes, a player may always type the ">" key to skip to the next sec
 If we have loaded a phase of the game via the query parameter without selecting a traveler, set the traveler to Peter by default.
 
 ## Cast
-This game has eight "cast members", and each has a "head shot" image in the /images/cast directory, and a folder of sprites in the /images/sprites/cast directory:
+This game has nine "cast members", and each has a "head shot" image in the /images/cast directory, and a folder of sprites in the /images/sprites/cast directory:
 1. Claire: claire.png
 1. Gilbert: gilbert.png
 1. Jason: jason.png
@@ -23,6 +23,7 @@ This game has eight "cast members", and each has a "head shot" image in the /ima
 1. Peter: peter.png
 1. Sam: sam.png
 1. Velvet: velvet.png
+1. Lindsey: lindsey.png
 
 ## Dialog
 Throughout this game, to display a piece of dialog, show a wide black rectangle.  In the left part of the rectangle is a square that will show the cast member image.  Centered below that square is the character name, word-wrapped if necessary to avoid extending past the left and right edges of the square.  In the right side of the rectangle, show the dialog message.
@@ -69,7 +70,7 @@ The background music for this phase is music/chicago.mp3.  Start the track at th
 At the bottom center are the words "Press Enter to Start", written in the [Nintendo Font](https://fontstruct.com/fontstructions/show/406653/nintendo_nes_font).  If the user presses enter, we go to the next phase.
 
 ## Choose Your Traveler
-This shows a character-select screen.  The title of the screen says "CHOOSE YOUR TRAVELER" in the Nintendo font.  The screen shows 8 boxes, arranged four by two, each showing a cast member head shot, and each labeled with the cast member name.
+This shows a character-select screen.  The title of the screen says "CHOOSE YOUR TRAVELER" in the Nintendo font.  The screen shows 8 boxes, arranged four by two, each showing a cast member head shot, and each labeled with the cast member name.  (Note: Lindsey is NOT a traveler, and thus is not included in this menu.)
 
 The player uses arrow keys to select a box and presses the enter key to proceed to the next phase.
 
@@ -452,10 +453,10 @@ Blair the Stylish Pirate (Patrice): A PIRATE'S CURSE UPON YE!
 If the player has not won or lost at this point, then the Fishing Dialog goes away and the player resumes moving their boat around the lake.
 
 
-## Bob's Intense Mini-Golf
-Query string name is "karaoke".
+### Bob's Intense Mini-Golf
+Query string name is "golf".
 
-This minigame's background music is music/karaoke_bgm.mp3.
+Download this minigame's background music from https://www.youtube.com/watch?v=efo-95ANS-c&list=PL6C0D3E2AAE82328F&index=7.
 
 Introductory dialog:
 Bob Golf (Gil): Welcome to the most INTENSE mini-golf course in ALL OF CANADA.
@@ -484,6 +485,7 @@ There are six holes.  The maps are in the images/elements/golf/greens subdirecto
 3. Any walls, in green.
 4. Elevation changes are noted in white (high elevation) and black (low elevation); if the ball drops from a white zone to a black zone, it lands with a "thunk" noise and its velocity changes appropriately.
 5. Water hazards, in orange. If a ball goes into a water hazard, there is a "splash" noise and the next stroke starts from the previous starting position
+6. Sand traps, in purple. A sand trap has a higher coefficient of friction than the greens.
 
 Process the golf_[x]info.png files as you generate code to generate machine-readable data for each hole.  (i.e., don't process the info images while running the app.)
 
@@ -513,6 +515,179 @@ Bob Golf (Gil): *sigh*
 Bob Golf (Gil): Not everybody is cut out to handle the high-stakes world of miniature golf.
 
 
+### Canadian Jeopardy
+
+#### Preparing the clues
+First, prepare a set of Jeopardy! clues.  Do this at the same time you write the code (i.e., don't write the clues live in the app).
+
+Recall that Jeopardy! presents you with the answers, and asks that you provide the appropriate question.  For example:
+
+Clue: On Sept. 1, 1715 Louis XIV died in this city, site of a fabulous palace he built.
+Question: What is Versailles?
+
+Use [this](https://www.popularmechanics.com/culture/tv/a19435419/how-to-write-a-jeopardy-clue/) and [this](https://www.reddit.com/r/Jeopardy/comments/1efysgc/how_to_write_good_jeopardy_clues/) for references on how to write good Jeopardy! clues.
+
+Prepare clues for a total of ten categories.  Categories should be named similarly to Jeopardy category naming conventions.  All categories should have to do with Canada — its culture, history, wildlife, art, and so on.  You must include these categories:
+* Hinterland Who's Who — these are clues about Canadian wildlife.
+	* Include one clue about the snowy owl
+* Featuring Canada As... — these are clues about TV shows and movies shot in Canada that pretend Canada is some other place.
+	* Include one clue about My Big Fat Greek Wedding, a movie set in Chicago with obvious skyline shots from Toronto.
+* A Word from Our Sponsors — these are clues about famous Canadian TV and radio ads.
+* Heritage Minutes — these are clues about Canadian history.
+* Le Bon Usage — these are clues about the Canadian French language
+* It's the Law — these are clues about obscure and/or weird Canadian laws
+* Unceded Territories — these are clues about the indigenous people of Canada
+* Capital-ism — these are clues about Canada's provincial capitals, plus Ottawa
+* Citizenship Test — these are clues about things that appear on the Canadian citizenship test
+
+For each category, come up with clues that range from $200 (easy) to $1000 (difficult).  Come up with two clues for each dollar amount.  Come up with three possible questions (one right, two wrong) for each clue.
+
+Save the clues to a /data/jeopardy/clues.json file.
+
+At the start of the game, select six of the ten categories at random, and select one of the two posisbilities for each of the prompts in each category.
+
+#### The Game Itself
+
+##### Intro and General Info
+Query string name is "jeopardy".
+
+For the initial section of the minigame, download the background music from https://www.youtube.com/watch?v=ZS1ZbTMpa9c.
+
+Introductory dialog:
+Not Alex Trebek (Lindsey): Good evening and welcome to Canadian Jeopardy!
+Not Alex Trebek (Lindsey): Your knowledge of Canadian culture, history, and trivia will be tested by me, a Legitimate Canadian™
+Not Alex Trebek (Lindsey): For every thousand dollars you rack up, you get a success! Four successes, and you win!
+Not Alex Trebek (Lindsey): For each clue you get wrong, that's a failure.  Three failures, and you lose.
+Not Alex Trebek (Lindsey): Let's play Canadian Jeopardy!
+
+##### Gameplay
+After this, we begin the gameplay proper.  
+
+Download the background music for this section from https://www.youtube.com/watch?v=8xooIQAlewE.
+
+Not Alex Trebek (Lindsey): Our categories are...
+
+Then iterate through each category for this run of the minigame.  Show the category onscreen (use [this image](https://9to5google.com/wp-content/uploads/sites/4/2019/04/Google-Jeopardy-category.jpg?quality=82&strip=all) as reference) with this dialog:
+
+Not Alex Trebek (Lindsey): [category name]
+
+The game screen shows a Jeopardy board, with a grid of displays.  The categories are in the top rectangles; the dollar amounts are in the rest.  Use [this image](https://commons.wikimedia.org/wiki/File:Jeopardy!_game_board_US.svg) for reference.  The player's current winnings are displayed in the top-right corner of the screen.
+
+The player uses the arrow keys to navigate a cursor directly to any unrevealed cell on the board, then presses Enter to select it.
+
+Then the game shows the clue full screen, white text on a blue background.  The player presses Enter to proceed to the answer choices.
+
+Then the game presents the three multiple-choice options in random order.
+
+If the player gets the clue correct, respond with one of these:
+* Not Alex Trebek (Lindsey): Correct!
+* Not Alex Trebek (Lindsey): You got that right, for [xxxx] dollars.
+* Not Alex Trebek (Lindsey): Absolutely right. You have control of the board.
+
+Add the dollar amount of the clue to an internal tally of "total amount from right answers".  Set the number of successes equal to the floor of that amount divided by $1,000.  If the player has four successes, end the minigame with success at this point.
+
+If the player gets the clue incorrect, respond with one of these:
+* Not Alex Trebek (Lindsey): I'm sorry.  The correct response is, "[correct response]".
+* Not Alex Trebek (Lindsey): Not quite.  The correct response is, "[correct response]".
+
+After this, add one failure to the failure tally.  If that tally reaches three failures, end the minigame with failure at this point.
+
+Post-minigame dialog:
+If the player won:
+Not Alex Trebek (Lindsey): Congratulations! You really know your stuff!
+If the player lost:
+Not Alex Trebek (Lindsey): I'm so sorry, you have lost.  You will receive our second-place consolation prize of just $3,000, and a lifetime spent thinking back on "[the last clue they got wrong]".
+
+
+### Unpleasant Goose Game
+Query string name is "goose".
+
+#### The Gameboards
+This is a logic game with a series of square-grid gameboards.
+
+Each gameboard contains the elements listed below.
+1. The player.
+2. One or more geese.
+3. Zero or more boulders.
+4. Zero or more water features.
+5. The green 'target' circle.
+
+Pull pixel-art assets for each of these, as well as for a default "grassland" square, from the web.
+
+Each gameboard specifies its starting arrangement of elements, including how each goose is aimed.
+
+If the player reaches the target circle, they get a success.  Four successes and they win!
+If a goose reaches the player, the player gets a failure.  Three failures and they lose.
+
+The player navigates the board by moving NESW with the arrow keys.
+
+#### Goose Behavior
+The goose only moves when the player does.  When the player moves one square NESW, each goose moves one square NESW.
+
+Throughout this, we'll talk about the goose 'spotting the player'.  There is a "cone of recognition" that emanates from the front of the goose.
+
+Consider a 5×5 grid, where the southwest corner is (x=1,y=1), and a goose at (1,3), aimed east.  In this case, its "cone of recognition" includes the three squares in front of the goose [(2,2), (2,3), (2,4)], and then the five squares beyond that [(3,1), (3,2), (3,3), (3,4), (3,5)], and so on forever.
+
+Whenever a player is in a goose's "cone of recognition", the goose "spots the player".  Highlight the cone of recognition with red translucent arrows pointing out from the relevant goose in the direction of the cone.
+
+Note that boulders block line-of-sight for the cone of recognition.
+
+By default, the goose moves forward, in whatever direction it is aimed.  Here are the exceptions to this default, in priority order:
+1. If the goose spots the player, the goose moves one square towards the player *unless* that would put it in the water.  In that exceptional case, the goose stays put.
+2. If the goose does not spot the player, but a step forward would take the goose into a boulder or a water feature, the goose stays put and reverses diretción.
+
+When a goose catches a player (i.e., lands on their square) it disappears.
+
+#### Level Design
+You will need to design a series of four gameboards of increasing difficulty.
+
+You can set the gameboard to whatever size you like.  Each one should have its own arrangement of player starting position, boulders, water, and geese.  It should be theoretically possible to solve each gameboard (i.e., get to the target un-goosed) on the first try.  However the gameboards should get more difficult as you go along.
+
+(If the design problem proves too difficult for you, let me know.)
+
+
+#### Minigame Dialog
+##### Introductory Dialog
+Ranger Willis (Sam): Welcome to Algonquin Provincial Park!
+Ranger Willis (Sam): Good to have a tourist willing to... brave the... er, current circumstances.
+Ranger Willis (Sam): There's a really scenic walk this way...
+Ranger Willis (Sam): The way forward is marked with green circles. [illustrate this with an image of a game grid green circle {see below}]
+Ranger Willis (Sam): The weensy little problem, is that there are... geese.
+Ranger Willis (Sam): So many Canada Geese.
+Ranger Willis (Sam): The good news is, left to their own devices, they'll just march straight forward. [illustrate this with part of a game grid, showing a goose aimed in a direction towards an obstacle, and an arrow]
+Ranger Willis (Sam): And they just go that way 'til they hit an obstacle. [illustrate this with the same part of the game grid, showing the goose going back the opposite way, with an arrow]
+Ranger Willis (Sam): Motivated only by boundless range.
+Ranger Willis (Sam): And they'll just keep doin' that 'til they spot you. [illustrate this with a goose, and the player in the 'recognition cone' of the goose {see below}, and an arrow from the goose towards the player.]
+Ranger Willis (Sam): Good news is, they only move when you move.
+Ranger Willis (Sam): Bad news is, they know no fear, and if they get you three times, we'll have to airlift you out to the hospital.
+Ranger Willis (Sam): Guess that's two bad things.
+Ranger Willis (Sam): Anyway, good luck!
+
+##### In-Game Dialog
+If the user gets a success, say one of these lines (at random, no repeats):
+* Ranger Willis (Sam): Hey, looks like you've yet again eluded death!
+* Ranger Willis (Sam): That was looking dicey there, but here you are, ungoosed!
+* Ranger Willis (Sam): Glad to see you not getting killed in this public park!
+* Ranger Willis (Sam): Doin' some good bobbin' and weavin' there, friend!
+
+If the user gets a failure, say one of these lines (at random, no repeats):
+* Ranger Willis (Sam): Ouch! That had to hurt.
+* Ranger Willis (Sam): Yeah, they got teeth on their tongues, is the thing.
+* Ranger Willis (Sam): Yeah, looks like ol' Bitey McBiterson did what he does best.
+* Ranger Willis (Sam): That's nature for you — violent in tooth and claw.
+* Ranger Willis (Sam): Oof, it's always the goose you don't see comin', isn't it?
+* Ranger Willis (Sam): Ouch, that was some nightmare fodder.  For me, anyway.
+
+### End-Game Dialog
+If the player won:
+* Ranger Willis (Sam): You made it!
+* Ranger Willis (Sam): The prophecies are true — you are the promised Goose Whisperer.
+* Ranger Willis (Sam): Anyhoozit, have a nice day! 
+If the player lost:
+* A title card reads "Later, in the hospital."
+* Ranger Willis (Sam): Hey, you're conscious again!
+* Ranger Willis (Sam): Glad to see you powered through your massive injuries.
+* Ranger Willis (Sam): Glad you could visit us at Algonquin Provincial Park!
 
 ## The Confrontation
 You can access this section directly by setting the query parameter "minigame=confrontation".

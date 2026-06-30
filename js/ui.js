@@ -82,6 +82,12 @@ function drawPartnerAnnouncement() {
 function drawDialogBox() {
     const isTop = currentDialog.style === 'top';
     const boxY = isTop ? 20 : canvas.height - 200;
+
+    // Optional illustration drawn behind the dialog box
+    if (currentDialog.illustration) {
+        currentDialog.illustration();
+    }
+
     ctx.fillStyle = COLORS.BLACK; ctx.fillRect(50, boxY, 700, 150);
     ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 4; ctx.strokeRect(50, boxY, 700, 150);
     

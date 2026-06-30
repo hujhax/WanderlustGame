@@ -54,9 +54,16 @@ function startFightingGame(nextPhase, isShadow = false) {
         let psIdx = 0, pfIdx = 0, csIdx = 0, cfIdx = 0;
 
         playedMinigames.forEach(mg => {
-            const mgTitle = mg.name === 'chicken' ? 'CATCH THAT CHICKEN' : 
-                          mg.name === 'math' ? 'MATHEMAGIC!' : 
-                          mg.name === 'karaoke' ? 'KARAOKE NIGHT' : 'FROMAGERIE FRENZY!';
+            const titles = {
+                chicken: 'CATCH THAT CHICKEN',
+                math: 'MATHEMAGIC!',
+                karaoke: 'KARAOKE NIGHT',
+                cheese: 'FROMAGERIE FRENZY!',
+                bump: 'BUMPERTOWN!',
+                fish: 'OBLIGATORY FISHING MINIGAME',
+                golf: "Bob's Intense Mini-Golf"
+            };
+            const mgTitle = titles[mg.name] || mg.name.toUpperCase();
 
             if (mg.won) {
                 dialogs.push([partnerFirstName, partnerActor, cSuccesses[csIdx++ % cSuccesses.length].replace('[minigame name]', mgTitle).replace('[Player\'s First Name]', playerFirstName), null]);
