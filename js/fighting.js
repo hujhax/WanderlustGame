@@ -195,7 +195,7 @@ function drawConfrontationPlay() {
         let sprite = combatSprites[char.actor], row = char.facing === 1 ? 3 : 1, frames = 1;
         if (char.state.startsWith('walk')) { sprite = walkSprites[char.actor]; frames = 6; }
         else if (char.state === 'punch') { sprite = halfSlashSprites[char.actor]; frames = 6; }
-        else if (char.state === 'kick') { sprite = backSlashSprites[char.actor]; frames = 6; }
+        else if (char.state === 'kick') { sprite = kickSprites[char.actor]; frames = 5; row = char.facing === 1 ? 0 : 1; }
 
         if (sprite && sprite.complete && sprite.naturalWidth > 0) {
             if (!fightingState.gameOver) char.frame = (char.frame + 0.2) % frames;
@@ -209,6 +209,6 @@ function drawConfrontationPlay() {
         ctx.font = '16px "Press Start 2P"'; ctx.fillText('Press Enter to Continue', canvas.width / 2, canvas.height / 2 + 50);
     } else {
         ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
-        ctx.fillText("Use the 'a' and 's' keys to attack!", canvas.width / 2, canvas.height - 30);
+        ctx.fillText("press 'a' to punch, 's' to kick", canvas.width / 2, canvas.height - 30);
     }
 }

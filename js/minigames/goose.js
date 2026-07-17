@@ -30,14 +30,14 @@ function gooseReverse(dir) {
 //   player: {x,y}, target: {x,y}, geese: [{x,y,dir}] }
 // Grid chars: G=grass, W=water, B=boulder
 const GOOSE_LEVELS = [
-    // Level 1 – 7×7, one goose, simple
+    // Level 1 – 7×7, one goose, vertical barrier
     {
         cols: 7, rows: 7,
         grid: [
             'GGGGGGG',
-            'GWWWGGG',
-            'GGWGGGG',
             'GGGGGGG',
+            'GGGBGGG',
+            'GGGBGGG',
             'GGGBGGG',
             'GGGGGGG',
             'GGGGGGG'
@@ -45,7 +45,7 @@ const GOOSE_LEVELS = [
         player: { x: 0, y: 6 },
         target:  { x: 6, y: 0 },
         geese: [
-            { x: 3, y: 3, dir: GOOSE_DIR.W }
+            { x: 5, y: 1, dir: GOOSE_DIR.S }
         ]
     },
 
@@ -54,18 +54,18 @@ const GOOSE_LEVELS = [
         cols: 8, rows: 7,
         grid: [
             'GGGGGGGG',
-            'GGWWGGGG',
-            'GBGGGBGG',
+            'GGGBGGGG',
+            'GGGBGBGG',
+            'GGGBGBGG',
+            'GGGBGBGG',
             'GGGGGGGG',
-            'GGBGGGGG',
-            'GGGWWGGG',
             'GGGGGGGG'
         ],
         player: { x: 0, y: 6 },
         target:  { x: 7, y: 0 },
         geese: [
-            { x: 4, y: 3, dir: GOOSE_DIR.W },
-            { x: 2, y: 1, dir: GOOSE_DIR.S }
+            { x: 1, y: 1, dir: GOOSE_DIR.E },
+            { x: 6, y: 2, dir: GOOSE_DIR.W }
         ]
     },
 
@@ -74,12 +74,12 @@ const GOOSE_LEVELS = [
         cols: 8, rows: 8,
         grid: [
             'GGGGGGGG',
-            'GWWBGGGG',
-            'GGGGBGGG',
-            'GBGGGGGG',
-            'GGGGWGGG',
             'GGGBGGGG',
-            'GGGGGGWG',
+            'GGGBGGGG',
+            'GGGBWGGG',
+            'GGGGWGGG',
+            'GGGGBGGG',
+            'GGGGBGGG',
             'GGGGGGGG'
         ],
         player: { x: 0, y: 7 },
@@ -96,13 +96,13 @@ const GOOSE_LEVELS = [
         cols: 9, rows: 9,
         grid: [
             'GGGGGGGGG',
-            'GWWGBGGGG',
-            'GGGGGBGGG',
-            'GBGGGGGGG',
-            'GGGWWWGGG',
-            'GGGGGGGBG',
-            'GBGGGGGGG',
-            'GGGGWWGGG',
+            'GGGBGGGGG',
+            'GGGBGGGGG',
+            'GGGBWGGGG',
+            'GGGGWGGGG',
+            'GGGGBGGGG',
+            'GGGGBGGGG',
+            'GGGGGGGGG',
             'GGGGGGGGG'
         ],
         player: { x: 0, y: 8 },
@@ -144,69 +144,53 @@ function initGooseGame() {
     };
 }
 
-// ── Cone-of-recognition helper ───────────────────────────────
-// Returns true if (px,py) is in the goose's cone.
-// Boulders block los.
+// ── Line of sight helper ──────────────────────────────────────
+// Returns true if the line from center of goose cell to center of player cell
+// does not pass through any boulder tiles.
 function gooseSpots(g, px, py, grid, cols, rows) {
-    const { dx, dy } = gooseDelta(g.dir);
-    // Expand the cone row by row from the goose's front
-    // Row 1 (immediately ahead): the 3 squares in front ±1 perpendicular
-    // Row 2+: expands to full width in the direction of travel
-    let cx = g.x + dx;
-    let cy = g.y + dy;
-    let step = 0;
+    if (g.x === px && g.y === py) return true;
 
-    while (cx >= 0 && cx < cols && cy >= 0 && cy < rows) {
-        // Perpendicular spread: at step 0 → width 3 (±1), step 1+ → full
-        const spread = (step === 0) ? 1 : Math.max(cols, rows);
+    const x0 = g.x + 0.5;
+    const y0 = g.y + 0.5;
+    const x1 = px + 0.5;
+    const y1 = py + 0.5;
 
-        if (dx === 0) {
-            // Moving N or S – perpendicular is X
-            for (let ox = -spread; ox <= spread; ox++) {
-                const tx = cx + ox;
-                const ty = cy;
-                if (tx < 0 || tx >= cols || ty < 0 || ty >= rows) continue;
-                // Check if boulder is blocking the column between goose and this square
-                let blocked = false;
-                let bx = g.x;
-                let by = g.y + dy;
-                while (bx !== tx || by !== ty) {
-                    if (bx >= 0 && bx < cols && by >= 0 && by < rows) {
-                        if (gooseTileAt(grid, bx, by) === GOOSE_TILE.BOULDER) { blocked = true; break; }
-                    }
-                    if (by !== ty) by += dy;
-                    else if (bx !== tx) bx += (tx > bx ? 1 : -1);
-                }
-                if (!blocked && tx === px && ty === py) return true;
-            }
-        } else {
-            // Moving E or W – perpendicular is Y
-            for (let oy = -spread; oy <= spread; oy++) {
-                const tx = cx;
-                const ty = cy + oy;
-                if (tx < 0 || tx >= cols || ty < 0 || ty >= rows) continue;
-                let blocked = false;
-                let bx = g.x + dx;
-                let by = g.y;
-                while (bx !== tx || by !== ty) {
-                    if (bx >= 0 && bx < cols && by >= 0 && by < rows) {
-                        if (gooseTileAt(grid, bx, by) === GOOSE_TILE.BOULDER) { blocked = true; break; }
-                    }
-                    if (bx !== tx) bx += dx;
-                    else if (by !== ty) by += (ty > by ? 1 : -1);
-                }
-                if (!blocked && tx === px && ty === py) return true;
-            }
+    const dx = x1 - x0;
+    const dy = y1 - y0;
+    const distance = Math.hypot(dx, dy);
+
+    // Step in small increments along the line segment
+    const steps = Math.ceil(distance * 20);
+    for (let i = 1; i < steps; i++) {
+        const t = i / steps;
+        const cx = Math.floor(x0 + t * dx);
+        const cy = Math.floor(y0 + t * dy);
+
+        // Skip the start (goose) and end (player) squares
+        if (cx === g.x && cy === g.y) continue;
+        if (cx === px && cy === py) continue;
+
+        if (gooseTileAt(grid, cx, cy) === GOOSE_TILE.BOULDER) {
+            return false;
         }
-
-        // If there is a boulder at (cx,cy), it blocks further sightlines in this column/row
-        if (gooseTileAt(grid, cx, cy) === GOOSE_TILE.BOULDER) break;
-
-        cx += dx;
-        cy += dy;
-        step++;
     }
-    return false;
+    return true;
+}
+
+function canGooseEnter(nx, ny, grid, cols, rows) {
+    if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) return false;
+    const tile = gooseTileAt(grid, nx, ny);
+    return tile !== GOOSE_TILE.BOULDER && tile !== GOOSE_TILE.WATER;
+}
+
+function getClosestCardinalDirection(fromX, fromY, toX, toY) {
+    const dx = toX - fromX;
+    const dy = toY - fromY;
+    if (Math.abs(dx) >= Math.abs(dy)) {
+        return dx >= 0 ? GOOSE_DIR.E : GOOSE_DIR.W;
+    } else {
+        return dy >= 0 ? GOOSE_DIR.S : GOOSE_DIR.N;
+    }
 }
 
 function gooseTileAt(grid, x, y) {
@@ -215,41 +199,62 @@ function gooseTileAt(grid, x, y) {
 }
 
 // ── Goose move logic ─────────────────────────────────────────
-function stepGeese() {
+function stepGeese(prevPlayerX, prevPlayerY) {
     const gs = minigameState.goose;
     const { grid, cols, rows, player, geese } = gs;
 
     geese.forEach(g => {
         if (!g.active) return;
 
-        const spotted = gooseSpots(g, player.x, player.y, grid, cols, rows);
+        // Check LOS at start of turn (before player moves) and at end of player move
+        const startHasLOS = gooseSpots(g, prevPlayerX, prevPlayerY, grid, cols, rows);
+        const currentHasLOS = gooseSpots(g, player.x, player.y, grid, cols, rows);
 
-        if (spotted) {
-            // Move one step towards player unless that puts it in water
+        if (startHasLOS) {
+            if (currentHasLOS) {
+                // Rotate to track player
+                g.dir = getClosestCardinalDirection(g.x, g.y, player.x, player.y);
+            } else {
+                // Lost LOS during player move: rotate to closest cardinal direction when player disappeared
+                g.dir = getClosestCardinalDirection(g.x, g.y, prevPlayerX, prevPlayerY);
+            }
+        }
+
+        if (currentHasLOS) {
+            // Chase: move one square closer (allowing diagonal)
             const dx = Math.sign(player.x - g.x);
             const dy = Math.sign(player.y - g.y);
-            // Prefer moving in the axis with larger distance
-            const absDx = Math.abs(player.x - g.x);
-            const absDy = Math.abs(player.y - g.y);
-            let nx = g.x, ny = g.y;
-            if (absDx >= absDy && absDx > 0) {
-                nx = g.x + Math.sign(player.x - g.x);
-                ny = g.y;
-            } else if (absDy > 0) {
-                nx = g.x;
-                ny = g.y + Math.sign(player.y - g.y);
-            }
-            // Update facing direction
-            if (nx !== g.x) g.dir = (nx > g.x) ? GOOSE_DIR.E : GOOSE_DIR.W;
-            else if (ny !== g.y) g.dir = (ny > g.y) ? GOOSE_DIR.S : GOOSE_DIR.N;
+            let nx = g.x + dx;
+            let ny = g.y + dy;
 
-            const tile = gooseTileAt(grid, nx, ny);
-            if (tile !== GOOSE_TILE.WATER) {
-                g.x = nx; g.y = ny;
+            if (canGooseEnter(nx, ny, grid, cols, rows)) {
+                g.x = nx;
+                g.y = ny;
+            } else {
+                // Fallback to cardinal moves towards player if diagonal is blocked
+                const absDx = Math.abs(player.x - g.x);
+                const absDy = Math.abs(player.y - g.y);
+                if (absDx >= absDy) {
+                    if (canGooseEnter(g.x + dx, g.y, grid, cols, rows)) {
+                        g.x = g.x + dx;
+                    } else if (canGooseEnter(g.x, g.y + dy, grid, cols, rows)) {
+                        g.y = g.y + dy;
+                    }
+                } else {
+                    if (canGooseEnter(g.x, g.y + dy, grid, cols, rows)) {
+                        g.y = g.y + dy;
+                    } else if (canGooseEnter(g.x + dx, g.y, grid, cols, rows)) {
+                        g.x = g.x + dx;
+                    }
+                }
             }
-            // else stay put (water blocks chase)
+
+            // Post-movement LOS update
+            if (gooseSpots(g, player.x, player.y, grid, cols, rows)) {
+                g.dir = getClosestCardinalDirection(g.x, g.y, player.x, player.y);
+            }
         } else {
-            // Move forward; bounce on boulder or water
+            // Normal behavior: move forward and bounce on boulder or water
             const { dx, dy } = gooseDelta(g.dir);
             const nx = g.x + dx;
             const ny = g.y + dy;
@@ -261,7 +266,8 @@ function stepGeese() {
                 if (tile === GOOSE_TILE.BOULDER || tile === GOOSE_TILE.WATER) {
                     g.dir = gooseReverse(g.dir);
                 } else {
-                    g.x = nx; g.y = ny;
+                    g.x = nx;
+                    g.y = ny;
                 }
             }
         }
@@ -316,10 +322,13 @@ function handleGooseInput(key) {
     const tile = gooseTileAt(gs.grid, nx, ny);
     if (tile === GOOSE_TILE.BOULDER || tile === GOOSE_TILE.WATER) return;
 
+    const prevPlayerX = gs.player.x;
+    const prevPlayerY = gs.player.y;
+
     gs.player.x = nx;
     gs.player.y = ny;
 
-    stepGeese();
+    stepGeese(prevPlayerX, prevPlayerY);
     resolveGooseOutcomes();
 
     if (gs.showResult === 'success') {
@@ -585,186 +594,157 @@ function drawConeArrow(cx, cy, size, angle) {
 
 function drawGooseTile(tile, x, y, w, h) {
     if (tile === GOOSE_TILE.GRASS) {
-        // Checkerboard grass effect
-        const dark = (Math.floor(x / w) + Math.floor(y / h)) % 2 === 0;
-        ctx.fillStyle = dark ? '#4a7c2f' : '#5a8f38';
-        ctx.fillRect(x, y, w, h);
-        // Tiny grass tufts (deterministic)
-        ctx.fillStyle = '#3d6626';
-        const seed1 = ((x * 7 + y * 13) % 5);
-        const seed2 = ((x * 11 + y * 17) % 4);
-        ctx.fillRect(x + seed1 * (w / 6) + 2, y + seed2 * (h / 5) + 2, 2, 3);
-        ctx.fillRect(x + (seed1 + 2) * (w / 7) + 1, y + (seed2 + 1) * (h / 6) + 1, 2, 3);
+        if (gooseTilesetImg.complete && gooseTilesetImg.naturalWidth > 0) {
+            // Draw the 24x24 tile at (24, 24) on the tileset
+            ctx.drawImage(gooseTilesetImg, 24, 24, 24, 24, x, y, w, h);
+        } else {
+            // Checkerboard grass effect
+            const dark = (Math.floor(x / w) + Math.floor(y / h)) % 2 === 0;
+            ctx.fillStyle = dark ? '#4a7c2f' : '#5a8f38';
+            ctx.fillRect(x, y, w, h);
+            // Tiny grass tufts (deterministic)
+            ctx.fillStyle = '#3d6626';
+            const seed1 = ((x * 7 + y * 13) % 5);
+            const seed2 = ((x * 11 + y * 17) % 4);
+            ctx.fillRect(x + seed1 * (w / 6) + 2, y + seed2 * (h / 5) + 2, 2, 3);
+            ctx.fillRect(x + (seed1 + 2) * (w / 7) + 1, y + (seed2 + 1) * (h / 6) + 1, 2, 3);
+        }
     } else if (tile === GOOSE_TILE.WATER) {
-        ctx.fillStyle = '#1a5276';
-        ctx.fillRect(x, y, w, h);
-        // Animated ripple stripe
-        const t = Date.now() / 600;
-        const offset = ((Math.floor((x + y) / w) + Math.floor(t * 2)) % 3) * (h / 3);
-        ctx.fillStyle = 'rgba(100,180,255,0.35)';
-        ctx.fillRect(x + 2, y + Math.floor(offset) + 2, w - 4, Math.max(2, h / 4));
+        if (oceanSheetImg.complete && oceanSheetImg.naturalWidth > 0) {
+            const frameIndex = Math.floor(Date.now() / 150) % 7;
+            ctx.drawImage(oceanSheetImg, frameIndex * 16, 0, 16, 16, x, y, w, h);
+        } else {
+            ctx.fillStyle = '#1a5276';
+            ctx.fillRect(x, y, w, h);
+        }
     } else if (tile === GOOSE_TILE.BOULDER) {
-        // Stone gray with highlight
-        ctx.fillStyle = '#707070';
-        ctx.fillRect(x, y, w, h);
-        ctx.fillStyle = '#909090';
-        ctx.fillRect(x + 2, y + 2, w - 6, h - 6);
-        ctx.fillStyle = '#b0b0b0';
-        ctx.fillRect(x + 4, y + 4, Math.max(4, w / 3), Math.max(3, h / 4));
-        ctx.fillStyle = '#505050';
-        ctx.fillRect(x + w - 5, y + h - 5, 4, 4);
+        if (boulderImg.complete && boulderImg.naturalWidth > 0) {
+            ctx.drawImage(boulderImg, x, y, w, h);
+        } else {
+            // Stone gray with highlight
+            ctx.fillStyle = '#707070';
+            ctx.fillRect(x, y, w, h);
+            ctx.fillStyle = '#909090';
+            ctx.fillRect(x + 2, y + 2, w - 6, h - 6);
+            ctx.fillStyle = '#b0b0b0';
+            ctx.fillRect(x + 4, y + 4, Math.max(4, w / 3), Math.max(3, h / 4));
+            ctx.fillStyle = '#505050';
+            ctx.fillRect(x + w - 5, y + h - 5, 4, 4);
+        }
     }
 }
 
 // ── Target (green circle) ─────────────────────────────────────
 function drawGooseTarget(x, y, w, h) {
-    // 8-bit pixel circle: draw as a grid of square pixels.
-    // We use a classic NES-style circular ring defined by a pixel mask.
-    // The mask is an 11×11 bitmap where 1 = ring pixel, 2 = fill pixel.
-    const MASK = [
-        [0,0,0,1,1,1,1,1,0,0,0],
-        [0,0,1,1,0,0,0,1,1,0,0],
-        [0,1,1,0,0,0,0,0,1,1,0],
-        [1,1,0,0,0,0,0,0,0,1,1],
-        [1,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,1],
-        [1,1,0,0,0,0,0,0,0,1,1],
-        [0,1,1,0,0,0,0,0,1,1,0],
-        [0,0,1,1,0,0,0,1,1,0,0],
-        [0,0,0,1,1,1,1,1,0,0,0],
-    ];
-
-    const GRID = 11;
-    // Pixel size: fit the mask inside the cell with a small margin
-    const px = Math.max(1, Math.floor(Math.min(w, h) * 0.8 / GRID));
-    const totalSize = px * GRID;
-    const startX = Math.floor(x + (w - totalSize) / 2);
-    const startY = Math.floor(y + (h - totalSize) / 2);
-
-    // Slow blink: toggle between bright and dim green every ~600ms
-    const blink = Math.floor(Date.now() / 600) % 2 === 0;
-    const ringColor  = blink ? '#00ff44' : '#00cc33';
-    const innerColor = blink ? 'rgba(0,255,68,0.18)' : 'rgba(0,180,40,0.12)';
-
-    // Draw inner fill first (dim green squares)
-    ctx.fillStyle = innerColor;
-    for (let row = 0; row < GRID; row++) {
-        for (let col = 0; col < GRID; col++) {
-            if (MASK[row][col] === 0) {
-                // Check if this pixel is truly inside the ring by flood-fill logic:
-                // simple check — surrounded by ring pixels implies interior
-                const inside =
-                    row > 0 && row < GRID - 1 && col > 0 && col < GRID - 1 &&
-                    MASK[row][col] === 0;
-                if (inside) {
-                    ctx.fillRect(startX + col * px, startY + row * px, px, px);
-                }
-            }
-        }
-    }
-
-    // Draw ring pixels
-    ctx.fillStyle = ringColor;
-    for (let row = 0; row < GRID; row++) {
-        for (let col = 0; col < GRID; col++) {
-            if (MASK[row][col] === 1) {
-                ctx.fillRect(startX + col * px, startY + row * px, px, px);
-            }
-        }
-    }
-
-    // Pixel-art flag pole (1px wide) + triangular pennant made of pixel blocks
-    const poleX = startX + Math.floor(GRID / 2) * px;
-    const poleTop = startY - px * 4;
-    const poleBot = startY + px * 2;
-    ctx.fillStyle = ringColor;
-    ctx.fillRect(poleX, poleTop, px, poleBot - poleTop);
-
-    // Pennant: 3 rows of decreasing width, yellow pixels
-    ctx.fillStyle = '#ffff00';
-    for (let r = 0; r < 3; r++) {
-        const cols = 3 - r;
-        ctx.fillRect(poleX + px, poleTop + r * px, cols * px, px);
-    }
-}
-
-// ── Goose sprite (drawn with canvas 2D primitives) ───────────
-function drawGooseSprite(g, x, y, w, h) {
     const cx = x + w / 2;
-    const cy = y + h / 2;
-    const s = Math.min(w, h) * 0.38;   // scale factor
-
-    ctx.save();
-    ctx.translate(cx, cy);
-
-    // Rotate to face direction
-    if (g.dir === GOOSE_DIR.E) ctx.rotate(0);
-    else if (g.dir === GOOSE_DIR.S) ctx.rotate(Math.PI / 2);
-    else if (g.dir === GOOSE_DIR.W) ctx.rotate(Math.PI);
-    else /* N */                   ctx.rotate(-Math.PI / 2);
-
-    // Body – white oval
-    ctx.fillStyle = '#f0f0f0';
+    
+    // Base
+    ctx.fillStyle = '#7f8c8d'; // Grey base
+    ctx.fillRect(cx - 10, y + h - 8, 20, 4);
+    
+    // Pole
+    ctx.fillStyle = '#95a5a6'; // Light grey pole
+    ctx.fillRect(cx - 2, y + 6, 4, h - 14);
+    
+    // Red flag
+    ctx.fillStyle = '#e74c3c'; // Red flag
     ctx.beginPath();
-    ctx.ellipse(0, 0, s * 0.9, s * 0.6, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Neck & head
-    ctx.fillStyle = '#f0f0f0';
-    ctx.beginPath();
-    ctx.ellipse(s * 0.7, -s * 0.35, s * 0.3, s * 0.2, -0.4, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Black stripe on neck (Canada Goose characteristic)
-    ctx.fillStyle = '#1a1a1a';
-    ctx.beginPath();
-    ctx.ellipse(s * 0.65, -s * 0.3, s * 0.22, s * 0.13, -0.4, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Head
-    ctx.fillStyle = '#1a1a1a';
-    ctx.beginPath();
-    ctx.arc(s * 0.95, -s * 0.52, s * 0.22, 0, Math.PI * 2);
-    ctx.fill();
-
-    // White chin patch
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.ellipse(s * 0.85, -s * 0.38, s * 0.13, s * 0.09, -0.4, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Beak (orange-yellow)
-    ctx.fillStyle = '#d4820a';
-    ctx.beginPath();
-    ctx.moveTo(s * 1.14, -s * 0.55);
-    ctx.lineTo(s * 1.35, -s * 0.5);
-    ctx.lineTo(s * 1.14, -s * 0.44);
+    ctx.moveTo(cx + 2, y + 6);
+    ctx.lineTo(cx + 18, y + 13);
+    ctx.lineTo(cx + 2, y + 20);
     ctx.closePath();
     ctx.fill();
+}
 
-    // Eye
-    ctx.fillStyle = '#ffcc00';
-    ctx.beginPath();
-    ctx.arc(s * 1.0, -s * 0.56, s * 0.07, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(s * 1.02, -s * 0.56, s * 0.04, 0, Math.PI * 2);
-    ctx.fill();
+// ── Goose sprite ─────────────────────────────────────────────
+function drawGooseSprite(g, x, y, w, h) {
+    if (gooseImg.complete && gooseImg.naturalWidth > 0) {
+        const cx = x + w / 2;
+        const cy = y + h / 2;
+        ctx.save();
+        ctx.translate(cx, cy);
 
-    // Wing detail
-    ctx.strokeStyle = '#c8c8c8';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(-s * 0.3, -s * 0.55);
-    ctx.quadraticCurveTo(0, -s * 0.7, s * 0.3, -s * 0.55);
-    ctx.stroke();
+        // Rotate to face direction (gooseImg faces East by default)
+        if (g.dir === GOOSE_DIR.E) ctx.rotate(0);
+        else if (g.dir === GOOSE_DIR.S) ctx.rotate(Math.PI / 2);
+        else if (g.dir === GOOSE_DIR.W) ctx.rotate(Math.PI);
+        else /* N */                   ctx.rotate(-Math.PI / 2);
 
-    ctx.restore();
+        ctx.drawImage(gooseImg, -w/2, -h/2, w, h);
+        ctx.restore();
+    } else {
+        const cx = x + w / 2;
+        const cy = y + h / 2;
+        const s = Math.min(w, h) * 0.38;   // scale factor
 
-    // Threat indicator (small red eye-cone overlay when player is in sight)
-    // Drawn separately in world space for readability — omitted here for cleanliness
+        ctx.save();
+        ctx.translate(cx, cy);
+
+        // Rotate to face direction
+        if (g.dir === GOOSE_DIR.E) ctx.rotate(0);
+        else if (g.dir === GOOSE_DIR.S) ctx.rotate(Math.PI / 2);
+        else if (g.dir === GOOSE_DIR.W) ctx.rotate(Math.PI);
+        else /* N */                   ctx.rotate(-Math.PI / 2);
+
+        // Body – white oval
+        ctx.fillStyle = '#f0f0f0';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, s * 0.9, s * 0.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Neck & head
+        ctx.fillStyle = '#f0f0f0';
+        ctx.beginPath();
+        ctx.ellipse(s * 0.7, -s * 0.35, s * 0.3, s * 0.2, -0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Black stripe on neck (Canada Goose characteristic)
+        ctx.fillStyle = '#1a1a1a';
+        ctx.beginPath();
+        ctx.ellipse(s * 0.65, -s * 0.3, s * 0.22, s * 0.13, -0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Head
+        ctx.fillStyle = '#1a1a1a';
+        ctx.beginPath();
+        ctx.arc(s * 0.95, -s * 0.52, s * 0.22, 0, Math.PI * 2);
+        ctx.fill();
+
+        // White chin patch
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.ellipse(s * 0.85, -s * 0.38, s * 0.13, s * 0.09, -0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Beak (orange-yellow)
+        ctx.fillStyle = '#d4820a';
+        ctx.beginPath();
+        ctx.moveTo(s * 1.14, -s * 0.55);
+        ctx.lineTo(s * 1.35, -s * 0.5);
+        ctx.lineTo(s * 1.14, -s * 0.44);
+        ctx.closePath();
+        ctx.fill();
+
+        // Eye
+        ctx.fillStyle = '#ffcc00';
+        ctx.beginPath();
+        ctx.arc(s * 1.0, -s * 0.56, s * 0.07, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(s * 1.02, -s * 0.56, s * 0.04, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Wing detail
+        ctx.strokeStyle = '#c8c8c8';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-s * 0.3, -s * 0.55);
+        ctx.quadraticCurveTo(0, -s * 0.7, s * 0.3, -s * 0.55);
+        ctx.stroke();
+
+        ctx.restore();
+    }
 }
 
 // ── Player sprite ─────────────────────────────────────────────

@@ -9,10 +9,12 @@ function drawDepartureCutscene() {
 
     const others = CAST.filter(c => c.actor.toLowerCase() !== playerActor && c.actor.toLowerCase() !== partnerActor);
     others.forEach((c, i) => {
-        const actor = c.actor.toLowerCase(), sprite = slashSprites[actor];
-        if (sprite && sprite.complete) {
-            const seed = (c.actor.length * 123) % 1000, frame = Math.floor((Date.now() + seed) / 150) % 6;
-            drawPixelatedImage(sprite, frame * 64, 2 * 64, 64, 64, 320 + i * 45, 380, 64, 64);
+        const actor = c.actor.toLowerCase(), sprite = waveSprites[actor];
+        if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+            const seed = (c.actor.length * 123) % 1000;
+            const pingPongFrames = [0, 1, 2, 3, 2, 1];
+            const frame = pingPongFrames[Math.floor((Date.now() + seed) / 150) % 6];
+            drawPixelatedImage(sprite, frame * 64, 0, 64, 64, 320 + i * 45, 380, 64, 64);
         }
     });
 
@@ -44,6 +46,7 @@ function drawSeparateWays() {
 
     const index = currentCycle % 2, zoomIteration = Math.floor(currentCycle / 2);
     const bg = index === 0 ? companionSitsBg : playerSitsBg;
+    if (bg.paused) bg.play().catch(e => {});
     
     if (bg.readyState >= 2 || bg.complete) {
         const W = canvas.width, H = canvas.height;
@@ -60,7 +63,7 @@ function drawSeparateWays() {
             // Background pans right: camera moves left
             if (zoomIteration > 0) panXOffset = -progress * 40;
         } else { // Player Sits
-            charX = 371; charY = 270;
+            charX = 385; charY = 285;
             // Background pans left: camera moves right
             if (zoomIteration > 0) panXOffset = progress * 40;
         }
@@ -69,18 +72,32 @@ function drawSeparateWays() {
 
         if (zoomIteration === 0) { 
             targetX = bgW / 2; 
-            targetY = bgH / 2; 
+            if (index === 1) {
+                targetY = 135; // Shifts camera up (player down) to be halfway closer to the bottom edge
+            } else {
+                targetY = bgH / 2;
+            }
         }
         else {
             if (zoomIteration === 1) zoom = s0 * 1.5;
-            else zoom = s0 * 2.7;
+            else {
+                if (index === 1 && zoomIteration === 2) {
+                    zoom = s0 * 2.1; // Reduced zoom to make the full player sprite fit on screen
+                } else {
+                    zoom = s0 * 2.7;
+                }
+            }
 
             // Positioning logic:
             // Companion (index 0): sprite stays lower-left -> camera target moves right and up
             // Player (index 1): sprite stays lower-right -> camera target moves left and up
             const xDir = (index === 0) ? 1 : -1;
             targetX = charX + xDir * (W / 4) / zoom + panXOffset;
-            targetY = charY - (H / 4) / zoom;
+            if (index === 1 && zoomIteration === 2) {
+                targetY = charY - 64; // Center on the player sprite so the full sprite is visible
+            } else {
+                targetY = charY - (H / 4) / zoom;
+            }
         }
 
         // Clamp targetY so we never see above or below the background image
@@ -106,7 +123,13 @@ function drawSeparateWays() {
             // Draw sprite at 128x128 (2x base size). charX is center, charY is at feet.
             // Row 3 for Companion (4th row), Row 1 for Player (2nd row)
             const row = (index === 0) ? 3 : 1;
-            drawPixelatedImage(sprite, 0, row * 64, 64, 64, charX - 64, charY - 128, 128, 128);
+            ctx.save();
+            ctx.translate(charX, charY);
+            if (index === 1 && zoomIteration === 0) {
+                ctx.scale(5 / 9, 5 / 9);
+            }
+            drawPixelatedImage(sprite, 0, row * 64, 64, 64, -64, -128, 128, 128);
+            ctx.restore();
         }
         
         ctx.restore();
@@ -120,21 +143,22 @@ function startTogetherAgain() {
 }
 
 function drawTogetherAgain() {
+    if (companionSitsBg.paused) companionSitsBg.play().catch(e => {});
     if (companionSitsBg.readyState >= 2 || companionSitsBg.complete) ctx.drawImage(companionSitsBg, 0, 0, canvas.width, canvas.height);
 
     const partnerName = PARTNER_PAIRS[CAST[selectedIndex].name], partnerActor = CAST.find(c => c.name === partnerName).actor.toLowerCase(), playerActor = CAST[selectedIndex].actor.toLowerCase();
     
-    // Companion sitting at (253, 430)
+    // Companion sitting at (253, 500)
     const sitSprite = sitSprites[partnerActor];
-    if (sitSprite && sitSprite.complete) drawPixelatedImage(sitSprite, 0, 3 * 64, 64, 64, 253 - 64, 430 - 128, 128, 128);
+    if (sitSprite && sitSprite.complete) drawPixelatedImage(sitSprite, 0, 3 * 64, 64, 64, 253 - 64, 500 - 128, 128, 128);
 
     if (togetherAgainState.state === 'walking') {
         togetherAgainState.playerX += 2;
         const walkSprite = walkSprites[playerActor];
         if (walkSprite && walkSprite.complete) {
             const frame = Math.floor(Date.now() / 150) % 6;
-            // Player walks at y=453
-            drawPixelatedImage(walkSprite, frame * 64, 3 * 64, 64, 64, togetherAgainState.playerX - 64, 453 - 128, 128, 128);
+            // Player walks at y=523
+            drawPixelatedImage(walkSprite, frame * 64, 3 * 64, 64, 64, togetherAgainState.playerX - 64, 523 - 128, 128, 128);
         }
         if (togetherAgainState.playerX >= 230) {
             togetherAgainState.state = 'sitting';
@@ -152,8 +176,8 @@ function drawTogetherAgain() {
     } else {
         const playerSit = sitSprites[playerActor];
         if (playerSit && playerSit.complete) {
-            // Player sits at (230, 453)
-            drawPixelatedImage(playerSit, 0, 3 * 64, 64, 64, 230 - 64, 453 - 128, 128, 128);
+            // Player sits at (230, 523)
+            drawPixelatedImage(playerSit, 0, 3 * 64, 64, 64, 230 - 64, 523 - 128, 128, 128);
         }
     }
 }

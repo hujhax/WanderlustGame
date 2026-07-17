@@ -219,17 +219,17 @@ function _drawClueScreen() {
     ctx.fillStyle = '#FFFFFF';
     ctx.font = 'bold 20px "Press Start 2P"';
     ctx.textAlign = 'center';
-    ctx.fillText('$' + c.value, canvas.width / 2, 50);
+    ctx.fillText('$' + c.value, canvas.width / 2, 75);
 
     // Category name
     ctx.fillStyle = JEOPARDY_GOLD;
     ctx.font = '14px "Press Start 2P"';
-    ctx.fillText(j.board[j.activeCol].name, canvas.width / 2, 85);
+    ctx.fillText(j.board[j.activeCol].name, canvas.width / 2, 105);
 
     // Clue text — big, centered, white
     ctx.fillStyle = '#FFFFFF';
     ctx.font = '16px "Press Start 2P"';
-    _drawWrappedTextCentered(c.clue, 60, 130, canvas.width - 120, 26, canvas.height - 200);
+    _drawWrappedTextCentered(c.clue, 60, 150, canvas.width - 120, 26, canvas.height - 200);
 
     // Prompt
     ctx.fillStyle = '#AAAAFF';
@@ -249,35 +249,35 @@ function _drawOptionsScreen() {
     ctx.fillStyle = '#FFFFFF';
     ctx.font = 'bold 16px "Press Start 2P"';
     ctx.textAlign = 'center';
-    ctx.fillText('$' + c.value + '  —  ' + j.board[j.activeCol].name, canvas.width / 2, 55);
+    ctx.fillText('$' + c.value + '  —  ' + j.board[j.activeCol].name, canvas.width / 2, 75);
 
     // Clue recap (smaller)
     ctx.fillStyle = '#CCCCFF';
     ctx.font = '11px "Press Start 2P"';
-    _drawWrappedTextCentered(c.clue, 40, 80, canvas.width - 80, 18, 70);
+    _drawWrappedTextCentered(c.clue, 40, 98, canvas.width - 80, 18, 70);
 
     // Divider
     ctx.strokeStyle = JEOPARDY_GOLD;
     ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(40, 168); ctx.lineTo(canvas.width - 40, 168); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(40, 170); ctx.lineTo(canvas.width - 40, 170); ctx.stroke();
 
     // Options
     const optionLabels = ['A', 'B', 'C'];
     for (let i = 0; i < c.options.length; i++) {
-        const y = 195 + i * 120;
+        const y = 195 + i * 110;
         const isSelected = j.selectedOption === i;
         ctx.fillStyle = isSelected ? JEOPARDY_LIGHT_BLUE : JEOPARDY_CELL_BLUE;
-        ctx.fillRect(40, y, canvas.width - 80, 105);
+        ctx.fillRect(40, y, canvas.width - 80, 95);
         if (isSelected) {
             ctx.strokeStyle = JEOPARDY_GOLD;
             ctx.lineWidth = 3;
-            ctx.strokeRect(40, y, canvas.width - 80, 105);
+            ctx.strokeRect(40, y, canvas.width - 80, 95);
         }
         // Label
         ctx.fillStyle = JEOPARDY_GOLD;
         ctx.font = 'bold 18px "Press Start 2P"';
         ctx.textAlign = 'left';
-        ctx.fillText(optionLabels[i] + '.', 58, y + 105 / 2 + 6);
+        ctx.fillText(optionLabels[i] + '.', 58, y + 95 / 2 + 6);
         // Option text
         ctx.fillStyle = '#FFFFFF';
         ctx.font = '14px "Press Start 2P"';
@@ -285,7 +285,7 @@ function _drawOptionsScreen() {
         const optionText = c.options[i];
         const maxWidth = canvas.width - 150;
         const lineHeight = 22;
-        const boxH = 105;
+        const boxH = 95;
         
         const lines = [];
         const words = optionText.split(' ');

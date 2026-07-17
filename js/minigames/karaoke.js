@@ -21,11 +21,22 @@ function drawKaraokeGame() {
 
     state.notes.forEach(note => {
         note.x -= 4; if (note.x < 400 && note.color === 'red') note.color = 'white';
-        ctx.fillStyle = note.hit ? COLORS.GREEN : note.color; 
+        ctx.fillStyle = (note.hit && note.success) ? COLORS.GREEN : note.color; 
         ctx.beginPath(); ctx.arc(note.x, getY(note.pitch), 10, 0, Math.PI * 2); ctx.fill();
         // Collision check at x = 150
-        if (Math.abs(note.x - 150) < 15 && !note.hit) { if (note.pitch === state.diamondPos) { success(); note.hit = true; } }
+        if (Math.abs(note.x - 150) < 15 && !note.hit) { 
+            if (note.pitch === state.diamondPos) { 
+                success(); 
+                note.hit = true; 
+                note.success = true; 
+            } 
+        }
         // Failure check if note passes diamond area
-        if (note.x < 130 && !note.hit) { failure(); note.hit = true; note.color = COLORS.RED; }
+        if (note.x < 130 && !note.hit) { 
+            failure(); 
+            note.hit = true; 
+            note.success = false; 
+            note.color = COLORS.RED; 
+        }
     });
 }

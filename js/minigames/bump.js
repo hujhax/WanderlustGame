@@ -79,10 +79,7 @@ function drawBumpGame() {
     car.x += car.vx;
     car.y += car.vy;
 
-    if (car.x < bounds.x1) { car.x = bounds.x1; car.vx *= -0.8; car.speed *= -0.5; }
-    if (car.x > bounds.x2) { car.x = bounds.x2; car.vx *= -0.8; car.speed *= -0.5; }
-    if (car.y < bounds.y1) { car.y = bounds.y1; car.vy *= -0.8; car.speed *= -0.5; }
-    if (car.y > bounds.y2) { car.y = bounds.y2; car.vy *= -0.8; car.speed *= -0.5; }
+    checkEnvCollision(car, true);
 
     const allCars = [car, ...state.otherCars];
     state.otherCars.forEach(other => {
@@ -123,8 +120,7 @@ function drawBumpGame() {
         other.x += other.vx;
         other.y += other.vy;
 
-        if (other.x < bounds.x1 || other.x > bounds.x2) { other.angle = Math.PI - other.angle; other.vx *= -1; }
-        if (other.y < bounds.y1 || other.y > bounds.y2) { other.angle = -other.angle; other.vy *= -1; }
+        checkEnvCollision(other, false);
     });
 
     // Bumper collisions with skidding
@@ -170,4 +166,44 @@ function drawBumpGame() {
     allCars.forEach(c => {
         drawRotatedCar(window.carImgs[c.color], c.x, c.y, c.angle, c.color);
     });
+}
+
+function checkEnvCollision(c, isPlayer) {
+    // 1. Left beige wall
+    if (c.x < 73) {
+        c.x = 73;
+        c.vx *= -0.8;
+        c.angle = Math.PI - c.angle;
+        if (isPlayer) c.speed *= -0.5;
+    }
+    
+    // 2. Right green zigzag
+    const rightPhase = ((c.y - 120) % 40 + 40) % 40;
+    const rightLimit = (rightPhase < 20) ? (713 + (rightPhase / 20) * 40) : (753 - ((rightPhase - 20) / 20) * 40);
+    if (c.x > rightLimit) {
+        c.x = rightLimit - 2;
+        c.vx *= -0.8;
+        c.angle = Math.PI - c.angle;
+        if (isPlayer) c.speed *= -0.5;
+    }
+    
+    // 3. Top white zigzag
+    const topPhase = ((c.x - 60) % 80 + 80) % 80;
+    const topLimit = (topPhase < 40) ? (82 + (topPhase / 40) * 20) : (102 - ((topPhase - 40) / 40) * 20);
+    if (c.y < topLimit) {
+        c.y = topLimit + 2;
+        c.vy *= -0.8;
+        c.angle = -c.angle;
+        if (isPlayer) c.speed *= -0.5;
+    }
+    
+    // 4. Bottom green zigzag
+    const bottomPhase = ((c.x - 100) % 80 + 80) % 80;
+    const bottomLimit = (bottomPhase < 40) ? (552 + (bottomPhase / 40) * 33) : (585 - ((bottomPhase - 40) / 40) * 33);
+    if (c.y > bottomLimit) {
+        c.y = bottomLimit - 2;
+        c.vy *= -0.8;
+        c.angle = -c.angle;
+        if (isPlayer) c.speed *= -0.5;
+    }
 }

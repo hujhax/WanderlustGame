@@ -28,7 +28,7 @@ function startMinigame() {
             for (let i = 0; i < 100; i++) {
                 const startX = i < 2 ? 400 + i * 300 : 1000 + i * 300 + Math.random() * 200;
                 minigameState.entities.push({ type: 'chicken', x: startX, y: 480, speed: 1 + Math.random() * 1, frame: Math.random() * 16 });
-                if (i > 0 && i % 4 === 0) minigameState.entities.push({ type: 'skull', x: startX + 150 + Math.random() * 100, y: 480 });
+                if (i > 0 && i % 8 < 3) minigameState.entities.push({ type: 'skull', x: startX + 150 + Math.random() * 100, y: 480 });
             }
         });
     } else if (gameType === 'math') {
@@ -66,7 +66,7 @@ function startMinigame() {
     } else if (gameType === 'jeopardy') {
         audio.play('JEOPARDY_INTRO_BGM');
         showDialog('Not Alex Trebek', 'Lindsey', "Good evening and welcome to Canadian Jeopardy!", () => {
-            showDialog('Not Alex Trebek', 'Lindsey', "Your knowledge of Canadian culture, history, and trivia will be tested by me, a Legitimate Canadian\u2122", () => {
+            showDialog('Not Alex Trebek', 'Lindsey', "Your knowledge of Canadian culture, history, and trivia will be tested by me, Lindsey, a Legitimate Canadian\u2122.", () => {
                 showDialog('Not Alex Trebek', 'Lindsey', "For every thousand dollars you rack up, you get a success! Four successes, and you win!", () => {
                     showDialog('Not Alex Trebek', 'Lindsey', "For each clue you get wrong, that's a failure.  Three failures, and you lose.", () => {
                         showDialog('Not Alex Trebek', 'Lindsey', "Let's play Canadian Jeopardy!", () => {
@@ -106,7 +106,16 @@ function startMinigame() {
 
 function success(points = 100) {
     minigameState.successes++; score += points; audio.playSFX('SUCCESS');
-    if (minigameState.successes >= 4) { minigameState.won = true; score += 1000; audio.playSFX('TADA'); endMinigame(); }
+    if (minigameState.successes >= 4) { 
+        minigameState.won = true; 
+        score += 1000; 
+        audio.playSFX('TADA'); 
+        if (minigameState.type === 'cheese') {
+            minigameState.shouldWinEnd = true;
+        } else {
+            endMinigame();
+        }
+    }
 }
 
 function failure() {
@@ -173,9 +182,30 @@ function drawMinigameMap() {
     ctx.fillStyle = COLORS.WHITE; ctx.font = '24px "Press Start 2P"'; ctx.textAlign = 'center';
     ctx.fillText(`Stop #${currentMinigameIndex + 1}`, canvas.width / 2, 80);
     const gameType = minigameOrder[currentMinigameIndex];
-    ctx.font = '30px "Press Start 2P"';
-    const titles = { chicken: 'CATCH THAT CHICKEN', math: 'MATHEMAGIC!', karaoke: 'KARAOKE NIGHT', cheese: 'FROMAGERIE FRENZY!', bump: 'BUMPERTOWN!', fish: 'OBLIGATORY FISHING MINIGAME', golf: "BOB'S INTENSE MINI-GOLF", jeopardy: 'CANADIAN JEOPARDY!', goose: 'UNPLEASANT GOOSE GAME' };
-    ctx.fillText(titles[gameType], canvas.width / 2, 140);
+    const titles = { 
+        chicken: 'CATCH THAT CHICKEN', 
+        math: 'MATHEMAGIC!', 
+        karaoke: 'KARAOKE NIGHT', 
+        cheese: 'FROMAGERIE FRENZY! (FORMERLY SUPERMARKET SWEEP)', 
+        bump: 'BUMPERTOWN! (POPULATION BUMP)', 
+        fish: 'LAKE FISH-A-LOT (AKA OBLIGATORY FISHING MINIGAME)', 
+        golf: "BOB'S INTENSE MINI-GOLF", 
+        jeopardy: 'CANADIAN JEOPARDY!', 
+        goose: 'UNPLEASANT GOOSE GAME' 
+    };
+    const titleText = titles[gameType];
+    const parenIdx = titleText.indexOf('(');
+    if (parenIdx !== -1) {
+        const mainTitle = titleText.substring(0, parenIdx).trim();
+        const subTitle = titleText.substring(parenIdx).trim();
+        ctx.font = '24px "Press Start 2P"';
+        ctx.fillText(mainTitle, canvas.width / 2, 130);
+        ctx.font = '12px "Press Start 2P"';
+        ctx.fillText(subTitle, canvas.width / 2, 160);
+    } else {
+        ctx.font = '24px "Press Start 2P"';
+        ctx.fillText(titleText, canvas.width / 2, 140);
+    }
     if (canadaMapImg.complete && canadaMapImg.naturalWidth > 0) {
         ctx.imageSmoothingEnabled = false; const imgWidth = 500; const imgHeight = 300;
         const ix = (canvas.width - imgWidth) / 2; const iy = 200; ctx.drawImage(canadaMapImg, ix, iy, imgWidth, imgHeight);
@@ -220,7 +250,12 @@ function drawMinigamePost() {
     ctx.fillStyle = COLORS.BLACK; ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = COLORS.WHITE; ctx.font = '32px "Press Start 2P"'; ctx.textAlign = 'center';
     ctx.fillText(minigameState.won ? "Great job!" : "Too bad!", canvas.width / 2, canvas.height / 2 - 50);
-    ctx.font = '16px "Press Start 2P"'; ctx.fillText('Press Enter to Continue', canvas.width / 2, canvas.height / 2 + 100);
+    
+    // Only show "Press Enter to Continue" when closing dialog is complete
+    if (!currentDialog) {
+        ctx.font = '16px "Press Start 2P"'; 
+        ctx.fillText('Press Enter to Continue', canvas.width / 2, canvas.height / 2 + 100);
+    }
 }
 
 function handleMinigameInput(key) {

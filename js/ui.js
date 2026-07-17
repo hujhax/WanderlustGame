@@ -81,17 +81,22 @@ function drawPartnerAnnouncement() {
 
 function drawDialogBox() {
     const isTop = currentDialog.style === 'top';
-    const boxY = isTop ? 20 : canvas.height - 200;
+    const boxH = 185;
+    const boxY = isTop ? 20 : canvas.height - boxH - 20;
 
     // Optional illustration drawn behind the dialog box
     if (currentDialog.illustration) {
         currentDialog.illustration();
     }
 
-    ctx.fillStyle = COLORS.BLACK; ctx.fillRect(50, boxY, 700, 150);
-    ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 4; ctx.strokeRect(50, boxY, 700, 150);
+    // Narrow the dialog box during IN_THE_CAR phase to avoid blocking the intimacy bar on the right
+    const isCar = currentPhase === PHASES.IN_THE_CAR;
+    const boxW = isCar ? 630 : 700;
+
+    ctx.fillStyle = COLORS.BLACK; ctx.fillRect(50, boxY, boxW, boxH);
+    ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 4; ctx.strokeRect(50, boxY, boxW, boxH);
     
-    const bgRectX = 70, bgRectY = boxY + 10, bgRectSize = 100;
+    const bgRectX = 70, bgRectY = boxY + 15, bgRectSize = 100;
     ctx.fillStyle = currentDialog.style === 'silhouette' ? '#888' : COLORS.BLACK;
     ctx.fillRect(bgRectX, bgRectY, bgRectSize, bgRectSize);
 
@@ -101,10 +106,12 @@ function drawDialogBox() {
         if (img && img.complete) {
             const size = Math.min(img.width, img.height);
             const ox = (img.width - size) / 2, oy = (img.height - size) / 2;
-            const pixelStyle = currentDialog.style === 'inverted' ? null : currentDialog.style;
-            drawPixelatedImage(img, ox, oy, size, size, 70, boxY + 10, 100, 100, pixelStyle);
+            const pixelStyle = currentDialog.style === 'silhouette' ? 'silhouette' : null;
+            drawPixelatedImage(img, ox, oy, size, size, 70, boxY + 15, 100, 100, pixelStyle);
         }
     }
+    
+    // Draw Name below the portrait
     ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
     const nameWords = currentDialog.name.split(' '), nameLines = []; let currentNameLine = '';
     nameWords.forEach(word => {
@@ -113,29 +120,89 @@ function drawDialogBox() {
         else currentNameLine = testLine;
     });
     nameLines.push(currentNameLine.trim());
-    nameLines.forEach((line, i) => ctx.fillText(line, 120, boxY + 125 + i * 15));
+    nameLines.forEach((line, i) => ctx.fillText(line, 120, boxY + 135 + i * 15));
+    
+    // Draw Dialog text
+    ctx.fillStyle = COLORS.WHITE;
     ctx.textAlign = 'left'; ctx.font = '12px "Press Start 2P"';
     const lines = currentDialog.chunks[currentDialog.chunkIndex].split('\n');
-    lines.forEach((line, i) => ctx.fillText(line, 200, boxY + 40 + i * 30));
+    lines.forEach((line, i) => ctx.fillText(line, 200, boxY + 45 + i * 30));
+    
+    // Blinking continuation indicator at bottom right of the black box
     if (Math.floor(Date.now() / 500) % 2 === 0) {
-        ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
-        ctx.fillText('Press Enter to Continue', 400, isTop ? boxY + 175 : boxY - 20);
+        ctx.fillStyle = COLORS.WHITE;
+        ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'right';
+        const indicatorX = isCar ? 660 : 730;
+        ctx.fillText('▼', indicatorX, boxY + boxH - 20);
+    }
+}
+
+function drawIntimacyBar() {
+    // Progress bar border
+    ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 3; ctx.strokeRect(710, 80, 30, 320);
+    ctx.fillStyle = COLORS.BLACK; ctx.fillRect(710, 80, 30, 320);
+    
+    // Gradient fill
+    const fillH = 320 * (intimacy / 8);
+    const barGrad = ctx.createLinearGradient(0, 400, 0, 80);
+    barGrad.addColorStop(0, '#0000FF');
+    barGrad.addColorStop(1, '#FF0000');
+    ctx.fillStyle = barGrad;
+    ctx.fillRect(712, 400 - fillH, 26, fillH);
+    
+    // Vertical text label
+    ctx.save();
+    ctx.translate(695, 240);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = COLORS.WHITE;
+    ctx.font = '6px "Press Start 2P"';
+    ctx.textAlign = 'center';
+    ctx.fillText("DEPTH & INTIMACY OF CONVERSATION", 0, 0);
+    ctx.restore();
+    
+    // Sparks
+    if (intimacy >= 7) {
+        if (Math.random() < 0.3) {
+            intimacySparks.push({
+                x: 725,
+                y: 80,
+                vx: (Math.random() - 0.5) * 4,
+                vy: -Math.random() * 3 - 2,
+                life: 1.0
+            });
+        }
+    }
+    
+    // Update and draw sparks
+    for (let i = intimacySparks.length - 1; i >= 0; i--) {
+        const p = intimacySparks[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.1; // gravity
+        p.life -= 0.03;
+        if (p.life <= 0) {
+            intimacySparks.splice(i, 1);
+        } else {
+            ctx.fillStyle = `rgba(255, 230, 0, ${p.life})`;
+            ctx.fillRect(p.x, p.y, 4, 4);
+        }
     }
 }
 
 function drawInTheCar() {
     drawTitle(false);
+    drawIntimacyBar();
     if (inTheCarState.waitingForResponse) {
         const boxY = 180, boxH = 220;
-        ctx.fillStyle = COLORS.BLACK; ctx.fillRect(50, boxY, 700, boxH);
-        ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 4; ctx.strokeRect(50, boxY, 700, boxH);
-        ctx.fillStyle = COLORS.SELECTION_YELLOW; ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.fillText("How do you respond?", 400, boxY + 30);
+        ctx.fillStyle = COLORS.BLACK; ctx.fillRect(50, boxY, 630, boxH);
+        ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 4; ctx.strokeRect(50, boxY, 630, boxH);
+        ctx.fillStyle = COLORS.SELECTION_YELLOW; ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.fillText("How do you respond?", 365, boxY + 30);
         ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'left';
         inTheCarState.options.forEach((opt, i) => {
             const y = boxY + 70 + i * 50;
             if (i === inTheCarState.selectedIndex) { ctx.fillStyle = COLORS.SELECTION_YELLOW; ctx.fillText("> ", 70, y); }
             else { ctx.fillStyle = COLORS.WHITE; }
-            const wrapped = wrapText(opt.text, 600);
+            const wrapped = wrapText(opt.text, 540);
             wrapped[0].split('\n').forEach((line, j) => ctx.fillText(line, 100, y + j * 15));
         });
     }

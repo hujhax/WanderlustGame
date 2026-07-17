@@ -89,14 +89,14 @@
           "value": 200,
           "variants": [
             {
-              "clue": "The 2000 romantic comedy 'My Big Fat Greek Wedding' is set in Chicago, but Toronto stood in — its skyline even peeking through the background in this obvious way.",
-              "correct": "What is the CN Tower appearing in the skyline?",
-              "wrong": ["What is Niagara Falls appearing in a scene?", "What is a TTC streetcar visible in the background?"]
+              "clue": "The 2000 romantic comedy 'My Big Fat Greek Wedding' is set in Chicago, but Toronto stood in, with this iconic Toronto item appearing in the background.",
+              "correct": "What is the CN Tower?",
+              "wrong": ["What is Niagara Falls?", "What is a TTC streetcar?"]
             },
             {
-              "clue": "The fictional Sunnydale, California in 'Buffy the Vampire Slayer' was actually filmed entirely in this Canadian-adjacent American city, but the show used Vancouver for exterior location shots.",
-              "correct": "What is Vancouver, B.C.?",
-              "wrong": ["What is Toronto, Ontario?", "What is Victoria, B.C.?"]
+              "clue": "The fictional Sunnydale, California in 'Buffy the Vampire Slayer' was actually filmed entirely in this Canadian-adjacent American city.",
+              "correct": "What is Vancouver?",
+              "wrong": ["What is Toronto?", "What is Victoria?"]
             }
           ]
         },
@@ -104,7 +104,7 @@
           "value": 400,
           "variants": [
             {
-              "clue": "The TV series 'Schitt's Creek' depicts a quirky small town somewhere in an unnamed province, but was actually filmed in Goodwood, Ontario. The show stars this Canadian comedy dynasty.",
+              "clue": "The TV series 'Schitt's reek' depicts a quirky small town somewhere in an unnamed province, but was actually filmed in Goodwood, Ontario. The show stars these two famous Canadian actors.",
               "correct": "What is the Eugene Levy and Catherine O'Hara?",
               "wrong": ["What is Mike Myers and Jim Carrey?", "What is John Candy and Martin Short?"]
             },
@@ -136,7 +136,7 @@
             {
               "clue": "Brokeback Mountain is set in Wyoming and Texas, but Ang Lee filmed the sweeping mountain vistas in this Canadian province, often called 'the wild rose country.'",
               "correct": "What is Alberta?",
-              "wrong": ["What is British Columbia?", "What is Montana (it was actually Alberta)?"]
+              "wrong": ["What is British Columbia?", "What is Montana?"]
             },
             {
               "clue": "Steven Spielberg's 'Saving Private Ryan' used Ireland and England for most shoots, but the final battle scene's European village streets were built on a set in this Canadian city's studios.",
@@ -251,7 +251,7 @@
           "value": 200,
           "variants": [
             {
-              "clue": "This Heritage Minute depicts a young Mohawk woman telling a British general of a planned American ambush — her warning helping repel the invasion of Upper Canada in 1812.",
+              "clue": "One Heritage Minute depicts a young Mohawk woman telling a British general of a planned American ambush — her warning helping repel the invasion of Upper Canada in 1812.",
               "correct": "Who is Laura Secord?",
               "wrong": ["Who is Mary Ann Shadd?", "Who is Pauline Johnson?"]
             },
@@ -706,8 +706,8 @@
               "wrong": ["What is the provincial government?", "What is the municipal government?"]
             },
             {
-              "clue": "The citizenship guide identifies this battle — fought in September 1759 on the Plains of Abraham — as a turning point that led to British control of New France.",
-              "correct": "What is the Battle of the Plains of Abraham (Battle of Quebec)?",
+              "clue": "The citizenship guide identifies this battle — fought in September 1759 — as a turning point that led to British control of New France.",
+              "correct": "What is the Battle of the Plains of Abraham?",
               "wrong": ["What is the Battle of Queenston Heights?", "What is the Battle of Châteauguay?"]
             }
           ]
@@ -730,22 +730,29 @@
       ]
     },
 
+
     {
-      "id": "o_canada",
-      "name": "O Canada!",
+      "id": "snack_time",
+      "name": "Snack Time",
       "clues": [
         {
           "value": 200,
           "variants": [
             {
-              "clue": "Canada has two official languages. French and English are both official at the federal level, and this province is the only one that is officially unilingual French.",
-              "correct": "What is Quebec?",
-              "wrong": ["What is New Brunswick?", "What is Ontario?"]
+              "clue": "These red-coloured, raspberry-flavoured candy fish are a staple of Canadian movie theatres and convenience stores, produced by Maynards.",
+              "correct": "What are Swedish Berries?",
+              "wrong": [
+                "What are Gummy Bears?",
+                "What are Sour Patch Kids?"
+              ]
             },
             {
-              "clue": "The Canadian flag features a red maple leaf with exactly this many points — a specific choice made when the flag was designed in 1965.",
-              "correct": "What is 11?",
-              "wrong": ["What is 13?", "What is 9?"]
+              "clue": "This popular Canadian potato chip flavour combines ketchup, barbecue, sour cream & onion, and salt & vinegar flavours into one chip.",
+              "correct": "What is All-Dressed?",
+              "wrong": [
+                "What is Dill Pickle?",
+                "What is Ketchup?"
+              ]
             }
           ]
         },
@@ -753,14 +760,20 @@
           "value": 400,
           "variants": [
             {
-              "clue": "Terry Fox's Marathon of Hope — a cross-Canada run to raise money for cancer research — began in St. John's, Newfoundland in 1980 and ended near this Ontario city after 143 days.",
-              "correct": "What is Thunder Bay?",
-              "wrong": ["What is Sudbury?", "What is Sault Ste. Marie?"]
+              "clue": "Named after a city on Vancouver Island, British Columbia, this no-bake bar dessert consists of three layers: a wafer/nut/coconut crumb base, custard-flavoured butter icing middle, and chocolate top.",
+              "correct": "What is a Nanaimo bar?",
+              "wrong": [
+                "What is a butter tart?",
+                "What is a BeaverTail?"
+              ]
             },
             {
-              "clue": "The Canadian Broadcasting Corporation — the CBC — was founded in 1936 partly to counter the dominance of American radio stations on the Canadian airwaves. Its French-language radio network is called this.",
-              "correct": "What is Radio-Canada?",
-              "wrong": ["What is Ici Musique?", "What is RDI?"]
+              "clue": "Originating in Quebec in the late 1950s, this iconic dish consists of french fries and cheese curds topped with brown gravy.",
+              "correct": "What is poutine?",
+              "wrong": [
+                "What is disco fries?",
+                "What is cheese fries?"
+              ]
             }
           ]
         },
@@ -768,14 +781,20 @@
           "value": 600,
           "variants": [
             {
-              "clue": "Canada's constitution is made up of several documents; the most recent major addition was the Constitution Act of 1982, which patriated the constitution from Britain and added this.",
-              "correct": "What is the Canadian Charter of Rights and Freedoms?",
-              "wrong": ["What is the Meech Lake Accord?", "What is the Notwithstanding Clause?"]
+              "clue": "A pastry classic, this dessert is a small pastry shell filled with a filling of butter, sugar, syrup, and egg, often with raisins or pecans, baked until flaky.",
+              "correct": "What is a butter tart?",
+              "wrong": [
+                "What is a sugar pie?",
+                "What is a Nanaimo bar?"
+              ]
             },
             {
-              "clue": "The 1995 Quebec referendum on sovereignty asked voters whether Quebec should become a sovereign country 'in partnership' with Canada — it failed by this razor-thin margin.",
-              "correct": "What is approximately 50.58% to 49.42% (less than 1%)?",
-              "wrong": ["What is 55% to 45%?", "What is 52% to 48%?"]
+              "clue": "This coffee-flavoured Canadian chocolate bar consists of alternating layers of vanilla wafer and coffee-flavoured foam, covered in milk chocolate.",
+              "correct": "What is Coffee Crisp?",
+              "wrong": [
+                "What is Crunchie?",
+                "What is Wunderbar?"
+              ]
             }
           ]
         },
@@ -783,14 +802,20 @@
           "value": 800,
           "variants": [
             {
-              "clue": "Poutine — Quebec's iconic dish of fries, cheese curds, and gravy — is said to have originated in the 1950s in this region of Quebec, with several towns claiming credit.",
-              "correct": "What is the Centre-du-Québec region (or the Eastern Townships)?",
-              "wrong": ["What is Montreal?", "What is the Gaspé Peninsula?"]
+              "clue": "Introduced in 1930, this iconic Christie biscuit features a sweet vanilla cream sandwiched between two maple-leaf-shaped cookies.",
+              "correct": "What is a Maple Leaf Cream?",
+              "wrong": [
+                "What is a Peek Freans?",
+                "What is a Pirate cookie?"
+              ]
             },
             {
-              "clue": "The Avro Arrow — Canada's legendary supersonic jet interceptor, cancelled by the Diefenbaker government in 1959 — was built by this now-defunct Canadian aviation company.",
-              "correct": "What is A.V. Roe Canada (Avro Canada)?",
-              "wrong": ["What is de Havilland Canada?", "What is Canadair?"]
+              "clue": "This deep-fried, stretched-dough pastry is shaped like the tail of a semi-aquatic Canadian mammal and is typically served hot with toppings like cinnamon and sugar.",
+              "correct": "What is a BeaverTail?",
+              "wrong": [
+                "What is a doughnut?",
+                "What is a funnel cake?"
+              ]
             }
           ]
         },
@@ -798,14 +823,353 @@
           "value": 1000,
           "variants": [
             {
-              "clue": "The Great Canadian Oil Sands project — now known as the oil sands — is centered in this region of northeastern Alberta, making it one of the largest proven oil reserves on Earth.",
-              "correct": "What is the Athabasca oil sands?",
-              "wrong": ["What is the Peace River oil sands?", "What is the Cold Lake oil sands?"]
+              "clue": "These spicy cinnamon hard candies with a dark chocolate center have been handmade in New Brunswick by Ganong since 1885.",
+              "correct": "What are Chicken Bones?",
+              "wrong": [
+                "What are Cinnamon Hearts?",
+                "What are Barley Toys?"
+              ]
             },
             {
-              "clue": "Margaret Atwood's novel 'The Handmaid's Tale' is set in the Republic of Gilead — a theocratic dystopia that has taken over the United States. The underground resistance runs through this Canadian city.",
-              "correct": "What is Toronto (via the Underground Femaleroad)?",
-              "wrong": ["What is Ottawa?", "What is Montreal?"]
+              "clue": "Invented in Belleville, Ontario in 1948 by W.T. Hawkins, this iconic Canadian snack is made from real aged white cheddar cheese and extruded cornmeal, known for being extra crunchy and irregular.",
+              "correct": "What are Hawkins Cheezies?",
+              "wrong": [
+                "What are Cheetos?",
+                "What are Cheese Balls?"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "for_the_birds",
+      "name": "For the Birds",
+      "clues": [
+        {
+          "value": 200,
+          "variants": [
+            {
+              "clue": "This Major League Baseball team based in Toronto plays its home games at the Rogers Centre and is named after Ontario's official provincial bird.",
+              "correct": "Who are the Toronto Blue Jays?",
+              "wrong": [
+                "Who are the Toronto Raptors?",
+                "Who are the Montreal Expos?"
+              ]
+            },
+            {
+              "clue": "This common name of the goose species Branta canadensis is also the name of a famous high-end Canadian winter clothing brand known for its parkas.",
+              "correct": "What is Canada Goose?",
+              "wrong": [
+                "What is Arc'teryx?",
+                "What is Moose Knuckles?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 400,
+          "variants": [
+            {
+              "clue": "Depicted on the Canadian dollar coin, this water bird is known for its eerie, haunting wail heard on northern Canadian lakes.",
+              "correct": "What is the common loon?",
+              "wrong": [
+                "What is the Canada goose?",
+                "What is the mallard duck?"
+              ]
+            },
+            {
+              "clue": "This aerobatic flight demonstration team of the Royal Canadian Air Force, flying CT-114 Tutor jets, shares its name with a small flocking bird.",
+              "correct": "Who are the Snowbirds?",
+              "wrong": [
+                "Who are the Blue Angels?",
+                "Who are the Thunderbirds?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 600,
+          "variants": [
+            {
+              "clue": "This acoustic guitar brand, handmade in La Patrie, Quebec, is named after a common coastal bird.",
+              "correct": "What is Seagull Guitars?",
+              "wrong": [
+                "What is Norman Guitars?",
+                "What is Simon & Patrick?"
+              ]
+            },
+            {
+              "clue": "This colloquial name for the Canada Jay, Canada's national bird candidate, is derived from the Cree mythological figure Wisakedjak.",
+              "correct": "What is the Whisky Jack?",
+              "wrong": [
+                "What is the Lumberjack?",
+                "What is the Timber Doodle?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 800,
+          "variants": [
+            {
+              "clue": "This former Yellowknife-based bush airline, named after the official territory bird of Nunavut, operated flights across the Northwest Territories until 1997.",
+              "correct": "What is Ptarmigan Airways?",
+              "wrong": [
+                "What is Tundra Air?",
+                "What is Arctic Wings?"
+              ]
+            },
+            {
+              "clue": "These athletic teams representing Carleton University in Ottawa share their name with a large, intelligent black bird of the crow family.",
+              "correct": "Who are the Carleton Ravens?",
+              "wrong": [
+                "Who are the Ottawa Gee-Gees?",
+                "Who are the York Lions?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 1000,
+          "variants": [
+            {
+              "clue": "This major Toronto-based publisher of romance novels, founded in 1949, is named after a colourful species of sea duck.",
+              "correct": "What is Harlequin?",
+              "wrong": [
+                "What is Penguin Canada?",
+                "What is Mallard Press?"
+              ]
+            },
+            {
+              "clue": "This historic Canadian nickel mining company, founded in 1928 and later acquired by Xstrata, is named after a community containing this bird of prey in its name.",
+              "correct": "What is Falconbridge?",
+              "wrong": [
+                "What is Eagle River?",
+                "What is Hawk Creek?"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "not_dirty",
+      "name": "It's Not as Dirty as it Sounds",
+      "clues": [
+        {
+          "value": 200,
+          "variants": [
+            {
+              "clue": "Ordering this at a Canadian coffee shop sounds like a suggestive double date, but you're actually just requesting two creams and two sugars.",
+              "correct": "What is a double-double?",
+              "wrong": [
+                "What is a twin-creamer?",
+                "What is a two-by-four?"
+              ]
+            },
+            {
+              "clue": "This winter headwear sounds like a suggestive command to strip or touch something, but it's just a standard knit cap or beanie.",
+              "correct": "What is a toque?",
+              "wrong": [
+                "What is a tuque-off?",
+                "What is a head-hugger?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 400,
+          "variants": [
+            {
+              "clue": "Asking someone in Saskatchewan for one of these sounds like a request for fuzzy affection, but you're actually just asking for a hooded sweatshirt.",
+              "correct": "What is a bunny hug?",
+              "wrong": [
+                "What is a rabbit squeeze?",
+                "What is a hare-nest?"
+              ]
+            },
+            {
+              "clue": "Eating these in Ottawa sounds like you are consuming the rear appendages of wild rodents, but it's actually just a delicious deep-fried pastry.",
+              "correct": "What are BeaverTails?",
+              "wrong": [
+                "What are OtterTails?",
+                "What are RodentRumps?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 600,
+          "variants": [
+            {
+              "clue": "Bringing this to an Ontario party sounds like you're inviting a massive group of guests or doing math, but you're just bringing a case of 24 beers.",
+              "correct": "What is a two-four?",
+              "wrong": [
+                "What is a double-dozen?",
+                "What is a case-pack?"
+              ]
+            },
+            {
+              "clue": "This Newfoundland initiation sounds like you're being subjected to a painful, high-pitched vocal performance, but it involves kissing a fish and drinking rum.",
+              "correct": "What is being screeched in?",
+              "wrong": [
+                "What is being cod-kissed?",
+                "What is howling out?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 800,
+          "variants": [
+            {
+              "clue": "While it sounds like a spiked beverage or a famous cartoon mouse, in Canada this refers to a convenient 375 mL bottle of liquor.",
+              "correct": "What is a mickey?",
+              "wrong": [
+                "What is a minnie?",
+                "What is a pocket-shot?"
+              ]
+            },
+            {
+              "clue": "Talking about having these in your pocket might make you sound like you are housing eccentric cartoon characters, but they are just one-dollar and two-dollar coins.",
+              "correct": "What are loonies and toonies?",
+              "wrong": [
+                "What are wackos and goofballs?",
+                "What are duckets and bucks?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 1000,
+          "variants": [
+            {
+              "clue": "This classic Canadian insult sounds like someone who works with garden watering equipment, but it historically referred to the chore of spraying down the hockey rink before Zambonis existed.",
+              "correct": "What is a hoser?",
+              "wrong": [
+                "What is a water-boy?",
+                "What is a rink-rat?"
+              ]
+            },
+            {
+              "clue": "While this term sounds like clay-pigeon shooting or a vulgar slang word for bodily fluids, in Newfoundland it describes a rowdy, anti-social, or low-class person.",
+              "correct": "What is a skeet?",
+              "wrong": [
+                "What is a sculpin?",
+                "What is a cod-head?"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tragically_hip",
+      "name": "The Tragically Hip",
+      "clues": [
+        {
+          "value": 200,
+          "variants": [
+            {
+              "clue": "The Tragically Hip's iconic late lead singer and lyricist, who was diagnosed with terminal brain cancer and led the band on a historic 2016 farewell tour, was named this.",
+              "correct": "Who is Gord Downie?",
+              "wrong": [
+                "Who is Bruce Cockburn?",
+                "Who is Neil Young?"
+              ]
+            },
+            {
+              "clue": "The Tragically Hip was formed in 1984 in this Ontario city, home to Queen's University.",
+              "correct": "What is Kingston?",
+              "wrong": [
+                "What is Toronto?",
+                "What is Ottawa?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 400,
+          "variants": [
+            {
+              "clue": "This 1992 album, featuring hits like 'Fifty-Mission Cap' and 'Wheat Kings', is the band's most commercially successful album in Canada.",
+              "correct": "What is Fully Completely?",
+              "wrong": [
+                "What is Road Apples?",
+                "What is Day for Night?"
+              ]
+            },
+            {
+              "clue": "The song 'Fifty-Mission Cap' tells the story of this Toronto Maple Leafs defenseman who scored the Stanley Cup-winning goal in 1951 and mysteriously disappeared shortly after.",
+              "correct": "Who is Bill Barilko?",
+              "wrong": [
+                "Who is Ace Bailey?",
+                "Who is Howie Morenz?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 600,
+          "variants": [
+            {
+              "clue": "The band's name was inspired by a skit in this 1982 movie directed by former Monkee Michael Nesmith.",
+              "correct": "What is Elephant Parts?",
+              "wrong": [
+                "What is Parts: The Clonus Horror?",
+                "What is Repo Man?"
+              ]
+            },
+            {
+              "clue": "The song 'Wheat Kings' is about this Saskatchewan man who was wrongfully convicted of the 1969 murder of Gail Miller and spent 23 years in prison.",
+              "correct": "Who is David Milgaard?",
+              "wrong": [
+                "Who is Guy Paul Morin?",
+                "Who is Steven Truscott?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 800,
+          "variants": [
+            {
+              "clue": "In the song 'Bobcaygeon', the narrator mentions seeing this band 'fail to inhale' during a performance in Toronto.",
+              "correct": "Who are the Constellations?",
+              "wrong": [
+                "Who are the Watchmen?",
+                "Who are the Grapes of Wrath?"
+              ]
+            },
+            {
+              "clue": "This famous Canadian actor and comedian introduced the Tragically Hip when they performed on Saturday Night Live in 1995.",
+              "correct": "Who is Dan Aykroyd?",
+              "wrong": [
+                "Who is Mike Myers?",
+                "Who is John Candy?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 1000,
+          "variants": [
+            {
+              "clue": "This track from the 1989 album Up to Here tells the story of a fictional 1973 jailbreak at Millhaven Institution, referencing the narrator's brother who was '38 years old' at the time.",
+              "correct": "What is '38 Years Old'?",
+              "wrong": [
+                "What is 'New Orleans Is Sinking'?",
+                "What is 'Blow at High Dough'?"
+              ]
+            },
+            {
+              "clue": "The Tragically Hip played their final concert on August 20, 2016, at the K-Rock Centre in Kingston, which was broadcast live commercial-free to millions of viewers by this national broadcaster.",
+              "correct": "What is the CBC?",
+              "wrong": [
+                "What is CTV?",
+                "What is Global TV?"
+              ]
             }
           ]
         }

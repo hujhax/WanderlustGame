@@ -24,6 +24,13 @@ let togetherAgainState = { startTime: 0, playerX: -100, state: 'walking' };
 let creditsStartTime = 0;
 let polaroids = [];
 
+let intimacy = 4;
+let intimacySparks = [];
+const gooseImg = new Image();
+const oceanSheetImg = new Image();
+const gooseTilesetImg = new Image();
+const boulderImg = new Image();
+
 // Image Objects
 const canadaMapImg = new Image();
 const golfGreenImgs = [];
@@ -57,7 +64,7 @@ const fishImages = {
     accordion: new Image()
 };
 
-const slashSprites = {}, idleSprites = {}, walkSprites = {}, runSprites = {}, jumpSprites = {}, sitSprites = {}, combatSprites = {}, halfSlashSprites = {}, backSlashSprites = {};
+const slashSprites = {}, idleSprites = {}, walkSprites = {}, runSprites = {}, jumpSprites = {}, sitSprites = {}, combatSprites = {}, halfSlashSprites = {}, backSlashSprites = {}, waveSprites = {}, kickSprites = {};
 
 function preloadAssets() {
     canadaMapImg.src = 'images/backgrounds/canada map.jpg';
@@ -95,10 +102,14 @@ function preloadAssets() {
     fishImages['soda can'].src = 'images/elements/fishing/soda-can.jpg';
     fishImages.accordion.src = 'images/elements/fishing/accordion.jpg';
 
+    gooseImg.src = 'images/sprites/goose.png';
+    oceanSheetImg.src = 'images/elements/ocean_sheet.png';
+    gooseTilesetImg.src = 'images/elements/goose_tileset.png';
+    boulderImg.src = 'images/elements/boulder.png';
+
     for (let i = 1; i <= 6; i++) {
-        const space = (i !== 5) ? " " : "";
         golfGreenImgs[i] = new Image();
-        golfGreenImgs[i].src = `images/elements/golf/greens/golf_${space}${i}.png`;
+        golfGreenImgs[i].src = `images/elements/golf/greens/golf_${i}.png`;
     }
 
     CAST.forEach(c => {
@@ -117,6 +128,8 @@ function preloadAssets() {
             combatSprites[actor] = new Image(); combatSprites[actor].src = `images/sprites/cast/${actor}/standard/combat.png`;
             halfSlashSprites[actor] = new Image(); halfSlashSprites[actor].src = `images/sprites/cast/${actor}/standard/1h_halfslash.png`;
             backSlashSprites[actor] = new Image(); backSlashSprites[actor].src = `images/sprites/cast/${actor}/standard/1h_backslash.png`;
+            waveSprites[actor] = new Image(); waveSprites[actor].src = `images/sprites/cast/${actor}/standard/wave.png`;
+            kickSprites[actor] = new Image(); kickSprites[actor].src = `images/sprites/cast/${actor}/standard/kick.png`;
         }
     });
 }
@@ -190,6 +203,8 @@ function gameLoop() {
 
 function startInTheCar() {
     currentPhase = PHASES.IN_THE_CAR; inTheCarState.cycle = 0; inTheCarState.usedInsults.clear(); inTheCarState.usedBlands.clear(); inTheCarState.usedTruths.clear(); inTheCarState.waitingForResponse = false;
+    intimacy = 4;
+    intimacySparks = [];
     audio.play('IN_THE_CAR', 45); nextCarCycle();
 }
 
@@ -289,8 +304,16 @@ window.addEventListener('keydown', (e) => {
             else if (e.key === 'ArrowDown') { inTheCarState.selectedIndex = (inTheCarState.selectedIndex + 1) % 3; audio.playSFX('ui'); }
             else if (e.key === 'Enter') {
                 const choice = inTheCarState.options[inTheCarState.selectedIndex]; inTheCarState.waitingForResponse = false;
-                if (choice.type === 'insult') { score -= 100; audio.playSFX('SAD_TROMBONE'); }
-                else if (choice.type === 'truth') { score += 200; audio.playSFX('TADA'); }
+                if (choice.type === 'insult') { 
+                    score -= 100; 
+                    audio.playSFX('SAD_TROMBONE'); 
+                    intimacy = Math.max(0, intimacy - 1);
+                }
+                else if (choice.type === 'truth') { 
+                    score += 200; 
+                    audio.playSFX('TADA'); 
+                    intimacy = Math.min(8, intimacy + 1);
+                }
                 showDialog(CAST[selectedIndex].firstName, CAST[selectedIndex].actor, choice.text, () => { inTheCarState.cycle++; nextCarCycle(); }, 'top');
             }
         }
@@ -309,8 +332,21 @@ window.addEventListener('keydown', (e) => {
         if (fightingState.gameOver) { if (e.key === 'Enter') { audio.stop(); if (fightingState.nextPhase === PHASES.SEPARATE_WAYS) { currentPhase = PHASES.NEXT_DAY; } else { startTogetherAgain(); } } }
         else handleFightingInput(e.key);
     } else if (currentPhase === PHASES.NEXT_DAY) {
-        if (e.key === 'Enter') { currentPhase = PHASES.SEPARATE_WAYS; separateWaysState.startTime = Date.now(); audio.play('KARAOKE_BGM'); }
-    } else if (currentPhase === PHASES.SEPARATE_WAYS) { if (e.key === 'Enter') startFightingGame(PHASES.TOGETHER_AGAIN, true); }
+        if (e.key === 'Enter') {
+            currentPhase = PHASES.SEPARATE_WAYS;
+            separateWaysState.startTime = Date.now();
+            companionSitsBg.play().catch(e => {});
+            playerSitsBg.play().catch(e => {});
+            audio.play('KARAOKE_BGM');
+        }
+    } else if (currentPhase === PHASES.SEPARATE_WAYS) {
+        if (e.key === 'Enter') {
+            const elapsed = Date.now() - separateWaysState.startTime;
+            if (elapsed >= 30000) {
+                startFightingGame(PHASES.TOGETHER_AGAIN, true);
+            }
+        }
+    }
     else if (currentPhase === PHASES.CLOSING_CREDITS) { if (e.key === 'Enter') { currentPhase = PHASES.TITLE; currentMinigameIndex = 0; score = 0; playedMinigames = []; audio.play('CHICAGO', 12); creditsStartTime = 0; } }
 });
 

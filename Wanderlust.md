@@ -1,4 +1,4 @@
-﻿anderlust
+﻿Wanderlust
 
 # General
 Wanderlust is a video game that uses NES-style pixel-art graphics and chiptune-style music and sound effects.
@@ -147,7 +147,7 @@ The opening screen of each minigame shows:
 1. A string that reads "Stop #" and then the number of this stop (1, 2, or 3 -- set the stop number to 1 when the player starts or restarts the game).
 2. The title of the minigame
 3. A pixel-art map of Canada (see "canada map.jpg"), with a bright orange dotted line, with a bit of outer glow, going from Ottawa to Vancouver.  Minigame #1 adds a red "x" to the map ¼ of the way along the route.  Minigame #2 instead adds a red "x" to the map ½ of the way along the route.  Minigame #3 instead adds a red "x" to the map ¾ of the way along the route.
-4. The instructtions "Press Enter to Continue".
+4. The instructions "Press Enter to Continue".
 
 The opening screen has no background music.
 
@@ -369,7 +369,7 @@ Mme. Tremblay (Claire): Do not weep, weary traveler. It has claimed prouder soul
 
 
 
-### Obligatory Fishing Minigame
+### Lake Fish-a-Lot (AKA Obligatory Fishing Minigame)
 You can reach this game directly with the query parameter `?minigame=fish`.
 
 For background music, download and use the music from https://www.youtube.com/watch?v=qmLEEXqU_Ek.
@@ -520,14 +520,14 @@ Bob Golf (Gil): Not everybody is cut out to handle the high-stakes world of mini
 #### Preparing the clues
 First, prepare a set of Jeopardy! clues.  Do this at the same time you write the code (i.e., don't write the clues live in the app).
 
-Recall that Jeopardy! presents you with the answers, and asks that you provide the appropriate question.  For example:
+Recall that Jeopardy! presents you with the answers ('clues'), and asks that you provide the appropriate question.  For example:
 
 Clue: On Sept. 1, 1715 Louis XIV died in this city, site of a fabulous palace he built.
 Question: What is Versailles?
 
 Use [this](https://www.popularmechanics.com/culture/tv/a19435419/how-to-write-a-jeopardy-clue/) and [this](https://www.reddit.com/r/Jeopardy/comments/1efysgc/how_to_write_good_jeopardy_clues/) for references on how to write good Jeopardy! clues.
 
-Prepare clues for a total of ten categories.  Categories should be named similarly to Jeopardy category naming conventions.  All categories should have to do with Canada — its culture, history, wildlife, art, and so on.  You must include these categories:
+Prepare clues for the following categories:
 * Hinterland Who's Who — these are clues about Canadian wildlife.
 	* Include one clue about the snowy owl
 * Featuring Canada As... — these are clues about TV shows and movies shot in Canada that pretend Canada is some other place.
@@ -539,6 +539,10 @@ Prepare clues for a total of ten categories.  Categories should be named similar
 * Unceded Territories — these are clues about the indigenous people of Canada
 * Capital-ism — these are clues about Canada's provincial capitals, plus Ottawa
 * Citizenship Test — these are clues about things that appear on the Canadian citizenship test
+* Snack Time - these are clues about Canadian snacks
+* For the Birds - these are clues about things in Canadian culture named after birds
+* It's Not as Dirty as it Sounds - these are clues about Canadian phrases that sound dirty but aren't
+* The Tragically Hip - these are clues about the band the Tragically Hip
 
 For each category, come up with clues that range from $200 (easy) to $1000 (difficult).  Come up with two clues for each dollar amount.  Come up with three possible questions (one right, two wrong) for each clue.
 

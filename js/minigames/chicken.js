@@ -68,12 +68,48 @@ function drawChickenGame() {
                 ctx.drawImage(chickenSheetImg, fx, 0, 128, 128, ent.x, roadCentreY - 50, 64, 64);
             }
         } else {
-            if (skullImg.complete) ctx.drawImage(skullImg, 0, 0, skullImg.width, skullImg.height, ent.x, roadCentreY - 25, 40, 30);
+            // Skull jumping physics
+            ent.y = ent.y || roadCentreY;
+            ent.isJumping = ent.isJumping || false;
+            ent.jumpVel = ent.jumpVel || 0;
+            ent.jumpTimer = ent.jumpTimer !== undefined ? ent.jumpTimer : Math.random() * 150 + 50;
+
+            if (!ent.isJumping) {
+                ent.jumpTimer--;
+                if (ent.jumpTimer <= 0) {
+                    ent.isJumping = true;
+                    ent.jumpVel = -10;
+                }
+            } else {
+                ent.y += ent.jumpVel;
+                ent.jumpVel += 0.8;
+                if (ent.y >= roadCentreY) {
+                    ent.y = roadCentreY;
+                    ent.isJumping = false;
+                    ent.jumpTimer = Math.random() * 150 + 100;
+                }
+            }
+
+            if (skullImg.complete) {
+                ctx.drawImage(skullImg, 0, 0, skullImg.width, skullImg.height, ent.x, ent.y - 50, 80, 60);
+            }
         }
         
-        if (Math.abs(ent.x - 100) < 40 && Math.abs(roadCentreY - state.playerY) < 50) {
-            if (ent.type === 'skull') { if (!state.isJumping || state.playerY > roadCentreY - 40) { failure(); ent.x = -1000; } }
-            else if (ent.type === 'chicken') { if (!state.isJumping || state.playerY > roadCentreY - 60) { success(); ent.x = -1000; } }
+        if (ent.type === 'skull') {
+            const skullY = ent.y || roadCentreY;
+            const hOverlap = Math.abs(ent.x - 100) < 50;
+            const vOverlap = (state.playerY - 120 < skullY) && (state.playerY > skullY - 60);
+            if (hOverlap && vOverlap) {
+                failure();
+                ent.x = -1000;
+            }
+        } else if (ent.type === 'chicken') {
+            const hOverlap = Math.abs(ent.x - 100) < 40;
+            const vOverlap = Math.abs(roadCentreY - state.playerY) < 50;
+            if (hOverlap && vOverlap) {
+                success();
+                ent.x = -1000;
+            }
         }
     });
 }

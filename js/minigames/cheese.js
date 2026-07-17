@@ -10,6 +10,7 @@ function initCheeseGrid() {
     minigameState.isAnimating = false;
     minigameState.fadingMatches = [];
     minigameState.chainLevel = 0;
+    minigameState.eatPressCount = 0;
 
     for (let r = 0; r < GRID_SIZE; r++) {
         minigameState.grid[r] = [];
@@ -104,6 +105,12 @@ function updateVisuals() {
 function drawCheeseGame() {
     updateVisuals();
     
+    if (minigameState.shouldWinEnd && !minigameState.isAnimating && (!minigameState.fadingMatches || minigameState.fadingMatches.length === 0)) {
+        minigameState.shouldWinEnd = false;
+        endMinigame();
+        return;
+    }
+    
     // Handle fading matches
     if (minigameState.fadingMatches && minigameState.fadingMatches.length > 0) {
         let allDone = true;
@@ -186,7 +193,26 @@ function drawCheeseGame() {
 function handleCheeseClick(x, y) {
     if (minigameState.isAnimating || (minigameState.fadingMatches && minigameState.fadingMatches.length > 0)) return;
     const btnX = 225, btnY = 80, btnSize = 50;
-    if (x >= btnX && x <= btnX + btnSize && y >= btnY && y <= btnY + btnSize) { minigameState.eatMode = true; return; }
+    if (x >= btnX && x <= btnX + btnSize && y >= btnY && y <= btnY + btnSize) {
+        minigameState.eatMode = true;
+        minigameState.eatPressCount = (minigameState.eatPressCount || 0) + 1;
+        
+        let dialogText = "";
+        if (minigameState.eatPressCount === 1) {
+            dialogText = "Ah, you have decided to eat one of the cheeses.  Ah well.  Choose wisely, and that cheese shall disappear from the table.";
+        } else if (minigameState.eatPressCount === 2) {
+            dialogText = "A second cheese?  Ah, I see you decide to live dangerously, my friend.";
+        } else {
+            dialogText = "You choose to eat a third cheese?  I will allow it, but I'm afraid that will be the end of your efforts to help the fromagerie.";
+        }
+        
+        const prevAnimating = minigameState.isAnimating;
+        minigameState.isAnimating = true;
+        showDialog('Mme. Tremblay', 'Claire', dialogText, () => {
+            minigameState.isAnimating = prevAnimating;
+        });
+        return;
+    }
     const c = Math.floor((x - FIELD_X) / CELL_SIZE), r = Math.floor((y - FIELD_Y) / CELL_SIZE);
     if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE && minigameState.grid) {
         if (minigameState.eatMode) {

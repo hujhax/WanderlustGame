@@ -19,13 +19,36 @@ function drawMathGame() {
 }
 
 function generateMathQuestion() {
-    const diff = minigameState.difficulty, ops = ['+', '-', '*'];
+    const diff = minigameState.difficulty || 1, ops = ['+', '-', '*'];
     const op = ops[Math.floor(Math.random() * (diff > 2 ? 3 : 2))];
-    let a, b;
-    if (op === '+') { a = Math.floor(Math.random() * 10 * diff); b = Math.floor(Math.random() * 10 * diff); }
-    else if (op === '-') { a = Math.floor(Math.random() * 10 * diff); b = Math.floor(Math.random() * a); }
-    else { a = Math.floor(Math.random() * 5 * diff); b = Math.floor(Math.random() * 5 * diff); }
-    minigameState.question = `${a} ${op} ${b} = ?`;
-    minigameState.correctAnswer = eval(`${a} ${op} ${b}`);
+    let a, b, c;
+    const useThree = diff > 1 && Math.random() < 0.4;
+    
+    if (useThree) {
+        const op2 = Math.random() < 0.5 ? '+' : '-';
+        a = Math.floor(Math.random() * 8 * diff) + 2;
+        b = Math.floor(Math.random() * 8 * diff) + 2;
+        c = Math.floor(Math.random() * 5 * diff) + 1;
+        
+        let result;
+        if (op2 === '+') result = a + b + c;
+        else result = a + b - c;
+        
+        minigameState.question = `${a} + ${b} ${op2} ${c} = ?`;
+        minigameState.correctAnswer = result;
+    } else {
+        if (op === '+') { 
+            a = Math.floor(Math.random() * 15 * diff) + 5; 
+            b = Math.floor(Math.random() * 15 * diff) + 5; 
+        } else if (op === '-') { 
+            a = Math.floor(Math.random() * 20 * diff) + 5; 
+            b = Math.floor(Math.random() * a); 
+        } else { 
+            a = Math.floor(Math.random() * 8 * diff) + 2; 
+            b = Math.floor(Math.random() * 6 * diff) + 2; 
+        }
+        minigameState.question = `${a} ${op} ${b} = ?`;
+        minigameState.correctAnswer = eval(`${a} ${op} ${b}`);
+    }
     minigameState.answer = ""; minigameState.timer = 10; minigameState.lastTimerUpdate = Date.now();
 }

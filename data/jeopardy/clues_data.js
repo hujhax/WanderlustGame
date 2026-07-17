@@ -1,6 +1,3 @@
-// Auto-generated from clues.json — edit clues.json then re-run:
-//   python3 -c "import json,sys; open("data/jeopardy/clues_data.js","w").write("// see clues.json\nconst JEOPARDY_CLUES_DATA = " + json.dumps(json.load(open("data/jeopardy/clues.json")), indent=2) + ";")"
-// This file lets the game load clue data without a server (avoids file:// CORS).
 const JEOPARDY_CLUES_DATA = {
   "categories": [
     {
@@ -11,7 +8,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 200,
           "variants": [
             {
-              "clue": "These small, masked mammals are the subject of classic Hinterland Who's Who PSAs and are known for washing their food before eating \u2014 though scientists say they may just like the feel of water.",
+              "clue": "These small, masked mammals are the subject of classic Hinterland Who's Who PSAs and are known for washing their food before eating — though scientists say they may just like the feel of water.",
               "correct": "What is the raccoon?",
               "wrong": [
                 "What is the beaver?",
@@ -53,7 +50,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 600,
           "variants": [
             {
-              "clue": "This fish, called 'the ghost of the stream,' runs up Pacific rivers each autumn and dies after spawning \u2014 its decomposing body fertilizing the forest floor.",
+              "clue": "This fish, called 'the ghost of the stream,' runs up Pacific rivers each autumn and dies after spawning — its decomposing body fertilizing the forest floor.",
               "correct": "What is the Pacific salmon?",
               "wrong": [
                 "What is the Arctic char?",
@@ -95,7 +92,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 1000,
           "variants": [
             {
-              "clue": "This secretive, nocturnal bird of prey relies exclusively on old-growth forests. Its call \u2014 a series of soft hoots \u2014 is rarely heard, and its population has become a flashpoint in B.C. logging debates.",
+              "clue": "This secretive, nocturnal bird of prey relies exclusively on old-growth forests. Its call — a series of soft hoots — is rarely heard, and its population has become a flashpoint in B.C. logging debates.",
               "correct": "What is the spotted owl?",
               "wrong": [
                 "What is the barred owl?",
@@ -122,19 +119,19 @@ const JEOPARDY_CLUES_DATA = {
           "value": 200,
           "variants": [
             {
-              "clue": "The 2000 romantic comedy 'My Big Fat Greek Wedding' is set in Chicago, but Toronto stood in \u2014 its skyline even peeking through the background in this obvious way.",
-              "correct": "What is the CN Tower appearing in the skyline?",
+              "clue": "The 2000 romantic comedy 'My Big Fat Greek Wedding' is set in Chicago, but Toronto stood in, with this iconic Toronto item appearing in the background.",
+              "correct": "What is the CN Tower?",
               "wrong": [
-                "What is Niagara Falls appearing in a scene?",
-                "What is a TTC streetcar visible in the background?"
+                "What is Niagara Falls?",
+                "What is a TTC streetcar?"
               ]
             },
             {
-              "clue": "The fictional Sunnydale, California in 'Buffy the Vampire Slayer' was actually filmed entirely in this Canadian-adjacent American city, but the show used Vancouver for exterior location shots.",
-              "correct": "What is Vancouver, B.C.?",
+              "clue": "The fictional Sunnydale, California in 'Buffy the Vampire Slayer' was actually filmed entirely in this Canadian-adjacent American city.",
+              "correct": "What is Vancouver?",
               "wrong": [
-                "What is Toronto, Ontario?",
-                "What is Victoria, B.C.?"
+                "What is Toronto?",
+                "What is Victoria?"
               ]
             }
           ]
@@ -143,7 +140,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 400,
           "variants": [
             {
-              "clue": "The TV series 'Schitt's Creek' depicts a quirky small town somewhere in an unnamed province, but was actually filmed in Goodwood, Ontario. The show stars this Canadian comedy dynasty.",
+              "clue": "The TV series 'Schitt's reek' depicts a quirky small town somewhere in an unnamed province, but was actually filmed in Goodwood, Ontario. The show stars these two famous Canadian actors.",
               "correct": "What is the Eugene Levy and Catherine O'Hara?",
               "wrong": [
                 "What is Mike Myers and Jim Carrey?",
@@ -151,7 +148,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "Deadpool's Wade Wilson explicitly calls out being from this Canadian city, and the 2016 film shot extensively there \u2014 though his hometown is played as a grimy, dangerous place.",
+              "clue": "Deadpool's Wade Wilson explicitly calls out being from this Canadian city, and the 2016 film shot extensively there — though his hometown is played as a grimy, dangerous place.",
               "correct": "What is Vancouver?",
               "wrong": [
                 "What is Calgary?",
@@ -164,7 +161,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 600,
           "variants": [
             {
-              "clue": "The X-Files famously moved its production from this Canadian city to Los Angeles after five seasons \u2014 causing local crew to lose their jobs and fans to mourn the loss of the 'Pacific Northwest' look.",
+              "clue": "The X-Files famously moved its production from this Canadian city to Los Angeles after five seasons — causing local crew to lose their jobs and fans to mourn the loss of the 'Pacific Northwest' look.",
               "correct": "What is Vancouver?",
               "wrong": [
                 "What is Toronto?",
@@ -172,7 +169,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "The 'Twilight' saga is set in Forks, Washington, but the first film was shot in Portland, Oregon \u2014 however, this Canadian province served as the filming location for New Moon's Italy sequences.",
+              "clue": "The 'Twilight' saga is set in Forks, Washington, but the first film was shot in Portland, Oregon — however, this Canadian province served as the filming location for New Moon's Italy sequences.",
               "correct": "What is British Columbia?",
               "wrong": [
                 "What is Quebec?",
@@ -189,7 +186,7 @@ const JEOPARDY_CLUES_DATA = {
               "correct": "What is Alberta?",
               "wrong": [
                 "What is British Columbia?",
-                "What is Montana (it was actually Alberta)?"
+                "What is Montana?"
               ]
             },
             {
@@ -214,7 +211,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "The 1994 cyberpunk classic 'Johnny Mnemonic' \u2014 set in a dystopian 2021 Newark, N.J. \u2014 was filmed almost entirely in this city, giving it a distinctive, unusually clean dystopia aesthetic.",
+              "clue": "The 1994 cyberpunk classic 'Johnny Mnemonic' — set in a dystopian 2021 Newark, N.J. — was filmed almost entirely in this city, giving it a distinctive, unusually clean dystopia aesthetic.",
               "correct": "What is Toronto?",
               "wrong": [
                 "What is Montreal?",
@@ -233,7 +230,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 200,
           "variants": [
             {
-              "clue": "This iconic Canadian beer brand's 'I AM CANADIAN' rant, delivered by Joe, became a cultural phenomenon in 2000 and was parodied endlessly \u2014 even by politicians.",
+              "clue": "This iconic Canadian beer brand's 'I AM CANADIAN' rant, delivered by Joe, became a cultural phenomenon in 2000 and was parodied endlessly — even by politicians.",
               "correct": "What is Molson Canadian?",
               "wrong": [
                 "What is Labatt Blue?",
@@ -241,7 +238,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "Harvey's 'This is a Harvey's hamburger' jingle emphasized that each burger is assembled to order \u2014 making it the 'custom' fast food option of this country.",
+              "clue": "Harvey's 'This is a Harvey's hamburger' jingle emphasized that each burger is assembled to order — making it the 'custom' fast food option of this country.",
               "correct": "What is Canada?",
               "wrong": [
                 "What is the United States?",
@@ -254,7 +251,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 400,
           "variants": [
             {
-              "clue": "Canadian Tire's iconic 'Barbecue Dad' ads, running for decades, featured a cheerful suburban dad who always had the right Canadian Tire product on hand \u2014 becoming a beloved, if slightly mocked, Canadian archetype.",
+              "clue": "Canadian Tire's iconic 'Barbecue Dad' ads, running for decades, featured a cheerful suburban dad who always had the right Canadian Tire product on hand — becoming a beloved, if slightly mocked, Canadian archetype.",
               "correct": "What is Canadian Tire?",
               "wrong": [
                 "What is Home Hardware?",
@@ -262,7 +259,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "The Shreddies 'Diamond Shreddies' campaign of 2008 claimed the cereal had been reformulated \u2014 it was simply rotated 45 degrees. This campaign won awards for its satirical take on this marketing concept.",
+              "clue": "The Shreddies 'Diamond Shreddies' campaign of 2008 claimed the cereal had been reformulated — it was simply rotated 45 degrees. This campaign won awards for its satirical take on this marketing concept.",
               "correct": "What is product reinvention / rebranding?",
               "wrong": [
                 "What is price inflation?",
@@ -275,7 +272,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 600,
           "variants": [
             {
-              "clue": "Old Spice's Canadian commercials in the 1970s featured a man on horseback splashing through surf \u2014 but this Canadian chain store's long-running ads were parodied alongside it in the comedy world as quintessentially 'dad' advertising.",
+              "clue": "Old Spice's Canadian commercials in the 1970s featured a man on horseback splashing through surf — but this Canadian chain store's long-running ads were parodied alongside it in the comedy world as quintessentially 'dad' advertising.",
               "correct": "What is Canadian Tire?",
               "wrong": [
                 "What is Tim Hortons?",
@@ -296,7 +293,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 800,
           "variants": [
             {
-              "clue": "This Canadian phone company's 'Crazy Phone Lady' ads from the early 2000s \u2014 featuring a woman frantically switching providers \u2014 were so successful they spawned imitators across the country.",
+              "clue": "This Canadian phone company's 'Crazy Phone Lady' ads from the early 2000s — featuring a woman frantically switching providers — were so successful they spawned imitators across the country.",
               "correct": "What is Telus?",
               "wrong": [
                 "What is Bell?",
@@ -344,7 +341,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 200,
           "variants": [
             {
-              "clue": "This Heritage Minute depicts a young Mohawk woman telling a British general of a planned American ambush \u2014 her warning helping repel the invasion of Upper Canada in 1812.",
+              "clue": "One Heritage Minute depicts a young Mohawk woman telling a British general of a planned American ambush — her warning helping repel the invasion of Upper Canada in 1812.",
               "correct": "Who is Laura Secord?",
               "wrong": [
                 "Who is Mary Ann Shadd?",
@@ -352,7 +349,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "The Heritage Minute 'Burnt Toast' features this phrase, shouted by a student who just had an epiphany about how brain injuries work \u2014 becoming one of the most quoted lines in Canadian pop culture.",
+              "clue": "The Heritage Minute 'Burnt Toast' features this phrase, shouted by a student who just had an epiphany about how brain injuries work — becoming one of the most quoted lines in Canadian pop culture.",
               "correct": "What is 'I smell burnt toast'?",
               "wrong": [
                 "What is 'There's no place like home'?",
@@ -365,7 +362,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 400,
           "variants": [
             {
-              "clue": "A Heritage Minute about the Underground Railroad depicts this woman, who escaped slavery and made 19 trips back to free over 300 people \u2014 though that number is disputed by historians.",
+              "clue": "A Heritage Minute about the Underground Railroad depicts this woman, who escaped slavery and made 19 trips back to free over 300 people — though that number is disputed by historians.",
               "correct": "Who is Harriet Tubman?",
               "wrong": [
                 "Who is Josiah Henson?",
@@ -373,7 +370,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "The 'Wilfrid Laurier' Heritage Minute shows Canada's first francophone Prime Minister dreaming of a century that would belong to Canada \u2014 he served as PM from 1896 to this year.",
+              "clue": "The 'Wilfrid Laurier' Heritage Minute shows Canada's first francophone Prime Minister dreaming of a century that would belong to Canada — he served as PM from 1896 to this year.",
               "correct": "What is 1911?",
               "wrong": [
                 "What is 1921?",
@@ -386,7 +383,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 600,
           "variants": [
             {
-              "clue": "The Heritage Minute about Confederation depicts the Charlottetown Conference of 1864 in this province \u2014 often called 'the Cradle of Confederation.'",
+              "clue": "The Heritage Minute about Confederation depicts the Charlottetown Conference of 1864 in this province — often called 'the Cradle of Confederation.'",
               "correct": "What is Prince Edward Island?",
               "wrong": [
                 "What is Nova Scotia?",
@@ -407,7 +404,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 800,
           "variants": [
             {
-              "clue": "The Heritage Minute about Vimy Ridge depicts Canadian troops capturing a ridge in France in April 1917 \u2014 an event some historians credit with forging this.",
+              "clue": "The Heritage Minute about Vimy Ridge depicts Canadian troops capturing a ridge in France in April 1917 — an event some historians credit with forging this.",
               "correct": "What is a distinct Canadian national identity?",
               "wrong": [
                 "What is the Canadian constitution?",
@@ -415,7 +412,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "The Heritage Minute about the 'Famous Five' depicts these women petitioning for women to be considered 'persons' under Canadian law \u2014 succeeding in 1929 after this landmark ruling.",
+              "clue": "The Heritage Minute about the 'Famous Five' depicts these women petitioning for women to be considered 'persons' under Canadian law — succeeding in 1929 after this landmark ruling.",
               "correct": "What is the Persons Case (Edwards v. Canada)?",
               "wrong": [
                 "What is the Women's Suffrage Act?",
@@ -428,7 +425,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 1000,
           "variants": [
             {
-              "clue": "The Heritage Minute featuring Nellie McClung depicts her participation in the 'Mock Parliament' of 1914, where women debated whether men should be given the vote \u2014 satirizing this province's legislature.",
+              "clue": "The Heritage Minute featuring Nellie McClung depicts her participation in the 'Mock Parliament' of 1914, where women debated whether men should be given the vote — satirizing this province's legislature.",
               "correct": "What is Manitoba's legislature?",
               "wrong": [
                 "What is Ontario's legislature?",
@@ -436,7 +433,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "The Heritage Minute 'Basketball' depicts James Naismith inventing the sport in Springfield, Massachusetts in 1891 \u2014 but Naismith himself was born in this small Ontario town.",
+              "clue": "The Heritage Minute 'Basketball' depicts James Naismith inventing the sport in Springfield, Massachusetts in 1891 — but Naismith himself was born in this small Ontario town.",
               "correct": "What is Almonte, Ontario?",
               "wrong": [
                 "What is Guelph, Ontario?",
@@ -455,7 +452,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 200,
           "variants": [
             {
-              "clue": "In Quebec French, this word \u2014 borrowed from English \u2014 is used for a shopping cart, while standard French uses 'chariot' or 'caddie.'",
+              "clue": "In Quebec French, this word — borrowed from English — is used for a shopping cart, while standard French uses 'chariot' or 'caddie.'",
               "correct": "What is 'carrosse' or 'panier'?",
               "wrong": [
                 "What is 'charrette'?",
@@ -463,10 +460,10 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "Quebec French uses this word \u2014 meaning 'to park' \u2014 that doesn't exist in standard French, which instead uses 'se garer' or 'stationner.'",
+              "clue": "Quebec French uses this word — meaning 'to park' — that doesn't exist in standard French, which instead uses 'se garer' or 'stationner.'",
               "correct": "What is 'parker'?",
               "wrong": [
-                "What is 'arr\u00eater'?",
+                "What is 'arrêter'?",
                 "What is 'stopper'?"
               ]
             }
@@ -476,7 +473,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 400,
           "variants": [
             {
-              "clue": "The Quebec French expression 'c'est le boutte' \u2014 roughly meaning 'it's the best' or 'it's awesome' \u2014 derives from this English word mispronounced and adopted into joual.",
+              "clue": "The Quebec French expression 'c'est le boutte' — roughly meaning 'it's the best' or 'it's awesome' — derives from this English word mispronounced and adopted into joual.",
               "correct": "What is 'boot' (as in 'the boot,' 'the end')?",
               "wrong": [
                 "What is 'butt'?",
@@ -497,7 +494,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 600,
           "variants": [
             {
-              "clue": "The Qu\u00e9b\u00e9cois oath 'Tabarnac!' \u2014 one of the strongest swear words in Quebec French \u2014 derives from this sacred object found in Catholic churches.",
+              "clue": "The Québécois oath 'Tabarnac!' — one of the strongest swear words in Quebec French — derives from this sacred object found in Catholic churches.",
               "correct": "What is the tabernacle?",
               "wrong": [
                 "What is the chalice?",
@@ -505,7 +502,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "Franco-Ontarian French differs from Qu\u00e9b\u00e9cois French in many ways; it uses this term for 'car,' while Quebecers more commonly say 'char.'",
+              "clue": "Franco-Ontarian French differs from Québécois French in many ways; it uses this term for 'car,' while Quebecers more commonly say 'char.'",
               "correct": "What is 'auto' or 'voiture'?",
               "wrong": [
                 "What is 'machine'?",
@@ -518,7 +515,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 800,
           "variants": [
             {
-              "clue": "The Office qu\u00e9b\u00e9cois de la langue fran\u00e7aise \u2014 nicknamed 'la langue police' \u2014 is the body that enforces French language laws under this Quebec legislation, commonly called Bill 101.",
+              "clue": "The Office québécois de la langue française — nicknamed 'la langue police' — is the body that enforces French language laws under this Quebec legislation, commonly called Bill 101.",
               "correct": "What is the Charter of the French Language?",
               "wrong": [
                 "What is the Official Languages Act?",
@@ -527,7 +524,7 @@ const JEOPARDY_CLUES_DATA = {
             },
             {
               "clue": "Acadian French retains certain features of 17th-century Norman French, including this pronoun still used by some Acadian speakers instead of 'vous' as a formal second-person address.",
-              "correct": "What is 'ouais' or 'tu' (informally \u2014 'je' vs 'j')?",
+              "correct": "What is 'ouais' or 'tu' (informally — 'je' vs 'j')?",
               "wrong": [
                 "What is 'il'?",
                 "What is 'nous'?"
@@ -539,7 +536,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 1000,
           "variants": [
             {
-              "clue": "The word 'd\u00e9panneur' \u2014 meaning a small convenience store \u2014 is used in Quebec French and comes from the verb 'd\u00e9panner,' meaning this.",
+              "clue": "The word 'dépanneur' — meaning a small convenience store — is used in Quebec French and comes from the verb 'dépanner,' meaning this.",
               "correct": "What is 'to help out' or 'to fix a breakdown'?",
               "wrong": [
                 "What is 'to stock goods'?",
@@ -547,7 +544,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "Michel Tremblay's plays, written in joual \u2014 Montreal's working-class dialect \u2014 scandalized critics in 1968 who believed theatre should be written in this form of French.",
+              "clue": "Michel Tremblay's plays, written in joual — Montreal's working-class dialect — scandalized critics in 1968 who believed theatre should be written in this form of French.",
               "correct": "What is standard (international) French?",
               "wrong": [
                 "What is Parisian French?",
@@ -566,7 +563,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 200,
           "variants": [
             {
-              "clue": "In Alberta, it is technically illegal to paint this piece of wooden farm equipment without a permit \u2014 though the law is essentially never enforced.",
+              "clue": "In Alberta, it is technically illegal to paint this piece of wooden farm equipment without a permit — though the law is essentially never enforced.",
               "correct": "What is a wooden ladder?",
               "wrong": [
                 "What is a barn door?",
@@ -574,7 +571,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "According to an old Halifax bylaw, you cannot sell this item on a Sunday in the city \u2014 a holdover from the Lord's Day Act era.",
+              "clue": "According to an old Halifax bylaw, you cannot sell this item on a Sunday in the city — a holdover from the Lord's Day Act era.",
               "correct": "What is ice cream?",
               "wrong": [
                 "What is beer?",
@@ -595,7 +592,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "In Ontario, it is technically illegal to drag this large animal down a city street on a Sunday \u2014 the law was written to prevent cattle drives through downtown.",
+              "clue": "In Ontario, it is technically illegal to drag this large animal down a city street on a Sunday — the law was written to prevent cattle drives through downtown.",
               "correct": "What is a cow (or cattle)?",
               "wrong": [
                 "What is a horse?",
@@ -608,7 +605,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 600,
           "variants": [
             {
-              "clue": "In Petrolia, Ontario, a local bylaw prohibits excessive this \u2014 defined as yelling, shouting, hooting, whistling, or singing \u2014 at night or even during the day if particularly loud.",
+              "clue": "In Petrolia, Ontario, a local bylaw prohibits excessive this — defined as yelling, shouting, hooting, whistling, or singing — at night or even during the day if particularly loud.",
               "correct": "What is noise (or shouting)?",
               "wrong": [
                 "What is public intoxication?",
@@ -616,7 +613,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "Canadian federal law \u2014 Section 8 of the Currency Act \u2014 makes it technically illegal to use this many coins of the same denomination in a single transaction.",
+              "clue": "Canadian federal law — Section 8 of the Currency Act — makes it technically illegal to use this many coins of the same denomination in a single transaction.",
               "correct": "What is more than 25 coins of the same denomination (e.g., more than 25 pennies)?",
               "wrong": [
                 "What is more than 10 coins?",
@@ -629,7 +626,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 800,
           "variants": [
             {
-              "clue": "In Oshawa, Ontario, it is technically illegal to climb this specific type of utility infrastructure \u2014 even if the pole is on your own property.",
+              "clue": "In Oshawa, Ontario, it is technically illegal to climb this specific type of utility infrastructure — even if the pole is on your own property.",
               "correct": "What is a telephone pole (or utility pole)?",
               "wrong": [
                 "What is a hydro tower?",
@@ -637,7 +634,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "Under the Criminal Code of Canada, it is illegal to challenge someone to a duel \u2014 and also illegal to do this, meaning accept a challenge to one.",
+              "clue": "Under the Criminal Code of Canada, it is illegal to challenge someone to a duel — and also illegal to do this, meaning accept a challenge to one.",
               "correct": "What is accept the challenge to a duel?",
               "wrong": [
                 "What is witness a duel?",
@@ -650,7 +647,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 1000,
           "variants": [
             {
-              "clue": "A 1985 Winnipeg bylaw makes it illegal to go shirtless in this specific type of public establishment \u2014 leading to an enduring urban legend about the city.",
+              "clue": "A 1985 Winnipeg bylaw makes it illegal to go shirtless in this specific type of public establishment — leading to an enduring urban legend about the city.",
               "correct": "What is a restaurant (or diner)?",
               "wrong": [
                 "What is a park?",
@@ -658,7 +655,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "Section 365 of the Criminal Code of Canada prohibits pretending to practice this \u2014 making fraudulent fortune-telling technically a federal crime in Canada.",
+              "clue": "Section 365 of the Criminal Code of Canada prohibits pretending to practice this — making fraudulent fortune-telling technically a federal crime in Canada.",
               "correct": "What is witchcraft (or sorcery)?",
               "wrong": [
                 "What is hypnosis?",
@@ -678,15 +675,15 @@ const JEOPARDY_CLUES_DATA = {
           "variants": [
             {
               "clue": "Canada's constitution recognizes three distinct groups of Indigenous peoples. The two most well-known groups are First Nations and Inuit; the third group is this.",
-              "correct": "What are the M\u00e9tis?",
+              "correct": "What are the Métis?",
               "wrong": [
                 "What are the Cree?",
                 "What are the Haudenosaunee?"
               ]
             },
             {
-              "clue": "The Haudenosaunee Confederacy \u2014 often called the Iroquois \u2014 is made up of six nations. One of them is the Mohawk; this is the name in the Haudenosaunee language for their confederacy.",
-              "correct": "What is Hodin\u00f6hs\u00f6:ni'?",
+              "clue": "The Haudenosaunee Confederacy — often called the Iroquois — is made up of six nations. One of them is the Mohawk; this is the name in the Haudenosaunee language for their confederacy.",
+              "correct": "What is Hodinöhsö:ni'?",
               "wrong": [
                 "What is Anishinaabe?",
                 "What is Wabanaki?"
@@ -706,7 +703,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "The term 'Turtle Island' is used by many Indigenous peoples to refer to this geographic area \u2014 based on a creation story shared across many nations.",
+              "clue": "The term 'Turtle Island' is used by many Indigenous peoples to refer to this geographic area — based on a creation story shared across many nations.",
               "correct": "What is North America?",
               "wrong": [
                 "What is Canada?",
@@ -719,7 +716,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 600,
           "variants": [
             {
-              "clue": "The 2015 Truth and Reconciliation Commission of Canada identified 94 of these, which it called 'Calls to Action' \u2014 a roadmap for reconciliation between Indigenous peoples and the Canadian government.",
+              "clue": "The 2015 Truth and Reconciliation Commission of Canada identified 94 of these, which it called 'Calls to Action' — a roadmap for reconciliation between Indigenous peoples and the Canadian government.",
               "correct": "What are the 94 Calls to Action?",
               "wrong": [
                 "What are the 94 treaty rights?",
@@ -727,7 +724,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "The Numbered Treaties \u2014 11 treaties signed between 1871 and 1921 \u2014 cover most of the Prairie provinces and parts of Ontario and the Northwest Territories. The last was Treaty 11, signed in this territory.",
+              "clue": "The Numbered Treaties — 11 treaties signed between 1871 and 1921 — cover most of the Prairie provinces and parts of Ontario and the Northwest Territories. The last was Treaty 11, signed in this territory.",
               "correct": "What is the Northwest Territories?",
               "wrong": [
                 "What is the Yukon?",
@@ -740,7 +737,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 800,
           "variants": [
             {
-              "clue": "This 1990 standoff in Quebec \u2014 sparked by a golf course expansion onto Kanien'keh\u00e1:ka (Mohawk) territory \u2014 lasted 78 days and resulted in no golf course expansion.",
+              "clue": "This 1990 standoff in Quebec — sparked by a golf course expansion onto Kanien'kehá:ka (Mohawk) territory — lasted 78 days and resulted in no golf course expansion.",
               "correct": "What is the Oka Crisis?",
               "wrong": [
                 "What is the Gustafsen Lake standoff?",
@@ -761,7 +758,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 1000,
           "variants": [
             {
-              "clue": "Louis Riel, who led the M\u00e9tis resistance and was executed for treason in 1885, has been the subject of debate about posthumous pardon. He remains the elected leader who established this province.",
+              "clue": "Louis Riel, who led the Métis resistance and was executed for treason in 1885, has been the subject of debate about posthumous pardon. He remains the elected leader who established this province.",
               "correct": "What is Manitoba?",
               "wrong": [
                 "What is Saskatchewan?",
@@ -769,7 +766,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "The First Nations Land Management Act allows signatory First Nations to opt out of 34 sections of the Indian Act dealing with this aspect of governance \u2014 taking control of their own land and resources.",
+              "clue": "The First Nations Land Management Act allows signatory First Nations to opt out of 34 sections of the Indian Act dealing with this aspect of governance — taking control of their own land and resources.",
               "correct": "What is land management (lands and resources)?",
               "wrong": [
                 "What is taxation?",
@@ -809,7 +806,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 400,
           "variants": [
             {
-              "clue": "Regina, the capital of Saskatchewan, has a name that is Latin for this \u2014 chosen in honor of Queen Victoria.",
+              "clue": "Regina, the capital of Saskatchewan, has a name that is Latin for this — chosen in honor of Queen Victoria.",
               "correct": "What is 'queen'?",
               "wrong": [
                 "What is 'river'?",
@@ -817,7 +814,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "This island city is both the capital of B.C. and the southernmost city in the province \u2014 known for its British-influenced architecture and mild, rain-shadow climate.",
+              "clue": "This island city is both the capital of B.C. and the southernmost city in the province — known for its British-influenced architecture and mild, rain-shadow climate.",
               "correct": "What is Victoria?",
               "wrong": [
                 "What is Vancouver?",
@@ -838,11 +835,11 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "Fredericton, the capital of New Brunswick, is home to the Beaverbrook Art Gallery \u2014 which holds several works by this Spanish surrealist, donated by newspaper magnate Lord Beaverbrook.",
-              "correct": "Who is Salvador Dal\u00ed?",
+              "clue": "Fredericton, the capital of New Brunswick, is home to the Beaverbrook Art Gallery — which holds several works by this Spanish surrealist, donated by newspaper magnate Lord Beaverbrook.",
+              "correct": "Who is Salvador Dalí?",
               "wrong": [
                 "Who is Pablo Picasso?",
-                "Who is Joan Mir\u00f3?"
+                "Who is Joan Miró?"
               ]
             }
           ]
@@ -851,7 +848,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 800,
           "variants": [
             {
-              "clue": "The Legislative Assembly of Prince Edward Island \u2014 Canada's smallest provincial legislature \u2014 sits in this Charlottetown building, originally built in 1847 and also the site of the Confederation Conference.",
+              "clue": "The Legislative Assembly of Prince Edward Island — Canada's smallest provincial legislature — sits in this Charlottetown building, originally built in 1847 and also the site of the Confederation Conference.",
               "correct": "What is Province House?",
               "wrong": [
                 "What is Confederation Centre?",
@@ -859,7 +856,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "Winnipeg is Manitoba's capital and sits at the confluence of two rivers \u2014 the Red River and this other river.",
+              "clue": "Winnipeg is Manitoba's capital and sits at the confluence of two rivers — the Red River and this other river.",
               "correct": "What is the Assiniboine River?",
               "wrong": [
                 "What is the Saskatchewan River?",
@@ -872,16 +869,16 @@ const JEOPARDY_CLUES_DATA = {
           "value": 1000,
           "variants": [
             {
-              "clue": "Halifax, the Nova Scotia capital, was founded in 1749 partly to counter this nearby French fortress \u2014 whose reconstruction is now a major tourist site in Cape Breton.",
+              "clue": "Halifax, the Nova Scotia capital, was founded in 1749 partly to counter this nearby French fortress — whose reconstruction is now a major tourist site in Cape Breton.",
               "correct": "What is the Fortress of Louisbourg?",
               "wrong": [
-                "What is Fort Beaus\u00e9jour?",
+                "What is Fort Beauséjour?",
                 "What is Fort Anne?"
               ]
             },
             {
               "clue": "Quebec City is one of only two walled cities in North America north of Mexico. The other is this city in New York state.",
-              "correct": "What is Qu\u00e9bec City itself (and the answer is Kingston)?",
+              "correct": "What is Québec City itself (and the answer is Kingston)?",
               "wrong": [
                 "What is Albany?",
                 "What is Kingston, Ontario (the walls were demolished)?"
@@ -899,7 +896,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 200,
           "variants": [
             {
-              "clue": "The Canadian citizenship study guide is officially called 'Discover Canada.' It states that Canada's system of government is this type \u2014 where the monarch is head of state but an elected Parliament holds power.",
+              "clue": "The Canadian citizenship study guide is officially called 'Discover Canada.' It states that Canada's system of government is this type — where the monarch is head of state but an elected Parliament holds power.",
               "correct": "What is a constitutional monarchy?",
               "wrong": [
                 "What is a federal republic?",
@@ -907,7 +904,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "According to the citizenship guide, Canada's national motto is 'A Mari Usque Ad Mare' \u2014 Latin for this phrase, which also appears on the coat of arms.",
+              "clue": "According to the citizenship guide, Canada's national motto is 'A Mari Usque Ad Mare' — Latin for this phrase, which also appears on the coat of arms.",
               "correct": "What is 'From Sea to Sea'?",
               "wrong": [
                 "What is 'Strong and Free'?",
@@ -920,7 +917,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 400,
           "variants": [
             {
-              "clue": "The citizenship test asks applicants to name the three main groups of Aboriginal peoples of Canada. Two are First Nations and M\u00e9tis; the third is this.",
+              "clue": "The citizenship test asks applicants to name the three main groups of Aboriginal peoples of Canada. Two are First Nations and Métis; the third is this.",
               "correct": "What are the Inuit?",
               "wrong": [
                 "What are the Cree?",
@@ -949,7 +946,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "According to 'Discover Canada,' Confederation \u2014 the joining of the original provinces into Canada \u2014 took place on this date in 1867, now celebrated as Canada Day.",
+              "clue": "According to 'Discover Canada,' Confederation — the joining of the original provinces into Canada — took place on this date in 1867, now celebrated as Canada Day.",
               "correct": "What is July 1, 1867?",
               "wrong": [
                 "What is July 4, 1867?",
@@ -962,7 +959,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 800,
           "variants": [
             {
-              "clue": "The citizenship guide asks applicants to know which level of government is responsible for this area \u2014 national defence, foreign policy, and banking are all exclusive jurisdiction of this level.",
+              "clue": "The citizenship guide asks applicants to know which level of government is responsible for this area — national defence, foreign policy, and banking are all exclusive jurisdiction of this level.",
               "correct": "What is the federal government?",
               "wrong": [
                 "What is the provincial government?",
@@ -970,11 +967,11 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "The citizenship guide identifies this battle \u2014 fought in September 1759 on the Plains of Abraham \u2014 as a turning point that led to British control of New France.",
-              "correct": "What is the Battle of the Plains of Abraham (Battle of Quebec)?",
+              "clue": "The citizenship guide identifies this battle — fought in September 1759 — as a turning point that led to British control of New France.",
+              "correct": "What is the Battle of the Plains of Abraham?",
               "wrong": [
                 "What is the Battle of Queenston Heights?",
-                "What is the Battle of Ch\u00e2teauguay?"
+                "What is the Battle of Châteauguay?"
               ]
             }
           ]
@@ -983,7 +980,7 @@ const JEOPARDY_CLUES_DATA = {
           "value": 1000,
           "variants": [
             {
-              "clue": "The citizenship guide states that the head of a provincial government is called the Premier, but the monarch's representative in each province \u2014 who performs the ceremonial role at the provincial level \u2014 holds this title.",
+              "clue": "The citizenship guide states that the head of a provincial government is called the Premier, but the monarch's representative in each province — who performs the ceremonial role at the provincial level — holds this title.",
               "correct": "What is the Lieutenant Governor?",
               "wrong": [
                 "What is the Governor General?",
@@ -991,7 +988,7 @@ const JEOPARDY_CLUES_DATA = {
               ]
             },
             {
-              "clue": "'Discover Canada' names Sir John A. Macdonald as Canada's first Prime Minister. It also identifies him as one of the Fathers of Confederation who organized the conferences leading to Confederation \u2014 starting with the 1864 meeting in this P.E.I. city.",
+              "clue": "'Discover Canada' names Sir John A. Macdonald as Canada's first Prime Minister. It also identifies him as one of the Fathers of Confederation who organized the conferences leading to Confederation — starting with the 1864 meeting in this P.E.I. city.",
               "correct": "What is Charlottetown?",
               "wrong": [
                 "What is Fredericton?",
@@ -1003,26 +1000,26 @@ const JEOPARDY_CLUES_DATA = {
       ]
     },
     {
-      "id": "o_canada",
-      "name": "O Canada!",
+      "id": "snack_time",
+      "name": "Snack Time",
       "clues": [
         {
           "value": 200,
           "variants": [
             {
-              "clue": "Canada has two official languages. French and English are both official at the federal level, and this province is the only one that is officially unilingual French.",
-              "correct": "What is Quebec?",
+              "clue": "These red-coloured, raspberry-flavoured candy fish are a staple of Canadian movie theatres and convenience stores, produced by Maynards.",
+              "correct": "What are Swedish Berries?",
               "wrong": [
-                "What is New Brunswick?",
-                "What is Ontario?"
+                "What are Gummy Bears?",
+                "What are Sour Patch Kids?"
               ]
             },
             {
-              "clue": "The Canadian flag features a red maple leaf with exactly this many points \u2014 a specific choice made when the flag was designed in 1965.",
-              "correct": "What is 11?",
+              "clue": "This popular Canadian potato chip flavour combines ketchup, barbecue, sour cream & onion, and salt & vinegar flavours into one chip.",
+              "correct": "What is All-Dressed?",
               "wrong": [
-                "What is 13?",
-                "What is 9?"
+                "What is Dill Pickle?",
+                "What is Ketchup?"
               ]
             }
           ]
@@ -1031,19 +1028,19 @@ const JEOPARDY_CLUES_DATA = {
           "value": 400,
           "variants": [
             {
-              "clue": "Terry Fox's Marathon of Hope \u2014 a cross-Canada run to raise money for cancer research \u2014 began in St. John's, Newfoundland in 1980 and ended near this Ontario city after 143 days.",
-              "correct": "What is Thunder Bay?",
+              "clue": "Named after a city on Vancouver Island, British Columbia, this no-bake bar dessert consists of three layers: a wafer/nut/coconut crumb base, custard-flavoured butter icing middle, and chocolate top.",
+              "correct": "What is a Nanaimo bar?",
               "wrong": [
-                "What is Sudbury?",
-                "What is Sault Ste. Marie?"
+                "What is a butter tart?",
+                "What is a BeaverTail?"
               ]
             },
             {
-              "clue": "The Canadian Broadcasting Corporation \u2014 the CBC \u2014 was founded in 1936 partly to counter the dominance of American radio stations on the Canadian airwaves. Its French-language radio network is called this.",
-              "correct": "What is Radio-Canada?",
+              "clue": "Originating in Quebec in the late 1950s, this iconic dish consists of french fries and cheese curds topped with brown gravy.",
+              "correct": "What is poutine?",
               "wrong": [
-                "What is Ici Musique?",
-                "What is RDI?"
+                "What is disco fries?",
+                "What is cheese fries?"
               ]
             }
           ]
@@ -1052,19 +1049,19 @@ const JEOPARDY_CLUES_DATA = {
           "value": 600,
           "variants": [
             {
-              "clue": "Canada's constitution is made up of several documents; the most recent major addition was the Constitution Act of 1982, which patriated the constitution from Britain and added this.",
-              "correct": "What is the Canadian Charter of Rights and Freedoms?",
+              "clue": "A pastry classic, this dessert is a small pastry shell filled with a filling of butter, sugar, syrup, and egg, often with raisins or pecans, baked until flaky.",
+              "correct": "What is a butter tart?",
               "wrong": [
-                "What is the Meech Lake Accord?",
-                "What is the Notwithstanding Clause?"
+                "What is a sugar pie?",
+                "What is a Nanaimo bar?"
               ]
             },
             {
-              "clue": "The 1995 Quebec referendum on sovereignty asked voters whether Quebec should become a sovereign country 'in partnership' with Canada \u2014 it failed by this razor-thin margin.",
-              "correct": "What is approximately 50.58% to 49.42% (less than 1%)?",
+              "clue": "This coffee-flavoured Canadian chocolate bar consists of alternating layers of vanilla wafer and coffee-flavoured foam, covered in milk chocolate.",
+              "correct": "What is Coffee Crisp?",
               "wrong": [
-                "What is 55% to 45%?",
-                "What is 52% to 48%?"
+                "What is Crunchie?",
+                "What is Wunderbar?"
               ]
             }
           ]
@@ -1073,19 +1070,19 @@ const JEOPARDY_CLUES_DATA = {
           "value": 800,
           "variants": [
             {
-              "clue": "Poutine \u2014 Quebec's iconic dish of fries, cheese curds, and gravy \u2014 is said to have originated in the 1950s in this region of Quebec, with several towns claiming credit.",
-              "correct": "What is the Centre-du-Qu\u00e9bec region (or the Eastern Townships)?",
+              "clue": "Introduced in 1930, this iconic Christie biscuit features a sweet vanilla cream sandwiched between two maple-leaf-shaped cookies.",
+              "correct": "What is a Maple Leaf Cream?",
               "wrong": [
-                "What is Montreal?",
-                "What is the Gasp\u00e9 Peninsula?"
+                "What is a Peek Freans?",
+                "What is a Pirate cookie?"
               ]
             },
             {
-              "clue": "The Avro Arrow \u2014 Canada's legendary supersonic jet interceptor, cancelled by the Diefenbaker government in 1959 \u2014 was built by this now-defunct Canadian aviation company.",
-              "correct": "What is A.V. Roe Canada (Avro Canada)?",
+              "clue": "This deep-fried, stretched-dough pastry is shaped like the tail of a semi-aquatic Canadian mammal and is typically served hot with toppings like cinnamon and sugar.",
+              "correct": "What is a BeaverTail?",
               "wrong": [
-                "What is de Havilland Canada?",
-                "What is Canadair?"
+                "What is a doughnut?",
+                "What is a funnel cake?"
               ]
             }
           ]
@@ -1094,19 +1091,352 @@ const JEOPARDY_CLUES_DATA = {
           "value": 1000,
           "variants": [
             {
-              "clue": "The Great Canadian Oil Sands project \u2014 now known as the oil sands \u2014 is centered in this region of northeastern Alberta, making it one of the largest proven oil reserves on Earth.",
-              "correct": "What is the Athabasca oil sands?",
+              "clue": "These spicy cinnamon hard candies with a dark chocolate center have been handmade in New Brunswick by Ganong since 1885.",
+              "correct": "What are Chicken Bones?",
               "wrong": [
-                "What is the Peace River oil sands?",
-                "What is the Cold Lake oil sands?"
+                "What are Cinnamon Hearts?",
+                "What are Barley Toys?"
               ]
             },
             {
-              "clue": "Margaret Atwood's novel 'The Handmaid's Tale' is set in the Republic of Gilead \u2014 a theocratic dystopia that has taken over the United States. The underground resistance runs through this Canadian city.",
-              "correct": "What is Toronto (via the Underground Femaleroad)?",
+              "clue": "Invented in Belleville, Ontario in 1948 by W.T. Hawkins, this iconic Canadian snack is made from real aged white cheddar cheese and extruded cornmeal, known for being extra crunchy and irregular.",
+              "correct": "What are Hawkins Cheezies?",
               "wrong": [
-                "What is Ottawa?",
-                "What is Montreal?"
+                "What are Cheetos?",
+                "What are Cheese Balls?"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "for_the_birds",
+      "name": "For the Birds",
+      "clues": [
+        {
+          "value": 200,
+          "variants": [
+            {
+              "clue": "This Major League Baseball team based in Toronto plays its home games at the Rogers Centre and is named after Ontario's official provincial bird.",
+              "correct": "Who are the Toronto Blue Jays?",
+              "wrong": [
+                "Who are the Toronto Raptors?",
+                "Who are the Montreal Expos?"
+              ]
+            },
+            {
+              "clue": "This common name of the goose species Branta canadensis is also the name of a famous high-end Canadian winter clothing brand known for its parkas.",
+              "correct": "What is Canada Goose?",
+              "wrong": [
+                "What is Arc'teryx?",
+                "What is Moose Knuckles?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 400,
+          "variants": [
+            {
+              "clue": "Depicted on the Canadian dollar coin, this water bird is known for its eerie, haunting wail heard on northern Canadian lakes.",
+              "correct": "What is the common loon?",
+              "wrong": [
+                "What is the Canada goose?",
+                "What is the mallard duck?"
+              ]
+            },
+            {
+              "clue": "This aerobatic flight demonstration team of the Royal Canadian Air Force, flying CT-114 Tutor jets, shares its name with a small flocking bird.",
+              "correct": "Who are the Snowbirds?",
+              "wrong": [
+                "Who are the Blue Angels?",
+                "Who are the Thunderbirds?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 600,
+          "variants": [
+            {
+              "clue": "This acoustic guitar brand, handmade in La Patrie, Quebec, is named after a common coastal bird.",
+              "correct": "What is Seagull Guitars?",
+              "wrong": [
+                "What is Norman Guitars?",
+                "What is Simon & Patrick?"
+              ]
+            },
+            {
+              "clue": "This colloquial name for the Canada Jay, Canada's national bird candidate, is derived from the Cree mythological figure Wisakedjak.",
+              "correct": "What is the Whisky Jack?",
+              "wrong": [
+                "What is the Lumberjack?",
+                "What is the Timber Doodle?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 800,
+          "variants": [
+            {
+              "clue": "This former Yellowknife-based bush airline, named after the official territory bird of Nunavut, operated flights across the Northwest Territories until 1997.",
+              "correct": "What is Ptarmigan Airways?",
+              "wrong": [
+                "What is Tundra Air?",
+                "What is Arctic Wings?"
+              ]
+            },
+            {
+              "clue": "These athletic teams representing Carleton University in Ottawa share their name with a large, intelligent black bird of the crow family.",
+              "correct": "Who are the Carleton Ravens?",
+              "wrong": [
+                "Who are the Ottawa Gee-Gees?",
+                "Who are the York Lions?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 1000,
+          "variants": [
+            {
+              "clue": "This major Toronto-based publisher of romance novels, founded in 1949, is named after a colourful species of sea duck.",
+              "correct": "What is Harlequin?",
+              "wrong": [
+                "What is Penguin Canada?",
+                "What is Mallard Press?"
+              ]
+            },
+            {
+              "clue": "This historic Canadian nickel mining company, founded in 1928 and later acquired by Xstrata, is named after a community containing this bird of prey in its name.",
+              "correct": "What is Falconbridge?",
+              "wrong": [
+                "What is Eagle River?",
+                "What is Hawk Creek?"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "not_dirty",
+      "name": "It's Not as Dirty as it Sounds",
+      "clues": [
+        {
+          "value": 200,
+          "variants": [
+            {
+              "clue": "Ordering this at a Canadian coffee shop sounds like a suggestive double date, but you're actually just requesting two creams and two sugars.",
+              "correct": "What is a double-double?",
+              "wrong": [
+                "What is a twin-creamer?",
+                "What is a two-by-four?"
+              ]
+            },
+            {
+              "clue": "This winter headwear sounds like a suggestive command to strip or touch something, but it's just a standard knit cap or beanie.",
+              "correct": "What is a toque?",
+              "wrong": [
+                "What is a tuque-off?",
+                "What is a head-hugger?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 400,
+          "variants": [
+            {
+              "clue": "Asking someone in Saskatchewan for one of these sounds like a request for fuzzy affection, but you're actually just asking for a hooded sweatshirt.",
+              "correct": "What is a bunny hug?",
+              "wrong": [
+                "What is a rabbit squeeze?",
+                "What is a hare-nest?"
+              ]
+            },
+            {
+              "clue": "Eating these in Ottawa sounds like you are consuming the rear appendages of wild rodents, but it's actually just a delicious deep-fried pastry.",
+              "correct": "What are BeaverTails?",
+              "wrong": [
+                "What are OtterTails?",
+                "What are RodentRumps?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 600,
+          "variants": [
+            {
+              "clue": "Bringing this to an Ontario party sounds like you're inviting a massive group of guests or doing math, but you're just bringing a case of 24 beers.",
+              "correct": "What is a two-four?",
+              "wrong": [
+                "What is a double-dozen?",
+                "What is a case-pack?"
+              ]
+            },
+            {
+              "clue": "This Newfoundland initiation sounds like you're being subjected to a painful, high-pitched vocal performance, but it involves kissing a fish and drinking rum.",
+              "correct": "What is being screeched in?",
+              "wrong": [
+                "What is being cod-kissed?",
+                "What is howling out?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 800,
+          "variants": [
+            {
+              "clue": "While it sounds like a spiked beverage or a famous cartoon mouse, in Canada this refers to a convenient 375 mL bottle of liquor.",
+              "correct": "What is a mickey?",
+              "wrong": [
+                "What is a minnie?",
+                "What is a pocket-shot?"
+              ]
+            },
+            {
+              "clue": "Talking about having these in your pocket might make you sound like you are housing eccentric cartoon characters, but they are just one-dollar and two-dollar coins.",
+              "correct": "What are loonies and toonies?",
+              "wrong": [
+                "What are wackos and goofballs?",
+                "What are duckets and bucks?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 1000,
+          "variants": [
+            {
+              "clue": "This classic Canadian insult sounds like someone who works with garden watering equipment, but it historically referred to the chore of spraying down the hockey rink before Zambonis existed.",
+              "correct": "What is a hoser?",
+              "wrong": [
+                "What is a water-boy?",
+                "What is a rink-rat?"
+              ]
+            },
+            {
+              "clue": "While this term sounds like clay-pigeon shooting or a vulgar slang word for bodily fluids, in Newfoundland it describes a rowdy, anti-social, or low-class person.",
+              "correct": "What is a skeet?",
+              "wrong": [
+                "What is a sculpin?",
+                "What is a cod-head?"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tragically_hip",
+      "name": "The Tragically Hip",
+      "clues": [
+        {
+          "value": 200,
+          "variants": [
+            {
+              "clue": "The Tragically Hip's iconic late lead singer and lyricist, who was diagnosed with terminal brain cancer and led the band on a historic 2016 farewell tour, was named this.",
+              "correct": "Who is Gord Downie?",
+              "wrong": [
+                "Who is Bruce Cockburn?",
+                "Who is Neil Young?"
+              ]
+            },
+            {
+              "clue": "The Tragically Hip was formed in 1984 in this Ontario city, home to Queen's University.",
+              "correct": "What is Kingston?",
+              "wrong": [
+                "What is Toronto?",
+                "What is Ottawa?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 400,
+          "variants": [
+            {
+              "clue": "This 1992 album, featuring hits like 'Fifty-Mission Cap' and 'Wheat Kings', is the band's most commercially successful album in Canada.",
+              "correct": "What is Fully Completely?",
+              "wrong": [
+                "What is Road Apples?",
+                "What is Day for Night?"
+              ]
+            },
+            {
+              "clue": "The song 'Fifty-Mission Cap' tells the story of this Toronto Maple Leafs defenseman who scored the Stanley Cup-winning goal in 1951 and mysteriously disappeared shortly after.",
+              "correct": "Who is Bill Barilko?",
+              "wrong": [
+                "Who is Ace Bailey?",
+                "Who is Howie Morenz?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 600,
+          "variants": [
+            {
+              "clue": "The band's name was inspired by a skit in this 1982 movie directed by former Monkee Michael Nesmith.",
+              "correct": "What is Elephant Parts?",
+              "wrong": [
+                "What is Parts: The Clonus Horror?",
+                "What is Repo Man?"
+              ]
+            },
+            {
+              "clue": "The song 'Wheat Kings' is about this Saskatchewan man who was wrongfully convicted of the 1969 murder of Gail Miller and spent 23 years in prison.",
+              "correct": "Who is David Milgaard?",
+              "wrong": [
+                "Who is Guy Paul Morin?",
+                "Who is Steven Truscott?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 800,
+          "variants": [
+            {
+              "clue": "In the song 'Bobcaygeon', the narrator mentions seeing this band 'fail to inhale' during a performance in Toronto.",
+              "correct": "Who are the Constellations?",
+              "wrong": [
+                "Who are the Watchmen?",
+                "Who are the Grapes of Wrath?"
+              ]
+            },
+            {
+              "clue": "This famous Canadian actor and comedian introduced the Tragically Hip when they performed on Saturday Night Live in 1995.",
+              "correct": "Who is Dan Aykroyd?",
+              "wrong": [
+                "Who is Mike Myers?",
+                "Who is John Candy?"
+              ]
+            }
+          ]
+        },
+        {
+          "value": 1000,
+          "variants": [
+            {
+              "clue": "This track from the 1989 album Up to Here tells the story of a fictional 1973 jailbreak at Millhaven Institution, referencing the narrator's brother who was '38 years old' at the time.",
+              "correct": "What is '38 Years Old'?",
+              "wrong": [
+                "What is 'New Orleans Is Sinking'?",
+                "What is 'Blow at High Dough'?"
+              ]
+            },
+            {
+              "clue": "The Tragically Hip played their final concert on August 20, 2016, at the K-Rock Centre in Kingston, which was broadcast live commercial-free to millions of viewers by this national broadcaster.",
+              "correct": "What is the CBC?",
+              "wrong": [
+                "What is CTV?",
+                "What is Global TV?"
               ]
             }
           ]
