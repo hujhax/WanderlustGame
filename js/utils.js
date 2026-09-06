@@ -28,22 +28,31 @@ function drawPixelatedImage(img, sx, sy, sw, sh, dx, dy, dw, dh, filter = null) 
     ctx.restore();
 }
 
-function wrapText(text, maxWidth) {
+function wrapTextLines(text, maxWidth, font = null) {
+    if (!text) return [];
+    ctx.save();
+    if (font) ctx.font = font;
     const words = text.split(' ');
     let lines = [];
     let currentLine = '';
-    ctx.font = '12px "Press Start 2P"';
     words.forEach(word => {
-        const testLine = currentLine + word + ' ';
-        if (ctx.measureText(testLine).width > maxWidth) {
-            lines.push(currentLine.trim());
-            currentLine = word + ' ';
+        const testLine = currentLine ? (currentLine + ' ' + word) : word;
+        if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
         } else {
             currentLine = testLine;
         }
     });
-    lines.push(currentLine.trim());
-    
+    if (currentLine) lines.push(currentLine);
+    ctx.restore();
+    return lines;
+}
+
+function wrapText(text, maxWidth) {
+    if (!text && text !== 0) return [''];
+    const lines = wrapTextLines(text, maxWidth, '12px "Press Start 2P"');
+    if (lines.length === 0) return [''];
     const chunks = [];
     for (let i = 0; i < lines.length; i += 3) {
         chunks.push(lines.slice(i, i + 3).join('\n'));

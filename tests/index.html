@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wanderlust Unit Test Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #E0E0E0;
+            font-family: 'Press Start 2P', monospace;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 {
+            color: #00FF00;
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #summary-box {
+            background-color: #1E1E1E;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        .stat-card {
+            padding: 10px;
+        }
+        .stat-val {
+            font-size: 22px;
+            margin-top: 5px;
+        }
+        .pass-color { color: #00FF00; }
+        .fail-color { color: #FF4444; }
+        .total-color { color: #30A0FF; }
+
+        .suite-card {
+            background-color: #1E1E1E;
+            border: 1px solid #333;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .suite-header {
+            background-color: #2A2A2A;
+            padding: 12px 15px;
+            font-size: 14px;
+            color: #FFFF00;
+            display: flex;
+            justify-content: space-between;
+        }
+        .test-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .test-item {
+            padding: 10px 15px;
+            border-top: 1px solid #282828;
+            font-size: 10px;
+            line-height: 1.6;
+        }
+        .test-item.pass {
+            color: #A9DDA9;
+        }
+        .test-item.fail {
+            color: #FF8888;
+            background-color: #2A1515;
+        }
+        .error-trace {
+            background: #000;
+            color: #FF5555;
+            padding: 8px;
+            margin-top: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            border-left: 3px solid #FF0000;
+        }
+        canvas { display: none; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <h1>Wanderlust Unit Test Suite</h1>
+
+    <div id="summary-box">
+        <div class="stat-card"><div class="stat-label">TOTAL TESTS</div><div id="stat-total" class="stat-val total-color">0</div></div>
+        <div class="stat-card"><div class="stat-label">PASSED</div><div id="stat-passed" class="stat-val pass-color">0</div></div>
+        <div class="stat-card"><div class="stat-label">FAILED</div><div id="stat-failed" class="stat-val fail-color">0</div></div>
+    </div>
+
+    <div id="suites-container"></div>
+
+    <!-- Test Harness & DOM Mocks -->
+    <script src="test_harness.js"></script>
+
+    <!-- Source Game Code -->
+    <script src="../js/constants.js"></script>
+    <script src="../js/audio.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/ui.js"></script>
+    <script src="../js/cutscenes.js"></script>
+    <script src="../js/fighting.js"></script>
+    <script src="../js/minigames/minigame_manager.js"></script>
+    <script src="../js/minigames/chicken.js"></script>
+    <script src="../js/minigames/math.js"></script>
+    <script src="../js/minigames/karaoke.js"></script>
+    <script src="../js/minigames/golf.js"></script>
+    <script src="../js/minigames/cheese.js"></script>
+    <script src="../js/minigames/bump.js"></script>
+    <script src="../js/minigames/fish.js"></script>
+    <script src="../data/jeopardy/clues_data.js"></script>
+    <script src="../js/minigames/jeopardy.js"></script>
+    <script src="../js/minigames/goose.js"></script>
+    <script src="../js/minigames/climb.js"></script>
+    <script src="../js/main.js"></script>
+
+    <!-- Test Suites -->
+    <script src="suites/constants.test.js"></script>
+    <script src="suites/utils.test.js"></script>
+    <script src="suites/audio_and_ui.test.js"></script>
+    <script src="suites/minigame_manager.test.js"></script>
+    <script src="suites/minigames.test.js"></script>
+
+    <!-- Render Execution Results -->
+    <script>
+        window.addEventListener('load', () => {
+            const results = TestHarness.getResults();
+
+            document.getElementById('stat-total').textContent = results.total;
+            document.getElementById('stat-passed').textContent = results.passed;
+            document.getElementById('stat-failed').textContent = results.failed;
+
+            const container = document.getElementById('suites-container');
+            results.suites.forEach(suite => {
+                const card = document.createElement('div');
+                card.className = 'suite-card';
+
+                const header = document.createElement('div');
+                header.className = 'suite-header';
+                header.innerHTML = `<span>${suite.name}</span><span>${suite.passed}/${suite.tests.length} PASSED</span>`;
+                card.appendChild(header);
+
+                const ul = document.createElement('ul');
+                ul.className = 'test-list';
+                suite.tests.forEach(test => {
+                    const li = document.createElement('li');
+                    li.className = `test-item ${test.passed ? 'pass' : 'fail'}`;
+                    li.innerHTML = `<span>${test.passed ? '✔' : '✖'} ${test.name}</span>`;
+                    if (!test.passed && test.error) {
+                        const trace = document.createElement('div');
+                        trace.className = 'error-trace';
+                        trace.textContent = test.error.stack || test.error.message;
+                        li.appendChild(trace);
+                    }
+                    ul.appendChild(li);
+                });
+                card.appendChild(ul);
+                container.appendChild(card);
+            });
+        });
+    </script>
+</body>
+</html>

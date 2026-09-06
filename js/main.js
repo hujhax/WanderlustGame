@@ -4,7 +4,7 @@ const ctx = canvas.getContext('2d');
 let selectedIndex = 0;
 let score = 0;
 let currentMinigameIndex = 0;
-let minigameOrder = ['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish', 'golf', 'jeopardy', 'goose'].sort(() => Math.random() - 0.5).slice(0, 3);
+let minigameOrder = ['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish', 'golf', 'jeopardy', 'goose', 'climb'].sort(() => Math.random() - 0.5).slice(0, 3);
 let playedMinigames = []; // Tracks {name, won} for confrontation
 
 let currentPhase = PHASES.INTRO;
@@ -64,7 +64,7 @@ const fishImages = {
     accordion: new Image()
 };
 
-const slashSprites = {}, idleSprites = {}, walkSprites = {}, runSprites = {}, jumpSprites = {}, sitSprites = {}, combatSprites = {}, halfSlashSprites = {}, backSlashSprites = {}, waveSprites = {}, kickSprites = {};
+const slashSprites = {}, idleSprites = {}, walkSprites = {}, runSprites = {}, jumpSprites = {}, sitSprites = {}, combatSprites = {}, halfSlashSprites = {}, backSlashSprites = {}, waveSprites = {}, kickSprites = {}, climbSprites = {};
 
 function preloadAssets() {
     canadaMapImg.src = 'images/backgrounds/canada map.jpg';
@@ -130,6 +130,7 @@ function preloadAssets() {
             backSlashSprites[actor] = new Image(); backSlashSprites[actor].src = `images/sprites/cast/${actor}/standard/1h_backslash.png`;
             waveSprites[actor] = new Image(); waveSprites[actor].src = `images/sprites/cast/${actor}/standard/wave.png`;
             kickSprites[actor] = new Image(); kickSprites[actor].src = `images/sprites/cast/${actor}/standard/kick.png`;
+            climbSprites[actor] = new Image(); climbSprites[actor].src = `images/sprites/cast/${actor}/standard/climb.png`;
         }
     });
 }
@@ -142,9 +143,9 @@ const playerSitsBg = document.createElement('video');
 playerSitsBg.src = 'images/backgrounds/player_alone.mp4';
 playerSitsBg.loop = true; playerSitsBg.muted = true;
 
-function showDialog(character, actor, text, callback, style = null, illustration = null) {
+function showDialog(character, actor, text, callback, style = null, illustration = null, options = null) {
     const castMember = CAST.find(c => c.actor === actor);
-    currentDialog = { name: character, castMember, fullText: text, chunks: wrapText(text, 400), chunkIndex: 0, style, illustration };
+    currentDialog = { name: character, castMember, fullText: text, chunks: wrapText(text, 400), chunkIndex: 0, style, illustration, options, selectedOption: 0 };
     dialogCallback = callback;
 }
 
@@ -209,6 +210,39 @@ function startInTheCar() {
 }
 
 window.addEventListener('mousedown', (e) => {
+    if (currentDialog) {
+        if (currentDialog.options && Array.isArray(currentDialog.options)) {
+            const rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
+            const isTop = currentDialog.style === 'top';
+            const boxH = 185;
+            const boxY = isTop ? 20 : canvas.height - boxH - 20;
+            const optY = boxY + boxH - 45;
+
+            // Yes (opt 0: 450..540), No (opt 1: 560..650)
+            if (y >= optY && y <= optY + 32) {
+                if (x >= 450 && x <= 540) {
+                    const cb = dialogCallback; currentDialog = null; dialogCallback = null;
+                    audio.playSFX('ui');
+                    if (cb) cb('yes');
+                    return;
+                } else if (x >= 560 && x <= 650) {
+                    const cb = dialogCallback; currentDialog = null; dialogCallback = null;
+                    audio.playSFX('ui');
+                    if (cb) cb('no');
+                    return;
+                }
+            }
+            return;
+        } else {
+            audio.playSFX('ui');
+            currentDialog.chunkIndex++;
+            if (currentDialog.chunkIndex >= currentDialog.chunks.length) {
+                const cb = dialogCallback; currentDialog = null; dialogCallback = null; if (cb) cb();
+            }
+            return;
+        }
+    }
+
     if (currentPhase === PHASES.INTRO) {
         currentPhase = PHASES.TITLE; audio.play('CHICAGO', 12);
         companionSitsBg.play().catch(e => {}); playerSitsBg.play().catch(e => {});
@@ -223,6 +257,9 @@ window.addEventListener('mousedown', (e) => {
         handleCheeseClick(x, y);
     } else if (currentPhase === PHASES.MINIGAME_PLAY && minigameState.type === 'golf') {
         handleGolfMouseDown(e);
+    } else if (currentPhase === PHASES.MINIGAME_PLAY && minigameState.type === 'climb') {
+        const rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
+        handleClimbClick(x, y);
     }
 });
 
@@ -281,7 +318,24 @@ window.addEventListener('keydown', (e) => {
         return;
     }
     if (currentDialog) {
-        if (e.key === 'Enter') {
+        if (currentDialog.options && Array.isArray(currentDialog.options)) {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                currentDialog.selectedOption = 0;
+                audio.playSFX('ui');
+                return;
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                currentDialog.selectedOption = 1;
+                audio.playSFX('ui');
+                return;
+            } else if (e.key === 'Enter') {
+                const choiceIdx = currentDialog.selectedOption || 0;
+                const cb = dialogCallback;
+                currentDialog = null;
+                dialogCallback = null;
+                if (cb) cb(choiceIdx === 0 ? 'yes' : 'no');
+                return;
+            }
+        } else if (e.key === 'Enter') {
             currentDialog.chunkIndex++;
             if (currentDialog.chunkIndex >= currentDialog.chunks.length) {
                 const cb = dialogCallback; currentDialog = null; dialogCallback = null; if (cb) cb();
@@ -364,7 +418,7 @@ if (minigameOverride) {
     else if (minigameOverride === 'reunited') startTogetherAgain();
     else if (minigameOverride === 'interview') startClosingInterview();
     else if (minigameOverride === 'credits') { currentPhase = PHASES.CLOSING_CREDITS; creditsY = canvas.height; creditsFinished = false; audio.play('MOON'); }
-    else if (['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish', 'golf', 'jeopardy', 'goose'].includes(minigameOverride)) { minigameOrder = [minigameOverride]; currentPhase = PHASES.MINIGAME_MAP; }
+    else if (['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish', 'golf', 'jeopardy', 'goose', 'climb'].includes(minigameOverride)) { minigameOrder = [minigameOverride]; currentPhase = PHASES.MINIGAME_MAP; }
 }
 
 preloadAssets();

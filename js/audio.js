@@ -12,6 +12,7 @@ class AudioManager {
             CHEESE_BGM: new Audio('music/cheese_bgm.mp3'),
             BUMP_BGM: new Audio('music/bump_bgm.mp3'),
             FISH_BGM: new Audio('music/fishing_bgm.mp3'),
+            CLIMB_BGM: new Audio('music/climb_bgm.webm'),
             JEOPARDY_INTRO_BGM: new Audio('music/jeopardy_intro_bgm.mp3'),
             JEOPARDY_BGM: new Audio('music/jeopardy_bgm.mp3'),
             FIGHT_BGM: new Audio('music/fighting_theme.mp3'),
@@ -37,10 +38,21 @@ class AudioManager {
             this.currentTrack.pause();
             this.currentTrack.currentTime = 0;
         }
-        this.currentTrack = this.tracks[trackName];
+        let targetTrack = this.tracks[trackName];
+        if (!targetTrack && trackName === 'CLIMB_BGM') {
+            targetTrack = this.tracks['MATH_BGM'] || this.tracks['GOLF_BGM'];
+        }
+        this.currentTrack = targetTrack;
         if (this.currentTrack) {
             this.currentTrack.currentTime = startTime;
-            this.currentTrack.play().catch(e => console.error("Audio playback failed:", e));
+            this.currentTrack.play().catch(e => {
+                // If specific BGM file is missing or not supported, try fallback BGM
+                if (trackName === 'CLIMB_BGM' && this.tracks['MATH_BGM'] && this.currentTrack !== this.tracks['MATH_BGM']) {
+                    this.play('MATH_BGM', startTime);
+                } else {
+                    console.warn(`BGM track '${trackName}' playback skipped (file missing or blocked by browser).`);
+                }
+            });
         }
     }
     playSFX(name) {

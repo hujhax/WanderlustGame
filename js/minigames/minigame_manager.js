@@ -101,6 +101,12 @@ function startMinigame() {
                 });
             });
         });
+    } else if (gameType === 'climb') {
+        audio.play('CLIMB_BGM');
+        showDialog('Rocky', 'Leichelle', "Welcome to the climbatorium! Where all your dreams come true! If your dreams include rock-climbing!", () => {
+            currentPhase = PHASES.MINIGAME_PLAY;
+            initClimbGame();
+        });
     }
 }
 
@@ -132,19 +138,44 @@ function endMinigame() {
     else if (minigameState.type === 'golf') {
         actor = 'Gilbert'; char = 'Bob Golf';
         if (minigameState.won) {
-            msg = "Whoa! Four successes! You stared into the abyss of golf and did. not. blink. Great job!";
+            showDialog(char, actor, "Whoa! Four successes!", () => {
+                showDialog(char, actor, "You stared into the abyss of golf and did. not. blink.", () => {
+                    showDialog(char, actor, "Great job!", null);
+                });
+            });
+            return;
         } else {
-            msg = "*sigh* Not everybody is cut out to handle the high-stakes world of miniature golf.";
+            showDialog(char, actor, "*sigh*", () => {
+                showDialog(char, actor, "Not everybody is cut out to handle the high-stakes world of miniature golf.", null);
+            });
+            return;
         }
     }
-    else if (minigameState.type === 'cheese') { actor = 'Claire'; char = 'Mme. Tremblay'; msg = minigameState.won ? "Hooray! The at-least-three-cheese gift baskets are saved! It's a Cheese Day miracle!" : "Alas, you have succumbed to the Temptation of the Cheese. Do not weep, weary traveler. It has claimed prouder souls than yours."; }
+    else if (minigameState.type === 'cheese') {
+        actor = 'Claire'; char = 'Mme. Tremblay';
+        if (minigameState.won) {
+            showDialog(char, actor, "Hooray! The at-least-three-cheese gift baskets are saved!", () => {
+                showDialog(char, actor, "It's a Cheese Day miracle!", null);
+            });
+            return;
+        } else {
+            showDialog(char, actor, "Alas, you have succumbed to the Temptation of the Cheese.", () => {
+                showDialog(char, actor, "Do not weep, weary traveler. It has claimed prouder souls than yours.", null);
+            });
+            return;
+        }
+    }
     else if (minigameState.type === 'bump') { actor = 'Krystal'; char = 'Charlene'; msg = minigameState.won ? "Congratulations. Here are four Bump Tickets, redeemable for a small plush toy." : "Eh, you failed. Honestly? No big."; }
     else if (minigameState.type === 'fish') { 
         actor = 'Patrice'; char = 'Blair the Stylish Pirate'; 
         if (minigameState.won) {
-            msg = `I knew ye had it in ye! Three cheers for ${CAST[selectedIndex].firstName}!`;
+            const firstName = (typeof CAST !== 'undefined' && CAST[selectedIndex]) ? CAST[selectedIndex].firstName : 'Player';
+            msg = `I knew ye had it in ye! Three cheers for ${firstName}!`;
         } else {
-            msg = `Bah! Only ${minigameState.successes} fish?! A PIRATE'S CURSE UPON YE!`;
+            showDialog(char, actor, `Bah! Only ${minigameState.successes} fish?!`, () => {
+                showDialog(char, actor, "A PIRATE'S CURSE UPON YE!", null);
+            });
+            return;
         }
     }
     else if (minigameState.type === 'jeopardy') {
@@ -172,10 +203,22 @@ function endMinigame() {
             return;
         }
     }
+    else if (minigameState.type === 'climb') {
+        actor = 'Leichelle'; char = 'Rocky';
+        if (minigameState.won) {
+            showDialog(char, actor, "Whoa! You just sent it on our V7 wall like it was *nothing*!", () => {
+                showDialog(char, actor, "Impressive job!", null);
+            });
+            return;
+        } else {
+            showDialog(char, actor, "Oof, three failures.", () => {
+                showDialog(char, actor, "Welp, the important thing is that you tried.", null);
+            });
+            return;
+        }
+    }
     showDialog(char, actor, msg, null);
 }
-
-
 
 function drawMinigameMap() {
     ctx.fillStyle = COLORS.BLACK; ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -191,7 +234,8 @@ function drawMinigameMap() {
         fish: 'LAKE FISH-A-LOT (AKA OBLIGATORY FISHING MINIGAME)', 
         golf: "BOB'S INTENSE MINI-GOLF", 
         jeopardy: 'CANADIAN JEOPARDY!', 
-        goose: 'UNPLEASANT GOOSE GAME' 
+        goose: 'UNPLEASANT GOOSE GAME',
+        climb: 'THE CLIMBATORIUM'
     };
     const titleText = titles[gameType];
     const parenIdx = titleText.indexOf('(');
@@ -232,17 +276,37 @@ function drawMinigamePlay() {
     else if (gameType === 'fish') drawFishGame();
     else if (gameType === 'jeopardy') drawJeopardyGame();
     else if (gameType === 'goose') drawGooseGame();
+    else if (gameType === 'climb') drawClimbGame();
     
     // UI elements common to all minigames (drawn last to be on top)
+    const isClimb = (gameType === 'climb');
+    const startScoreX = isClimb ? 10 : 20;
+    const greenStartX = isClimb ? 220 : 200;
+    const greenStep = isClimb ? 18 : 30;
+    const redStartX = isClimb ? 305 : 350;
+    const redStep = isClimb ? 18 : 30;
+
     ctx.textAlign = 'left';
-    ctx.fillStyle = COLORS.WHITE; ctx.font = '12px "Press Start 2P"'; ctx.fillText(`Score: ${score}`, 20, 30);
+    ctx.fillStyle = COLORS.WHITE; ctx.font = isClimb ? '10px "Press Start 2P"' : '12px "Press Start 2P"'; 
+
+    if (isClimb) {
+        const wallNum = (minigameState.successes || 0) + 1;
+        ctx.fillText(`Score:${score}  Wall #${wallNum}`, startScoreX, 28);
+    } else {
+        ctx.fillText(`Score:${score}`, startScoreX, 28);
+    }
+
     for (let i = 0; i < 4; i++) {
-        ctx.beginPath(); ctx.arc(200 + i * 30, 25, 10, 0, Math.PI * 2);
+        const gx = greenStartX + i * greenStep;
+        const radius = isClimb ? 6 : 10;
+        ctx.beginPath(); ctx.arc(gx, 23, radius, 0, Math.PI * 2);
         if (i < minigameState.successes) { ctx.fillStyle = COLORS.GREEN; ctx.fill(); } else { ctx.strokeStyle = COLORS.GREEN; ctx.lineWidth = 2; ctx.stroke(); }
     }
+
     for (let i = 0; i < 3; i++) {
-        const fx = 350 + i * 30;
-        if (i < minigameState.failures) { ctx.fillStyle = COLORS.RED; ctx.fillRect(fx - 10, 15, 20, 20); } else { ctx.strokeStyle = COLORS.RED; ctx.lineWidth = 2; ctx.strokeRect(fx - 10, 15, 20, 20); }
+        const fx = redStartX + i * redStep;
+        const size = isClimb ? 12 : 20;
+        if (i < minigameState.failures) { ctx.fillStyle = COLORS.RED; ctx.fillRect(fx - size / 2, 23 - size / 2, size, size); } else { ctx.strokeStyle = COLORS.RED; ctx.lineWidth = 2; ctx.strokeRect(fx - size / 2, 23 - size / 2, size, size); }
     }
 }
 
@@ -276,5 +340,7 @@ function handleMinigameInput(key) {
         handleJeopardyInput(key);
     } else if (state.type === 'goose') {
         handleGooseInput(key);
+    } else if (state.type === 'climb') {
+        handleClimbInput(key);
     }
 }

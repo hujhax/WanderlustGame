@@ -1,4 +1,4 @@
-﻿Wanderlust
+Wanderlust
 
 # General
 Wanderlust is a video game that uses NES-style pixel-art graphics and chiptune-style music and sound effects.
@@ -14,7 +14,7 @@ For debug purposes, a player may always type the ">" key to skip to the next sec
 If we have loaded a phase of the game via the query parameter without selecting a traveler, set the traveler to Peter by default.
 
 ## Cast
-This game has nine "cast members", and each has a "head shot" image in the /images/cast directory, and a folder of sprites in the /images/sprites/cast directory:
+This game has eight core "cast members", and each has a "head shot" image in the /images/cast directory, and a folder of sprites in the /images/sprites/cast directory:
 1. Claire: claire.png
 1. Gilbert: gilbert.png
 1. Jason: jason.png
@@ -23,7 +23,10 @@ This game has nine "cast members", and each has a "head shot" image in the /imag
 1. Peter: peter.png
 1. Sam: sam.png
 1. Velvet: velvet.png
+
+There are two extra cast members who have a head shot but no sprites.
 1. Lindsey: lindsey.png
+1. Leichelle: leichelle.png
 
 ## Dialog
 Throughout this game, to display a piece of dialog, show a wide black rectangle.  In the left part of the rectangle is a square that will show the cast member image.  Centered below that square is the character name, word-wrapped if necessary to avoid extending past the left and right edges of the square.  In the right side of the rectangle, show the dialog message.
@@ -70,7 +73,7 @@ The background music for this phase is music/chicago.mp3.  Start the track at th
 At the bottom center are the words "Press Enter to Start", written in the [Nintendo Font](https://fontstruct.com/fontstructions/show/406653/nintendo_nes_font).  If the user presses enter, we go to the next phase.
 
 ## Choose Your Traveler
-This shows a character-select screen.  The title of the screen says "CHOOSE YOUR TRAVELER" in the Nintendo font.  The screen shows 8 boxes, arranged four by two, each showing a cast member head shot, and each labeled with the cast member name.  (Note: Lindsey is NOT a traveler, and thus is not included in this menu.)
+This shows a character-select screen.  The title of the screen says "CHOOSE YOUR TRAVELER" in the Nintendo font.  The screen shows 8 boxes, arranged four by two, each showing a core cast member head shot, and each labeled with the cast member name.  (Note: Lindsey and Leichelel are NOT travelers, and thus are not included in this menu.)
 
 The player uses arrow keys to select a box and presses the enter key to proceed to the next phase.
 
@@ -692,6 +695,169 @@ If the player lost:
 * Ranger Willis (Sam): Hey, you're conscious again!
 * Ranger Willis (Sam): Glad to see you powered through your massive injuries.
 * Ranger Willis (Sam): Glad you could visit us at Algonquin Provincial Park!
+
+## The Climbatorium
+Query string name is "climb".
+
+Download this minigame's background music from https://www.youtube.com/watch?v=EmG-Af0LK88
+
+Introductory dialog:
+Rocky (Leichelle): Welcome to the climbatorium! Where all your dreams come true! If your dreams include rock-climbing!
+
+### Gameplay
+Climbatorium is a roguelike deckbuilder about rock-climbing.
+
+#### The Climbing Screen
+We open on the climbing screen.
+
+The game screen is split in half.  The left half of the screen — the "wall area" — contains the climbing wall.  The climbing wall has a light gray background and a set of brightly-colored shapes scattered over it. The wall objects consist of 9 combinations of shapes and colors:
+1. Red Square, Red Circle, Red Diamond
+2. Blue Square, Blue Circle, Blue Diamond
+3. Green Square, Green Circle, Green Diamond
+
+(Wild asterisks do not spawn randomly on the climbing wall, though a row of asterisks sits at the very top of each wall, and Wild Asterisk Cards remain available as a shop ware.)
+
+Show the HUD (score, successes, failures) at the top of the screen, left-justified, as it is for "Catch That Chicken".
+
+The "wall area" also has a strip to the right of the wall, which is a black background with stars — the strip is wide enough to contain the text (in Nintendo font) "+ 1 CARD".
+
+The player starts centered at the bottom of the climbing wall.  (They start with the leftmost sprite in their `./standard/climb.png` sheet.)  There is a highlit "reach circle" of a certain radius around the player avatar at all times.  (The reach-circle highlight only highlights on the wall itself; not the starry background and definitely not the rest of the screen.) Additionally, a yellow dotted outline conforming to the geometry of the shape itself (square, circle, diamond, plus) is drawn just outside the fill color for every shape on the wall that currently falls within the player's reach radius.
+
+There are green, glowing horizontal lines at regular intervals along the wall.  The horizontal lines sit in front of the background but behind the shapes.  To the immediate right of each horizontal line is floating "+ 1 CARD" text.
+
+The right half of the screen — the "card area" — contains the player's current cards.  The background of the card area is designed to look like the surface of a wooden table.  It also has a "coins indicator", which starts at 0¢.
+
+The player starts with an initial 7-card deck:
+1. Color Card: Red (matches any red shape within reach: Red Square, Red Circle, Red Diamond, Red Plus)
+2. Color Card: Blue (matches any blue shape within reach: Blue Square, Blue Circle, Blue Diamond, Blue Plus)
+3. Color Card: Green (matches any green shape within reach: Green Square, Green Circle, Green Diamond, Green Plus)
+4. Shape Card: Square (matches any square shape within reach: Red Square, Blue Square, Green Square)
+5. Shape Card: Circle (matches any circle shape within reach: Red Circle, Blue Circle, Green Circle)
+6. Shape Card: Diamond (matches any diamond shape within reach: Red Diamond, Blue Diamond, Green Diamond)
+7. Shape Card: Plus (matches any plus shape within reach: Red Plus, Blue Plus, Green Plus)
+
+Color cards are worth 2¢ each at the end of a wall. Shape cards are worth 1¢ each. Wild Asterisk Cards are worth 3¢ each. Wares Cards are worth 5¢ each. Every time the player crosses an active horizontal "+ 1 CARD" line, they get another card. Once they cross/activate that line, it deactivates: it turns a darker gray-green and stops glowing, and the "+ 1 CARD" indicator disappears.
+
+The card area includes the draw pile and the discard pile.  The player can click either to get a modal window that shows the cards in the pile (N.B. for the draw pile, those cards are presented in random order, not in the order of the draw pile).  The user can click on that modal to make it disappear.  If the player empties the draw pile, when they earn another card, reshuffle the discard pile and turn it into the draw pile.
+
+If the player gathers up every card of their deck in-hand, turn the horizontal indicators (and their accompanying text) red: it is no longer possible to activate the lines.  Once cards become available, the player activates a line beneath their avatar for every available card, starting with the bottommost line.
+
+The avatar starts at the bottom of the screen.  Once the avatar reaches the midpoint of the screen, that's where they stay; our view of the climbing wall should scroll vertically to keep them at that halfway point *unless* that would put the bottom of the wall above the bottom of the climbing area.  In that case, keep the bottom of the wall pinned to the bottom of the climbing area and let the avatar descend onscreen.
+
+Every climbing wall has a fixed height.  The top of the wall is a horizontal cutoff, above which is that same black background with stars.  Just above the top of the wall is a row of regularly-spaced "wild" asterisks.  The moment a player climbs past the top of the climbing wall, position the player atop the wall and animate through the third row of `emote.png` once.  Play the victory sound in the background and add a success to the counter.
+
+After successfully finishing a wall:
+1. If the player has four successes, end the game as described below.
+2. Provide new dialog from Rocky:
+Rocky (Leichelle): You completed wall number [number] with [number of cards] cards! You get two coins per card, for a total of [number of coins earned]!
+3. Otherwise, we:
+3a. Convert all their remaining cards in hand to coins (2¢ per card), and
+3b. Proceed to the card shop (see below).
+
+The Climbing Screen also has a large red "Give Up" button in the card section.  If the player presses this, produce this dialog:
+Rocky (Leichelle): Oh no! You're going to give up, keep your cards, and start again at the bottom?
+The dialog box offers yes/no options.  If the player selects 'yes', proceed with the restart (restarting the player at the bottom of the current wall without generating a new wall); if they select 'no', cancel it.
+
+Cards in the card area of the screen are dynamically grayed out whenever they are not currently playable (i.e. no matching shapes are within the player's current reach circle, or no valid 2-step path exists).
+
+To do the restart: do a star wipe to a black screen and then another star wipe to the avatar back at the bottom of the current climbing wall.  They keep all their current cards, and they get dealt new cards from the deck (whatever we decide the number of initially-dealt cards is).  This registers as a failure.
+
+Crossing a horizontal line awards the player 50 in-game points; clearing a wall awards 1000 points.
+
+##### Climbing UI
+If the player clicks one of their cards, they get a modal.  It shows an enlarged image of the card, a description of what the card does, and provides buttons for "Play this card" and "Cancel".  If the player clicks cancel (or clicks anywhere outside the modal) remove the modal.  If the player clicks "Play this card", play the card.
+
+If the card includes choosing a shape on the wall, put a highlight glow around the highest appropriate shape in the reach circle.  (If there is no appropriate shape in the reach circle, gray out the card and make it inactive; i.e., clicking on it does not activate the modal.)  Gray out all the shapes that are incompatible with the card.  Add small explanatory text — "Select a shape by clicking it, or use the arrow keys." — to the bottom of the wall area of the screen, and leave it there until the player makes a selection.
+
+Then the player can pick a shape by either:
+1. Clicking the shape (which moves the highlight to that shape), or 
+2. Selecting a shape with the left-right arrow keys (the highlight cycles through the appropriate shapes, moving clockwise around the player), and then hitting enter to activate the currently-selected shape.
+
+
+#### The Card Shop
+Introduce the card shop with this one of these dialogs (chosen at random, with no repeats through the game):
+
+Rocky (Leichelle): The Cardatorium has wares, if you have coin.
+Rocky (Leichelle): Getcher pipin' hot fresh cards!
+Rocky (Leichelle): And now, we move on to the true heart of the climbatorium: unfettered capitalism.
+
+The card shop is how the player improves their deck between climbs.  The screen resembles a merchant's table.  The top of the screen shows three "wares" for sale and their sale prices.  If the player does not have enough coins to buy a ware, it is grayed out.
+
+Here are the wares and their prices:
+1. Pulsating asterisk card (2¢).
+	* This card matches any shape.
+2. Ring of Reach (4¢)
+	* This ring expands your "reach circle" by a factor of 70%.
+3. Ring of Hand (4¢)
+	* This ring increases your initial card draw by 3 cards.
+4. Shape-then-shape card (2¢)
+	* [not the description: this card depicts two shapes (chosen at random), one above the other]
+	* This card allows you do two moves in a row: first grabbing a [shape 1] and then grabbing a [shape 2].
+5. Card Go Up card (2¢)
+	* [not the description: this card depicts a big gray up-arrow]
+	* Move to the highest shape within reach.
+6. Ring of Riches (3¢)
+	* This card gives you an extra coin for every card you have at the end of the game.
+7. Trash two cards (1¢)
+	* [not the description: this card depicts a trash bin]
+	* This card lets you remove two of your current cards from the deck for the duration of this climb.
+8. Draw three (3¢)
+	* [not the description: this card shows a hand drawing a card from the draw pile, with "× 3" text]
+	* This card lets you draw three cards from the deck!
+	
+Hovering over a ware shows its description.
+
+Attempting to purchase a card gives this interaction:
+Rocky (Leichelle): Looks like you want to buy the [ware description] for [ware price].  Is that correct?
+The dialog box offers yes/no options.  If the player selects 'yes', make the sale; if they select 'no', cancel it.
+
+The rest of the screen is titled "Card Removal is 1¢", and shows the player's hand as a horizontal row.  (Add scroll arrows to the left and right if you can't display the whole deck onscreen; treat it as an 'eternal scroll' that loops around.)
+
+Attempting to delete a card gives this interaction:
+Rocky (Leichelle): Looks like you get rid of your [card description] for [removal price].  Is that correct?
+The dialog box offers yes/no options.  If the player selects 'yes', make the sale; if they select 'no', cancel it.
+
+The Cardatorium has a large red button that says "Next Wall".  Pressing that button moves the player on to the start of the next climbing wall.
+
+#### Tuning the Difficulty
+Tuning the difficulty of this game will be very challenging.
+
+We have the following variables in play:
+* Card draws: how far apart are the horizontal lines? Do they each draw "1 CARD", or more than one?
+* Initial deal: how many cards are initially dealt?
+* Deck: how big is the initial deck?
+* Wall composition: how far apart are the shapes, on average? how uniform is their distribution? how frequently do asterisks (i.e., "wild card" shapes) appear on the wall?  How tall is the wall?
+* Reach: how big is the reach circle?
+
+This game will have a maximum of four rounds (since there is a maximum of four successes).  Here's how I'd like the difficulty tuned:
+
+* Round 1:
+	* If the player uses...
+		* No strategy (just random cards) they win 10% of the time
+		* A dead-simple strategy (always go at least slightly up) they win 80% of the time
+		* A slightly more intelligent strategy (anything thinking a few moves ahead) they win 95% of the time.
+* Round 2:
+	* This should be harder.
+		* No strategy should win 5% of the time
+		* Dead-simple strategy should win...
+			* 70% of the time if they make no improvements
+			* 80% of the time if they make one round of improvements
+		* Intelligent strategy should win...
+			* 75% of the time if they make no improvements
+			* 90% of the time if they make one round of improvements
+* Rounds 3 and 4 should be harder still
+	* They should be pretty punishing if the player has made no improvements.
+	
+	
+#### Finishing the Game
+If the player gets four successes, they win.  The dialog when the player wins:
+Rocky (Leichelle): Whoa! You just sent it on our V7 wall like it was *nothing*!
+Rocky (Leichelle): Impressive job!
+
+If the player gets three failures, they lose. The dialog when the player loses:
+Rocky (Leichelle): Oof, three failures.
+Rocky (Leichelle): Welp, the important thing is that you tried.
+
 
 ## The Confrontation
 You can access this section directly by setting the query parameter "minigame=confrontation".

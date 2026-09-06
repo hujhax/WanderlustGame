@@ -45,7 +45,8 @@ const CAST = [
     { name: 'Peter Rogers', firstName: 'Peter', actor: 'Peter', imgPath: 'images/cast/peter.png' },
     { name: 'Sam Adams', firstName: 'Sam', actor: 'Sam', imgPath: 'images/cast/sam.png' },
     { name: 'The Velvet Duke', firstName: 'Velvet', actor: 'Velvet', imgPath: 'images/cast/velvet.png' },
-    { name: 'Lindsey McGowen', firstName: 'Lindsey', actor: 'Lindsey', imgPath: 'images/cast/lindsey.png', noSprites: true }
+    { name: 'Lindsey McGowen', firstName: 'Lindsey', actor: 'Lindsey', imgPath: 'images/cast/lindsey.png', noSprites: true },
+    { name: 'Leichelle Little', firstName: 'Leichelle', actor: 'Leichelle', imgPath: 'images/cast/leichelle.png', noSprites: true }
 ];
 
 const PARTNER_PAIRS = {

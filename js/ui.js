@@ -128,12 +128,35 @@ function drawDialogBox() {
     const lines = currentDialog.chunks[currentDialog.chunkIndex].split('\n');
     lines.forEach((line, i) => ctx.fillText(line, 200, boxY + 45 + i * 30));
     
-    // Blinking continuation indicator at bottom right of the black box
-    if (Math.floor(Date.now() / 500) % 2 === 0) {
-        ctx.fillStyle = COLORS.WHITE;
-        ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'right';
-        const indicatorX = isCar ? 660 : 730;
-        ctx.fillText('▼', indicatorX, boxY + boxH - 20);
+    // Draw Yes/No Options if provided
+    if (currentDialog.options && Array.isArray(currentDialog.options)) {
+        const optY = boxY + boxH - 45;
+        const opts = currentDialog.options;
+        const selIdx = currentDialog.selectedOption || 0;
+
+        opts.forEach((optText, idx) => {
+            const optX = 450 + idx * 110;
+            const isSel = (idx === selIdx);
+            
+            ctx.fillStyle = isSel ? COLORS.SELECTION_YELLOW : '#333333';
+            ctx.fillRect(optX, optY, 90, 32);
+            ctx.strokeStyle = COLORS.WHITE;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(optX, optY, 90, 32);
+
+            ctx.fillStyle = isSel ? COLORS.BLACK : COLORS.WHITE;
+            ctx.font = '10px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText(optText, optX + 45, optY + 20);
+        });
+    } else {
+        // Blinking continuation indicator at bottom right of the black box
+        if (Math.floor(Date.now() / 500) % 2 === 0) {
+            ctx.fillStyle = COLORS.WHITE;
+            ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'right';
+            const indicatorX = isCar ? 660 : 730;
+            ctx.fillText('▼', indicatorX, boxY + boxH - 20);
+        }
     }
 }
 
