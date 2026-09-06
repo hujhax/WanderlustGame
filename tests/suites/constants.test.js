@@ -81,4 +81,11 @@ describe('Constants & Configuration Data', () => {
             });
         });
     });
+
+    it('Confrontation dialogue replaces [minigame name] with "the Climbatorium" for climb minigame', () => {
+        const template = "You just *had* to show off at [minigame name], didn't you?";
+        const titles = { climb: 'the Climbatorium' };
+        const result = template.replace('[minigame name]', titles.climb);
+        assertEquals(result, "You just *had* to show off at the Climbatorium, didn't you?");
+    });
 });

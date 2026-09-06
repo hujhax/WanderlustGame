@@ -61,7 +61,10 @@ function startFightingGame(nextPhase, isShadow = false) {
                 cheese: 'FROMAGERIE FRENZY!',
                 bump: 'BUMPERTOWN!',
                 fish: 'OBLIGATORY FISHING MINIGAME',
-                golf: "Bob's Intense Mini-Golf"
+                golf: "Bob's Intense Mini-Golf",
+                jeopardy: 'CANADIAN JEOPARDY!',
+                goose: 'UNPLEASANT GOOSE GAME',
+                climb: 'the Climbatorium'
             };
             const mgTitle = titles[mg.name] || mg.name.toUpperCase();
 
