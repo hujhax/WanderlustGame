@@ -159,59 +159,108 @@ function startTogetherAgain() {
 function drawTogetherAgain() {
     if (companionSitsBg.paused) companionSitsBg.play().catch(e => {});
 
-    const scale = Math.max(canvas.width / 540, canvas.height / 540);
-    const scaledW = 540 * scale, scaledH = 540 * scale;
-    const offsetX = (canvas.width - scaledW) / 2;
-    const offsetY = (canvas.height - scaledH) / 2;
+    if (isMobileMode) {
+        const scale = Math.max(canvas.width / 540, canvas.height / 540);
+        const scaledW = 540 * scale, scaledH = 540 * scale;
+        const offsetX = (canvas.width - scaledW) / 2;
+        const offsetY = (canvas.height - scaledH) / 2;
 
-    if (companionSitsBg.readyState >= 2) {
-        ctx.drawImage(companionSitsBg, offsetX, offsetY, scaledW, scaledH);
-    } else {
-        ctx.fillStyle = '#2d1e18';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
-    const rockX = offsetX + 253 * scale;
-    const rockY = offsetY + 477 * scale;
-
-    const partnerName = PARTNER_PAIRS[CAST[selectedIndex].name];
-    const partnerActor = CAST.find(c => c.name === partnerName).actor.toLowerCase();
-    const playerActor = CAST[selectedIndex].actor.toLowerCase();
-    
-    // Companion sitting at rock seat
-    const sitSprite = sitSprites[partnerActor];
-    if (sitSprite && sitSprite.complete) {
-        drawPixelatedImage(sitSprite, 0, 3 * 64, 64, 64, rockX - 64, rockY - 128, 128, 128);
-    }
-
-    const targetPlayerX = rockX - 45;
-
-    if (togetherAgainState.state === 'walking') {
-        if (togetherAgainState.playerX === -100) togetherAgainState.playerX = -64;
-        togetherAgainState.playerX += 2.5;
-
-        const walkSprite = walkSprites[playerActor];
-        if (walkSprite && walkSprite.complete) {
-            const frame = Math.floor(Date.now() / 150) % 6;
-            drawPixelatedImage(walkSprite, frame * 64, 3 * 64, 64, 64, togetherAgainState.playerX - 64, rockY - 128, 128, 128);
+        if (companionSitsBg.readyState >= 2 || companionSitsBg.complete) {
+            ctx.drawImage(companionSitsBg, offsetX, offsetY, scaledW, scaledH);
+        } else {
+            ctx.fillStyle = '#2d1e18';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
-        if (togetherAgainState.playerX >= targetPlayerX) {
-            togetherAgainState.state = 'sitting';
-            const pFirst = CAST[selectedIndex].firstName, cFirst = CAST.find(c => c.name === partnerName).firstName;
-            showDialog(pFirst, CAST[selectedIndex].actor, "I'm sorry I fought with you.", () => {
-                showDialog(cFirst, CAST.find(c => c.name === partnerName).actor, "I'm sorry too.", () => {
-                    showDialog(pFirst, CAST[selectedIndex].actor, "Can we be friends again?", () => {
-                        showDialog(cFirst, CAST.find(c => c.name === partnerName).actor, "Yes we can!", () => {
-                            showDialog(pFirst, CAST[selectedIndex].actor, "YAY!", startClosingInterview, 'top');
+
+        const rockX = offsetX + 253 * scale;
+        const rockY = offsetY + 477 * scale;
+
+        const partnerName = PARTNER_PAIRS[CAST[selectedIndex].name];
+        const partnerActor = CAST.find(c => c.name === partnerName).actor.toLowerCase();
+        const playerActor = CAST[selectedIndex].actor.toLowerCase();
+        
+        // Companion sitting at rock seat
+        const sitSprite = sitSprites[partnerActor];
+        if (sitSprite && sitSprite.complete) {
+            drawPixelatedImage(sitSprite, 0, 3 * 64, 64, 64, rockX - 64, rockY - 128, 128, 128);
+        }
+
+        const targetPlayerX = rockX - 45;
+
+        if (togetherAgainState.state === 'walking') {
+            if (togetherAgainState.playerX === -100) togetherAgainState.playerX = -64;
+            togetherAgainState.playerX += 2.5;
+
+            const walkSprite = walkSprites[playerActor];
+            if (walkSprite && walkSprite.complete) {
+                const frame = Math.floor(Date.now() / 150) % 6;
+                drawPixelatedImage(walkSprite, frame * 64, 3 * 64, 64, 64, togetherAgainState.playerX - 64, rockY - 128, 128, 128);
+            }
+            if (togetherAgainState.playerX >= targetPlayerX) {
+                togetherAgainState.state = 'sitting';
+                const pFirst = CAST[selectedIndex].firstName, cFirst = CAST.find(c => c.name === partnerName).firstName;
+                showDialog(pFirst, CAST[selectedIndex].actor, "I'm sorry I fought with you.", () => {
+                    showDialog(cFirst, CAST.find(c => c.name === partnerName).actor, "I'm sorry too.", () => {
+                        showDialog(pFirst, CAST[selectedIndex].actor, "Can we be friends again?", () => {
+                            showDialog(cFirst, CAST.find(c => c.name === partnerName).actor, "Yes we can!", () => {
+                                showDialog(pFirst, CAST[selectedIndex].actor, "YAY!", startClosingInterview, 'top');
+                            }, 'top');
                         }, 'top');
                     }, 'top');
                 }, 'top');
-            }, 'top');
+            }
+        } else {
+            const playerSit = sitSprites[playerActor];
+            if (playerSit && playerSit.complete) {
+                drawPixelatedImage(playerSit, 0, 3 * 64, 64, 64, targetPlayerX - 64, rockY - 128, 128, 128);
+            }
         }
     } else {
-        const playerSit = sitSprites[playerActor];
-        if (playerSit && playerSit.complete) {
-            drawPixelatedImage(playerSit, 0, 3 * 64, 64, 64, targetPlayerX - 64, rockY - 128, 128, 128);
+        // Exact original desktop behavior
+        if (companionSitsBg.readyState >= 2 || companionSitsBg.complete) {
+            ctx.drawImage(companionSitsBg, 0, 0, canvas.width, canvas.height);
+        } else {
+            ctx.fillStyle = '#2d1e18';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        const partnerName = PARTNER_PAIRS[CAST[selectedIndex].name];
+        const partnerActor = CAST.find(c => c.name === partnerName).actor.toLowerCase();
+        const playerActor = CAST[selectedIndex].actor.toLowerCase();
+        
+        // Companion sitting at (253, 500)
+        const sitSprite = sitSprites[partnerActor];
+        if (sitSprite && sitSprite.complete) {
+            drawPixelatedImage(sitSprite, 0, 3 * 64, 64, 64, 253 - 64, 500 - 128, 128, 128);
+        }
+
+        if (togetherAgainState.state === 'walking') {
+            togetherAgainState.playerX += 2;
+            const walkSprite = walkSprites[playerActor];
+            if (walkSprite && walkSprite.complete) {
+                const frame = Math.floor(Date.now() / 150) % 6;
+                // Player walks at y=523
+                drawPixelatedImage(walkSprite, frame * 64, 3 * 64, 64, 64, togetherAgainState.playerX - 64, 523 - 128, 128, 128);
+            }
+            if (togetherAgainState.playerX >= 230) {
+                togetherAgainState.state = 'sitting';
+                const pFirst = CAST[selectedIndex].firstName, cFirst = CAST.find(c => c.name === partnerName).firstName;
+                showDialog(pFirst, CAST[selectedIndex].actor, "I'm sorry I fought with you.", () => {
+                    showDialog(cFirst, CAST.find(c => c.name === partnerName).actor, "I'm sorry too.", () => {
+                        showDialog(pFirst, CAST[selectedIndex].actor, "Can we be friends again?", () => {
+                            showDialog(cFirst, CAST.find(c => c.name === partnerName).actor, "Yes we can!", () => {
+                                showDialog(pFirst, CAST[selectedIndex].actor, "YAY!", startClosingInterview, 'top');
+                            }, 'top');
+                        }, 'top');
+                    }, 'top');
+                }, 'top');
+            }
+        } else {
+            const playerSit = sitSprites[playerActor];
+            if (playerSit && playerSit.complete) {
+                // Player sits at (230, 523)
+                drawPixelatedImage(playerSit, 0, 3 * 64, 64, 64, 230 - 64, 523 - 128, 128, 128);
+            }
         }
     }
 }
