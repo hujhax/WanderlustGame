@@ -56,16 +56,18 @@ function initClimbGame() {
     const roundIdx = Math.min(3, minigameState.successes || 0);
     const cfg = CLIMB_ROUND_CONFIGS[roundIdx];
 
+    const wallW = isMobileMode ? 530 : 360;
+
     minigameState.climb = {
         subPhase: 'climbing',
-        wallWidth: 360,
+        wallWidth: wallW,
         wallHeight: cfg.wallHeight,
-        starStripX: 360,
-        starStripWidth: 40,
-        cardAreaX: 400,
-        cardAreaWidth: 400,
+        starStripX: isMobileMode ? 530 : 360,
+        starStripWidth: isMobileMode ? 70 : 40,
+        cardAreaX: isMobileMode ? 0 : 400,
+        cardAreaWidth: isMobileMode ? 600 : 400,
         player: {
-            x: 180,
+            x: isMobileMode ? 265 : 180,
             y: cfg.wallHeight - 40,
             baseReachRadius: cfg.baseReach,
             reachRadius: cfg.baseReach
@@ -116,40 +118,43 @@ function generateClimbWall() {
     const state = minigameState.climb;
     const roundIdx = Math.min(3, minigameState.successes || 0);
     const cfg = CLIMB_ROUND_CONFIGS[roundIdx];
+    const wallW = isMobileMode ? 530 : 360;
+    const maxX = wallW - 30;
 
     state.shapes = [];
     state.lines = [];
 
     // GUARANTEED VARIETY STARTING SHAPES AT BOTTOM OF WALL (Inside initial reach circle)
     // Row 1 at y = wallHeight - 50
-    const startRow1X = [60, 140, 220, 300];
+    const startRow1X = isMobileMode ? [100, 210, 320, 430] : [60, 140, 220, 300];
     startRow1X.forEach((baseX, idx) => {
-        const x = Math.max(30, Math.min(330, baseX + (Math.random() * 20 - 10)));
+        const x = Math.max(30, Math.min(maxX, baseX + (Math.random() * 20 - 10)));
         const y = cfg.wallHeight - 50 + (Math.random() * 6 - 3);
         const choice = BASE_WALL_SHAPES[idx % BASE_WALL_SHAPES.length];
         state.shapes.push({ id: Math.random(), x, y, type: choice.type, color: choice.color, shape: choice.shape });
     });
 
     // Row 2 at y = wallHeight - 85
-    const startRow2X = [60, 140, 220, 300];
+    const startRow2X = isMobileMode ? [100, 210, 320, 430] : [60, 140, 220, 300];
     startRow2X.forEach((baseX, idx) => {
-        const x = Math.max(30, Math.min(330, baseX + (Math.random() * 20 - 10)));
+        const x = Math.max(30, Math.min(maxX, baseX + (Math.random() * 20 - 10)));
         const y = cfg.wallHeight - 85 + (Math.random() * 6 - 3);
         const choice = BASE_WALL_SHAPES[(idx + 4) % BASE_WALL_SHAPES.length];
         state.shapes.push({ id: Math.random(), x, y, type: choice.type, color: choice.color, shape: choice.shape });
     });
 
     // Generate shapes along remaining height of wall with organic, chaotic placement
+    const usableSpan = wallW - 80;
     for (let y = cfg.wallHeight - 120; y > 75; y -= cfg.shapeSpacing) {
-        const count = Math.floor(Math.random() * 3) + 2; // 2, 3, or 4 shapes per level
+        const count = isMobileMode ? (Math.floor(Math.random() * 3) + 3) : (Math.floor(Math.random() * 3) + 2);
         const rowJitterY = y + (Math.random() * 14 - 7);
         const rowOffset = (Math.sin(y * 0.08) * 35) + (Math.random() * 30 - 15);
 
         const rowShapes = [];
         for (let i = 0; i < count; i++) {
-            const span = 280 / Math.max(1, count - 1);
+            const span = usableSpan / Math.max(1, count - 1);
             let x = 40 + i * span + rowOffset + (Math.random() * 36 - 18);
-            x = Math.max(30, Math.min(330, x));
+            x = Math.max(30, Math.min(maxX, x));
 
             // Prevent overlap with other shapes in the same row
             const tooClose = rowShapes.some(s => Math.abs(s.x - x) < 32);
@@ -163,14 +168,14 @@ function generateClimbWall() {
 
         // Fallback: if no shape added due to overlap rejection, add one
         if (rowShapes.length === 0) {
-            const x = Math.max(30, Math.min(330, 40 + Math.random() * 280));
+            const x = Math.max(30, Math.min(maxX, 40 + Math.random() * usableSpan));
             const choice = BASE_WALL_SHAPES[Math.floor(Math.random() * BASE_WALL_SHAPES.length)];
             state.shapes.push({ id: Math.random(), x, y: rowJitterY, type: choice.type, color: choice.color, shape: choice.shape });
         }
     }
 
     // Top row wild asterisks (above top horizontal cutoff line)
-    for (let x = 35; x <= 325; x += 40) {
+    for (let x = 35; x <= maxX; x += 40) {
         state.shapes.push({ id: Math.random(), x, y: 60, type: CLIMB_SHAPE_TYPES.WILD_ASTERISK });
     }
 
@@ -259,27 +264,32 @@ function drawClimbingScreen() {
     const state = minigameState.climb;
     const time = Date.now() * 0.002;
 
-    const screenCenterY = canvas.height / 2;
-    let cameraY = state.player.y - screenCenterY;
-    cameraY = Math.max(0, Math.min(state.wallHeight - canvas.height, cameraY));
+    const wallW = isMobileMode ? 530 : state.wallWidth;
+    const starX = isMobileMode ? 530 : state.starStripX;
+    const starW = isMobileMode ? 70 : state.starStripWidth;
+    const visibleWallH = isMobileMode ? 460 : canvas.height;
 
-    // --- LEFT HALF: WALL AREA ---
+    const screenCenterY = visibleWallH / 2;
+    let cameraY = state.player.y - screenCenterY;
+    cameraY = Math.max(0, Math.min(state.wallHeight - visibleWallH, cameraY));
+
+    // --- WALL AREA ---
     ctx.save();
     ctx.beginPath();
-    ctx.rect(0, 0, state.wallWidth, canvas.height);
+    ctx.rect(0, 0, wallW, visibleWallH);
     ctx.clip();
 
     // 8-Bit Pixelated Rock Wall Background
-    draw8BitRockWall(state.wallWidth, canvas.height, cameraY);
+    draw8BitRockWall(wallW, visibleWallH, cameraY);
 
     // Wall Top Cutoff & Starry Sky Above Top
     const topScreenY = 70 - cameraY;
     if (topScreenY > 0) {
         ctx.fillStyle = COLORS.BLACK;
-        ctx.fillRect(0, 0, state.wallWidth, topScreenY);
+        ctx.fillRect(0, 0, wallW, topScreenY);
         ctx.fillStyle = COLORS.WHITE;
         for (let i = 0; i < 16; i++) {
-            const sx = (i * 37 + 12) % state.wallWidth;
+            const sx = (i * 37 + 12) % wallW;
             const sy = (i * 19 + 5) % topScreenY;
             ctx.fillRect(sx, sy, 2, 2);
         }
@@ -289,7 +299,7 @@ function drawClimbingScreen() {
     const allCardsInHand = (state.hand.length === state.deck.length);
     state.lines.forEach(line => {
         const screenY = line.y - cameraY;
-        if (screenY >= -10 && screenY <= canvas.height + 10) {
+        if (screenY >= -10 && screenY <= visibleWallH + 10) {
             ctx.lineWidth = 4;
             if (allCardsInHand) {
                 ctx.strokeStyle = COLORS.RED;
@@ -303,7 +313,7 @@ function drawClimbingScreen() {
             }
             ctx.beginPath();
             ctx.moveTo(0, screenY);
-            ctx.lineTo(state.wallWidth, screenY);
+            ctx.lineTo(wallW, screenY);
             ctx.stroke();
             ctx.shadowBlur = 0;
         }
@@ -312,7 +322,7 @@ function drawClimbingScreen() {
     // Shapes on Wall (No Black Outlines)
     state.shapes.forEach(shape => {
         const sy = shape.y - cameraY;
-        if (sy >= 55 && sy <= canvas.height + 20) {
+        if (sy >= 55 && sy <= visibleWallH + 20) {
             let isTarget = false;
             let isHighlighted = false;
             if (state.activeModal === 'select_shape') {
@@ -380,14 +390,14 @@ function drawClimbingScreen() {
     // Explanatory prompt during shape selection
     if (state.activeModal === 'select_shape') {
         ctx.fillStyle = COLORS.BLACK;
-        ctx.fillRect(10, canvas.height - 40, state.wallWidth - 20, 30);
+        ctx.fillRect(10, visibleWallH - 40, wallW - 20, 30);
         ctx.strokeStyle = COLORS.WHITE;
         ctx.lineWidth = 2;
-        ctx.strokeRect(10, canvas.height - 40, state.wallWidth - 20, 30);
+        ctx.strokeRect(10, visibleWallH - 40, wallW - 20, 30);
         ctx.fillStyle = COLORS.SELECTION_YELLOW;
         ctx.font = '8px "Press Start 2P"';
         ctx.textAlign = 'center';
-        ctx.fillText('Select shape with Left/Right or click it.', state.wallWidth / 2, canvas.height - 22);
+        ctx.fillText('Select shape with Left/Right or click it.', wallW / 2, visibleWallH - 22);
     }
 
     ctx.restore();
@@ -395,25 +405,25 @@ function drawClimbingScreen() {
     // --- STARRY STRIP RIGHT OF WALL (+ 1 CARD Text in Green) ---
     ctx.save();
     ctx.fillStyle = COLORS.BLACK;
-    ctx.fillRect(state.starStripX, 0, state.starStripWidth, canvas.height);
+    ctx.fillRect(starX, 0, starW, visibleWallH);
 
     ctx.fillStyle = COLORS.WHITE;
     for (let i = 0; i < 12; i++) {
-        const sx = state.starStripX + ((i * 13) % state.starStripWidth);
-        const sy = (i * 47) % canvas.height;
+        const sx = starX + ((i * 13) % starW);
+        const sy = (i * 47) % visibleWallH;
         ctx.fillRect(sx, sy, 2, 2);
     }
 
     // Floating "+ 1 CARD" / "+ 2 CARDS" text in Green Shades
     state.lines.forEach(line => {
         const screenY = line.y - cameraY;
-        if (screenY >= 0 && screenY <= canvas.height) {
+        if (screenY >= 0 && screenY <= visibleWallH) {
             ctx.fillStyle = allCardsInHand ? COLORS.RED : (line.active ? '#00FF66' : '#225533');
             ctx.font = '7px "Press Start 2P"';
             ctx.textAlign = 'center';
             const val = line.value || 1;
-            ctx.fillText(`+ ${val}`, state.starStripX + state.starStripWidth / 2, screenY - 5);
-            ctx.fillText(val > 1 ? 'CARDS' : 'CARD', state.starStripX + state.starStripWidth / 2, screenY + 8);
+            ctx.fillText(`+ ${val}`, starX + starW / 2, screenY - 5);
+            ctx.fillText(val > 1 ? 'CARDS' : 'CARD', starX + starW / 2, screenY + 8);
         }
     });
     ctx.restore();
@@ -421,87 +431,163 @@ function drawClimbingScreen() {
     // Solid Black Top HUD Background Bar
     ctx.save();
     ctx.fillStyle = COLORS.BLACK;
-    ctx.fillRect(0, 0, 400, 45);
+    ctx.fillRect(0, 0, wallW, 45);
     ctx.strokeStyle = COLORS.WHITE;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(0, 45);
-    ctx.lineTo(400, 45);
+    ctx.lineTo(wallW, 45);
     ctx.stroke();
     ctx.restore();
 
-    // --- RIGHT HALF: CARD AREA (8-Bit Wood Table) ---
+    // --- CARD AREA (8-Bit Wood Table) ---
     ctx.save();
-    draw8BitWoodTexture(state.cardAreaX, 0, state.cardAreaWidth, canvas.height);
+    if (isMobileMode) {
+        // Mobile Mode: Bottom Section (0, 460, 600, 340)
+        draw8BitWoodTexture(0, 460, 600, 340);
 
-    // Coins Indicator
-    ctx.fillStyle = COLORS.BLACK;
-    ctx.fillRect(state.cardAreaX + 20, 20, 120, 35);
-    ctx.strokeStyle = COLORS.GOLD;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(state.cardAreaX + 20, 20, 120, 35);
-    ctx.fillStyle = COLORS.GOLD;
-    ctx.font = '12px "Press Start 2P"';
-    ctx.textAlign = 'left';
-    ctx.fillText(`COINS: ${state.coins}¢`, state.cardAreaX + 30, 42);
+        // Top control bar at y = 472
+        // Coins Indicator
+        ctx.fillStyle = COLORS.BLACK;
+        ctx.fillRect(15, 472, 115, 32);
+        ctx.strokeStyle = COLORS.GOLD;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(15, 472, 115, 32);
+        ctx.fillStyle = COLORS.GOLD;
+        ctx.font = '10px "Press Start 2P"';
+        ctx.textAlign = 'left';
+        ctx.fillText(`COINS:${state.coins}¢`, 23, 492);
 
-    // Draw / Discard Buttons
-    drawPileButton(state.cardAreaX + 20, 75, 110, 50, `DRAW (${state.drawPile.length})`);
-    drawPileButton(state.cardAreaX + 150, 75, 110, 50, `DISCARD (${state.discardPile.length})`);
+        // Draw / Discard Buttons
+        drawPileButton(140, 472, 115, 32, `DRAW (${state.drawPile.length})`);
+        drawPileButton(265, 472, 115, 32, `DISC (${state.discardPile.length})`);
 
-    // Give Up Button
-    ctx.fillStyle = COLORS.RED;
-    ctx.fillRect(state.cardAreaX + 275, 20, 105, 105);
-    ctx.strokeStyle = COLORS.WHITE;
-    ctx.lineWidth = 3;
-    ctx.strokeRect(state.cardAreaX + 275, 20, 105, 105);
-    ctx.fillStyle = COLORS.WHITE;
-    ctx.font = '12px "Press Start 2P"';
-    ctx.textAlign = 'center';
-    ctx.fillText('GIVE UP', state.cardAreaX + 327, 75);
+        // Give Up Button
+        ctx.fillStyle = COLORS.RED;
+        ctx.fillRect(390, 472, 195, 32);
+        ctx.strokeStyle = COLORS.WHITE;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(390, 472, 195, 32);
+        ctx.fillStyle = COLORS.WHITE;
+        ctx.font = '10px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.fillText('GIVE UP', 487, 492);
 
-    // Player Cards in Hand (No Text on Card Face)
-    const cardsPerPage = 6;
-    const totalHandPages = Math.ceil(state.hand.length / cardsPerPage) || 1;
-    if (state.handPage >= totalHandPages) state.handPage = Math.max(0, totalHandPages - 1);
+        // Hand Header & Pagination
+        const cardsPerPage = 6;
+        const totalHandPages = Math.ceil(state.hand.length / cardsPerPage) || 1;
+        if (state.handPage >= totalHandPages) state.handPage = Math.max(0, totalHandPages - 1);
 
-    ctx.fillStyle = COLORS.WHITE;
-    ctx.font = '10px "Press Start 2P"';
-    ctx.textAlign = 'left';
-    if (state.hand.length > cardsPerPage) {
-        ctx.fillText(`HAND (${state.hand.length}) P.${state.handPage + 1}/${totalHandPages}`, state.cardAreaX + 20, 155);
+        ctx.fillStyle = COLORS.WHITE;
+        ctx.font = '10px "Press Start 2P"';
+        ctx.textAlign = 'left';
+        if (state.hand.length > cardsPerPage) {
+            ctx.fillText(`HAND (${state.hand.length}) P.${state.handPage + 1}/${totalHandPages}`, 20, 526);
 
-        // Prev Page (<)
-        ctx.fillStyle = (state.handPage > 0) ? COLORS.GOLD : '#555555';
-        ctx.fillRect(state.cardAreaX + 280, 138, 25, 22);
-        ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 1.5; ctx.strokeRect(state.cardAreaX + 280, 138, 25, 22);
-        ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
-        ctx.fillText('<', state.cardAreaX + 292, 153);
+            // Prev Page (<)
+            ctx.fillStyle = (state.handPage > 0) ? COLORS.GOLD : '#555555';
+            ctx.fillRect(480, 510, 45, 24);
+            ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 1.5; ctx.strokeRect(480, 510, 45, 24);
+            ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
+            ctx.fillText('<', 502, 526);
 
-        // Next Page (>)
-        ctx.fillStyle = (state.handPage < totalHandPages - 1) ? COLORS.GOLD : '#555555';
-        ctx.fillRect(state.cardAreaX + 315, 138, 25, 22);
-        ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 1.5; ctx.strokeRect(state.cardAreaX + 315, 138, 25, 22);
-        ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
-        ctx.fillText('>', state.cardAreaX + 327, 153);
+            // Next Page (>)
+            ctx.fillStyle = (state.handPage < totalHandPages - 1) ? COLORS.GOLD : '#555555';
+            ctx.fillRect(535, 510, 45, 24);
+            ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 1.5; ctx.strokeRect(535, 510, 45, 24);
+            ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
+            ctx.fillText('>', 557, 526);
+        } else {
+            ctx.fillText('YOUR HAND:', 20, 526);
+        }
+
+        // Hand Cards (2 rows of 3 columns)
+        const startIndex = state.handPage * cardsPerPage;
+        const visibleCards = state.hand.slice(startIndex, startIndex + cardsPerPage);
+        const cardW = 175, cardH = 118;
+
+        visibleCards.forEach((card, localIdx) => {
+            const actualIdx = startIndex + localIdx;
+            const col = localIdx % 3;
+            const row = Math.floor(localIdx / 3);
+            const cx = 15 + col * 192;
+            const cy = 540 + row * 126;
+            const playable = isClimbCardPlayable(card);
+            drawClimbCard(card, cx, cy, cardW, cardH, state.selectedCardIndex === actualIdx, playable);
+        });
     } else {
-        ctx.fillText('YOUR HAND:', state.cardAreaX + 20, 155);
+        // Desktop Mode: Right Section (400, 0, 400, 600)
+        draw8BitWoodTexture(state.cardAreaX, 0, state.cardAreaWidth, canvas.height);
+
+        // Coins Indicator
+        ctx.fillStyle = COLORS.BLACK;
+        ctx.fillRect(state.cardAreaX + 20, 20, 120, 35);
+        ctx.strokeStyle = COLORS.GOLD;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(state.cardAreaX + 20, 20, 120, 35);
+        ctx.fillStyle = COLORS.GOLD;
+        ctx.font = '12px "Press Start 2P"';
+        ctx.textAlign = 'left';
+        ctx.fillText(`COINS: ${state.coins}¢`, state.cardAreaX + 30, 42);
+
+        // Draw / Discard Buttons
+        drawPileButton(state.cardAreaX + 20, 75, 110, 50, `DRAW (${state.drawPile.length})`);
+        drawPileButton(state.cardAreaX + 150, 75, 110, 50, `DISCARD (${state.discardPile.length})`);
+
+        // Give Up Button
+        ctx.fillStyle = COLORS.RED;
+        ctx.fillRect(state.cardAreaX + 275, 20, 105, 105);
+        ctx.strokeStyle = COLORS.WHITE;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(state.cardAreaX + 275, 20, 105, 105);
+        ctx.fillStyle = COLORS.WHITE;
+        ctx.font = '12px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.fillText('GIVE UP', state.cardAreaX + 327, 75);
+
+        // Hand Header & Pagination
+        const cardsPerPage = 6;
+        const totalHandPages = Math.ceil(state.hand.length / cardsPerPage) || 1;
+        if (state.handPage >= totalHandPages) state.handPage = Math.max(0, totalHandPages - 1);
+
+        ctx.fillStyle = COLORS.WHITE;
+        ctx.font = '10px "Press Start 2P"';
+        ctx.textAlign = 'left';
+        if (state.hand.length > cardsPerPage) {
+            ctx.fillText(`HAND (${state.hand.length}) P.${state.handPage + 1}/${totalHandPages}`, state.cardAreaX + 20, 155);
+
+            // Prev Page (<)
+            ctx.fillStyle = (state.handPage > 0) ? COLORS.GOLD : '#555555';
+            ctx.fillRect(state.cardAreaX + 280, 138, 25, 22);
+            ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 1.5; ctx.strokeRect(state.cardAreaX + 280, 138, 25, 22);
+            ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
+            ctx.fillText('<', state.cardAreaX + 292, 153);
+
+            // Next Page (>)
+            ctx.fillStyle = (state.handPage < totalHandPages - 1) ? COLORS.GOLD : '#555555';
+            ctx.fillRect(state.cardAreaX + 315, 138, 25, 22);
+            ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 1.5; ctx.strokeRect(state.cardAreaX + 315, 138, 25, 22);
+            ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
+            ctx.fillText('>', state.cardAreaX + 327, 153);
+        } else {
+            ctx.fillText('YOUR HAND:', state.cardAreaX + 20, 155);
+        }
+
+        const handY = 170;
+        const cardW = 100, cardH = 140;
+        const startIndex = state.handPage * cardsPerPage;
+        const visibleCards = state.hand.slice(startIndex, startIndex + cardsPerPage);
+
+        visibleCards.forEach((card, localIdx) => {
+            const actualIdx = startIndex + localIdx;
+            const col = localIdx % 3;
+            const row = Math.floor(localIdx / 3);
+            const cx = state.cardAreaX + 20 + col * 120;
+            const cy = handY + row * 155;
+            const playable = isClimbCardPlayable(card);
+            drawClimbCard(card, cx, cy, cardW, cardH, state.selectedCardIndex === actualIdx, playable);
+        });
     }
-
-    const handY = 170;
-    const cardW = 100, cardH = 140;
-    const startIndex = state.handPage * cardsPerPage;
-    const visibleCards = state.hand.slice(startIndex, startIndex + cardsPerPage);
-
-    visibleCards.forEach((card, localIdx) => {
-        const actualIdx = startIndex + localIdx;
-        const col = localIdx % 3;
-        const row = Math.floor(localIdx / 3);
-        const cx = state.cardAreaX + 20 + col * 120;
-        const cy = handY + row * 155;
-        const playable = isClimbCardPlayable(card);
-        drawClimbCard(card, cx, cy, cardW, cardH, state.selectedCardIndex === actualIdx, playable);
-    });
 
     ctx.restore();
 
@@ -1150,139 +1236,237 @@ function drawCardShopScreen() {
     const state = minigameState.climb;
     ctx.save();
 
-    // Wood texture covers the entire canvas (underlying the top HUD)
     draw8BitWoodTexture(0, 0, canvas.width, canvas.height);
 
-    // Player Coins on top right over wood background
-    ctx.fillStyle = COLORS.GOLD;
-    ctx.font = '10px "Press Start 2P"';
-    ctx.textAlign = 'right';
-    ctx.fillText(`YOUR COINS: ${state.coins}¢`, canvas.width - 20, 28);
+    if (isMobileMode) {
+        // Mobile Shop Screen (600x800 portrait)
+        ctx.fillStyle = COLORS.GOLD;
+        ctx.font = '10px "Press Start 2P"';
+        ctx.textAlign = 'left';
+        ctx.fillText(`YOUR COINS: ${state.coins}¢`, 20, 30);
 
-    // Shop Title below top HUD
-    ctx.fillStyle = COLORS.SELECTION_YELLOW;
-    ctx.font = '16px "Press Start 2P"';
-    ctx.textAlign = 'center';
-    ctx.fillText('CARDATORIUM SHOP', canvas.width / 2, 72);
-
-    // 3 Wares Boxes (Spacious 220x195px boxes with generous padding)
-    const shopWares = state.shopWares || [];
-    shopWares.forEach((ware, idx) => {
-        if (!ware) return;
-        const wx = 30 + idx * 260;
-        const wy = 95, ww = 220, wh = 195;
-
-        const wareType = (ware && (ware.type || ware.cardType)) || '';
-        const ownedRings = state.ownedRings || new Set();
-        const isPurchased = Boolean(ware && (ware.purchased || (wareType.startsWith('ring_') && ownedRings.has(wareType))));
-        const warePrice = (ware && typeof ware.price === 'number') ? ware.price : 0;
-        const canAfford = !isPurchased && state.coins >= warePrice;
-
-        ctx.fillStyle = isPurchased ? '#3E2723' : (canAfford ? '#4E342E' : '#2A1B18');
-        ctx.fillRect(wx, wy, ww, wh);
-        ctx.strokeStyle = isPurchased ? '#777777' : (canAfford ? COLORS.GOLD : '#888888');
-        ctx.lineWidth = 3;
-        ctx.strokeRect(wx, wy, ww, wh);
-
-        // Ware Graphic (Top half of box)
-        ctx.save();
-        if (isPurchased) ctx.globalAlpha = 0.7;
-        try {
-            draw8BitWareGraphic(ware || {}, wx, wy, ww, wh);
-        } catch (e) {
-            console.error("Error rendering ware graphic:", e);
-        }
-        ctx.restore();
-
-        // Ware Name beneath image (no overlap!)
-        const wareName = (ware && ware.name) || 'Special Ware';
-        ctx.fillStyle = isPurchased ? '#AAAAAA' : (canAfford ? COLORS.SELECTION_YELLOW : '#888888');
-        ctx.font = '8px "Press Start 2P"';
+        ctx.fillStyle = COLORS.SELECTION_YELLOW;
+        ctx.font = '14px "Press Start 2P"';
         ctx.textAlign = 'center';
-        ctx.fillText(wareName, wx + ww / 2, wy + 93);
+        ctx.fillText('CARDATORIUM SHOP', canvas.width / 2, 55);
 
-        // Ware Description text
-        ctx.fillStyle = isPurchased ? '#888888' : (canAfford ? '#E0E0E0' : '#888888');
-        ctx.font = '7px "Press Start 2P"';
-        const wareDesc = (ware && ware.desc) || '';
-        const lines = wrapTextLines(wareDesc, ww - 24, '7px "Press Start 2P"');
-        lines.forEach((l, i) => {
-            if (wy + 114 + i * 13 < wy + wh - 22) {
-                ctx.fillText(l, wx + ww / 2, wy + 114 + i * 13);
+        // 3 Wares Boxes stacked vertically
+        const shopWares = state.shopWares || [];
+        shopWares.forEach((ware, idx) => {
+            if (!ware) return;
+            const wx = 30;
+            const wy = 75 + idx * 135;
+            const ww = 540;
+            const wh = 122;
+
+            const wareType = (ware && (ware.type || ware.cardType)) || '';
+            const ownedRings = state.ownedRings || new Set();
+            const isPurchased = Boolean(ware && (ware.purchased || (wareType.startsWith('ring_') && ownedRings.has(wareType))));
+            const warePrice = (ware && typeof ware.price === 'number') ? ware.price : 0;
+            const canAfford = !isPurchased && state.coins >= warePrice;
+
+            ctx.fillStyle = isPurchased ? '#3E2723' : (canAfford ? '#4E342E' : '#2A1B18');
+            ctx.fillRect(wx, wy, ww, wh);
+            ctx.strokeStyle = isPurchased ? '#777777' : (canAfford ? COLORS.GOLD : '#888888');
+            ctx.lineWidth = 3;
+            ctx.strokeRect(wx, wy, ww, wh);
+
+            // Icon on left
+            ctx.save();
+            if (isPurchased) ctx.globalAlpha = 0.7;
+            try {
+                draw8BitWareGraphic(ware || {}, wx + 10, wy + 10, 100, 100);
+            } catch (e) {
+                console.error("Error rendering ware graphic:", e);
+            }
+            ctx.restore();
+
+            // Name
+            const wareName = (ware && ware.name) || 'Special Ware';
+            ctx.fillStyle = isPurchased ? '#AAAAAA' : (canAfford ? COLORS.SELECTION_YELLOW : '#888888');
+            ctx.font = '10px "Press Start 2P"';
+            ctx.textAlign = 'left';
+            ctx.fillText(wareName, wx + 130, wy + 30);
+
+            // Desc
+            ctx.fillStyle = isPurchased ? '#888888' : (canAfford ? '#E0E0E0' : '#888888');
+            ctx.font = '8px "Press Start 2P"';
+            const wareDesc = (ware && ware.desc) || '';
+            const lines = wrapTextLines(wareDesc, 240, '8px "Press Start 2P"');
+            lines.forEach((l, i) => {
+                ctx.fillText(l, wx + 130, wy + 55 + i * 15);
+            });
+
+            // Price / BOUGHT Tag
+            ctx.fillStyle = isPurchased ? '#FF5555' : (canAfford ? COLORS.GOLD : '#888888');
+            ctx.font = '10px "Press Start 2P"';
+            ctx.textAlign = 'right';
+            ctx.fillText(isPurchased ? 'SOLD OUT' : `PRICE: ${warePrice}¢`, wx + ww - 20, wy + 30);
+
+            if (isPurchased) {
+                ctx.save();
+                ctx.translate(wx + ww - 90, wy + wh / 2 + 10);
+                ctx.rotate(-Math.PI / 8);
+                ctx.fillStyle = '#D32F2F';
+                ctx.fillRect(-50, -14, 100, 28);
+                ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2; ctx.strokeRect(-50, -14, 100, 28);
+                ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 10px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('BOUGHT!', 0, 0);
+                ctx.restore();
             }
         });
 
-        // Price Tag (Bottom of box)
-        ctx.fillStyle = isPurchased ? '#FF5555' : (canAfford ? COLORS.GOLD : '#888888');
+        // Card Removal Section
+        ctx.fillStyle = COLORS.WHITE;
         ctx.font = '10px "Press Start 2P"';
         ctx.textAlign = 'center';
-        ctx.fillText(isPurchased ? 'SOLD OUT' : `PRICE: ${warePrice}¢`, wx + ww / 2, wy + wh - 12);
+        ctx.fillText('Card Removal is 1¢ (Click card to remove)', canvas.width / 2, 495);
 
-        // CRISP SOLID RED DIAGONAL STAMP WITH "BOUGHT!" TEXT ACROSS THE WARE BOX
-        if (isPurchased) {
-            ctx.save();
-            ctx.translate(wx + ww / 2, wy + wh / 2);
-            ctx.rotate(-Math.PI / 6); // -30 degree angle
-            ctx.fillStyle = '#D32F2F'; // Solid retro red banner
-            ctx.fillRect(-65, -16, 130, 32);
-            ctx.strokeStyle = '#FFFFFF';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(-65, -16, 130, 32);
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = 'bold 12px "Press Start 2P"';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('BOUGHT!', 0, 0);
-            ctx.restore();
+        const deckY = 510;
+        const cardW = 72, cardH = 100;
+        const maxVisible = 6;
+        const totalCards = state.deck.length;
+
+        // Scroll Left Button (<)
+        ctx.fillStyle = (state.deckScrollOffset > 0 || totalCards > maxVisible) ? COLORS.GOLD : '#555555';
+        ctx.fillRect(15, deckY + 25, 35, 45);
+        ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 2; ctx.strokeRect(15, deckY + 25, 35, 45);
+        ctx.fillStyle = COLORS.WHITE; ctx.font = '16px "Press Start 2P"'; ctx.textAlign = 'center';
+        ctx.fillText('<', 32, deckY + 53);
+
+        // Scroll Right Button (>)
+        ctx.fillStyle = (totalCards > maxVisible) ? COLORS.GOLD : '#555555';
+        ctx.fillRect(550, deckY + 25, 35, 45);
+        ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 2; ctx.strokeRect(550, deckY + 25, 35, 45);
+        ctx.fillStyle = COLORS.WHITE; ctx.font = '16px "Press Start 2P"'; ctx.textAlign = 'center';
+        ctx.fillText('>', 567, deckY + 53);
+
+        // Render single row of visible cards
+        const startIdx = state.deckScrollOffset;
+        const endIdx = Math.min(totalCards, startIdx + maxVisible);
+
+        for (let i = startIdx; i < endIdx; i++) {
+            const col = i - startIdx;
+            const cx = 60 + col * 79;
+            drawClimbCard(state.deck[i], cx, deckY, cardW, cardH, false);
         }
-    });
 
-    // Card Removal Section Title
-    ctx.fillStyle = COLORS.WHITE;
-    ctx.font = '11px "Press Start 2P"';
-    ctx.textAlign = 'center';
-    ctx.fillText('Card Removal is 1¢ (Click card to remove)', canvas.width / 2, 310);
+        // Next Wall Button
+        ctx.fillStyle = COLORS.RED;
+        ctx.fillRect(canvas.width / 2 - 120, 685, 240, 50);
+        ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 3; ctx.strokeRect(canvas.width / 2 - 120, 685, 240, 50);
+        ctx.fillStyle = COLORS.WHITE; ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'center';
+        ctx.fillText('NEXT WALL', canvas.width / 2, 715);
+    } else {
+        // Desktop Shop Screen (800x600 landscape)
+        ctx.fillStyle = COLORS.GOLD;
+        ctx.font = '10px "Press Start 2P"';
+        ctx.textAlign = 'right';
+        ctx.fillText(`YOUR COINS: ${state.coins}¢`, canvas.width - 20, 28);
 
-    // Single Horizontal Scrollable Line for Card Removal
-    const deckY = 330;
-    const cardW = 75, cardH = 105;
-    const maxVisible = 6;
-    const totalCards = state.deck.length;
+        ctx.fillStyle = COLORS.SELECTION_YELLOW;
+        ctx.font = '16px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.fillText('CARDATORIUM SHOP', canvas.width / 2, 72);
 
-    // Scroll Left Button (<)
-    ctx.fillStyle = (state.deckScrollOffset > 0 || totalCards > maxVisible) ? COLORS.GOLD : '#555555';
-    ctx.fillRect(40, deckY + 30, 35, 45);
-    ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 2; ctx.strokeRect(40, deckY + 30, 35, 45);
-    ctx.fillStyle = COLORS.WHITE; ctx.font = '16px "Press Start 2P"'; ctx.textAlign = 'center';
-    ctx.fillText('<', 57, deckY + 58);
+        const shopWares = state.shopWares || [];
+        shopWares.forEach((ware, idx) => {
+            if (!ware) return;
+            const wx = 30 + idx * 260;
+            const wy = 95, ww = 220, wh = 195;
 
-    // Scroll Right Button (>)
-    ctx.fillStyle = (totalCards > maxVisible) ? COLORS.GOLD : '#555555';
-    ctx.fillRect(725, deckY + 30, 35, 45);
-    ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 2; ctx.strokeRect(725, deckY + 30, 35, 45);
-    ctx.fillStyle = COLORS.WHITE; ctx.font = '16px "Press Start 2P"'; ctx.textAlign = 'center';
-    ctx.fillText('>', 742, deckY + 58);
+            const wareType = (ware && (ware.type || ware.cardType)) || '';
+            const ownedRings = state.ownedRings || new Set();
+            const isPurchased = Boolean(ware && (ware.purchased || (wareType.startsWith('ring_') && ownedRings.has(wareType))));
+            const warePrice = (ware && typeof ware.price === 'number') ? ware.price : 0;
+            const canAfford = !isPurchased && state.coins >= warePrice;
 
-    // Render single row of visible cards
-    const startIdx = state.deckScrollOffset;
-    const endIdx = Math.min(totalCards, startIdx + maxVisible);
+            ctx.fillStyle = isPurchased ? '#3E2723' : (canAfford ? '#4E342E' : '#2A1B18');
+            ctx.fillRect(wx, wy, ww, wh);
+            ctx.strokeStyle = isPurchased ? '#777777' : (canAfford ? COLORS.GOLD : '#888888');
+            ctx.lineWidth = 3;
+            ctx.strokeRect(wx, wy, ww, wh);
 
-    for (let i = startIdx; i < endIdx; i++) {
-        const col = i - startIdx;
-        const cx = 100 + col * 100;
-        drawClimbCard(state.deck[i], cx, deckY, cardW, cardH, false);
+            ctx.save();
+            if (isPurchased) ctx.globalAlpha = 0.7;
+            try {
+                draw8BitWareGraphic(ware || {}, wx, wy, ww, wh);
+            } catch (e) {
+                console.error("Error rendering ware graphic:", e);
+            }
+            ctx.restore();
+
+            const wareName = (ware && ware.name) || 'Special Ware';
+            ctx.fillStyle = isPurchased ? '#AAAAAA' : (canAfford ? COLORS.SELECTION_YELLOW : '#888888');
+            ctx.font = '8px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText(wareName, wx + ww / 2, wy + 93);
+
+            ctx.fillStyle = isPurchased ? '#888888' : (canAfford ? '#E0E0E0' : '#888888');
+            ctx.font = '7px "Press Start 2P"';
+            const wareDesc = (ware && ware.desc) || '';
+            const lines = wrapTextLines(wareDesc, ww - 24, '7px "Press Start 2P"');
+            lines.forEach((l, i) => {
+                if (wy + 114 + i * 13 < wy + wh - 22) {
+                    ctx.fillText(l, wx + ww / 2, wy + 114 + i * 13);
+                }
+            });
+
+            ctx.fillStyle = isPurchased ? '#FF5555' : (canAfford ? COLORS.GOLD : '#888888');
+            ctx.font = '10px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText(isPurchased ? 'SOLD OUT' : `PRICE: ${warePrice}¢`, wx + ww / 2, wy + wh - 12);
+
+            if (isPurchased) {
+                ctx.save();
+                ctx.translate(wx + ww / 2, wy + wh / 2);
+                ctx.rotate(-Math.PI / 6);
+                ctx.fillStyle = '#D32F2F';
+                ctx.fillRect(-65, -16, 130, 32);
+                ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2; ctx.strokeRect(-65, -16, 130, 32);
+                ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 12px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('BOUGHT!', 0, 0);
+                ctx.restore();
+            }
+        });
+
+        ctx.fillStyle = COLORS.WHITE;
+        ctx.font = '11px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.fillText('Card Removal is 1¢ (Click card to remove)', canvas.width / 2, 310);
+
+        const deckY = 330;
+        const cardW = 75, cardH = 105;
+        const maxVisible = 6;
+        const totalCards = state.deck.length;
+
+        ctx.fillStyle = (state.deckScrollOffset > 0 || totalCards > maxVisible) ? COLORS.GOLD : '#555555';
+        ctx.fillRect(40, deckY + 30, 35, 45);
+        ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 2; ctx.strokeRect(40, deckY + 30, 35, 45);
+        ctx.fillStyle = COLORS.WHITE; ctx.font = '16px "Press Start 2P"'; ctx.textAlign = 'center';
+        ctx.fillText('<', 57, deckY + 58);
+
+        ctx.fillStyle = (totalCards > maxVisible) ? COLORS.GOLD : '#555555';
+        ctx.fillRect(725, deckY + 30, 35, 45);
+        ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 2; ctx.strokeRect(725, deckY + 30, 35, 45);
+        ctx.fillStyle = COLORS.WHITE; ctx.font = '16px "Press Start 2P"'; ctx.textAlign = 'center';
+        ctx.fillText('>', 742, deckY + 58);
+
+        const startIdx = state.deckScrollOffset;
+        const endIdx = Math.min(totalCards, startIdx + maxVisible);
+
+        for (let i = startIdx; i < endIdx; i++) {
+            const col = i - startIdx;
+            const cx = 100 + col * 100;
+            drawClimbCard(state.deck[i], cx, deckY, cardW, cardH, false);
+        }
+
+        ctx.fillStyle = COLORS.RED;
+        ctx.fillRect(canvas.width / 2 - 100, 525, 200, 50);
+        ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 3; ctx.strokeRect(canvas.width / 2 - 100, 525, 200, 50);
+        ctx.fillStyle = COLORS.WHITE; ctx.font = '12px "Press Start 2P"'; ctx.textAlign = 'center';
+        ctx.fillText('NEXT WALL', canvas.width / 2, 555);
     }
-
-    // Next Wall Button
-    ctx.fillStyle = COLORS.RED;
-    ctx.fillRect(canvas.width / 2 - 100, 525, 200, 50);
-    ctx.strokeStyle = COLORS.WHITE;
-    ctx.lineWidth = 3;
-    ctx.strokeRect(canvas.width / 2 - 100, 525, 200, 50);
-    ctx.fillStyle = COLORS.WHITE;
-    ctx.font = '12px "Press Start 2P"';
-    ctx.textAlign = 'center';
-    ctx.fillText('NEXT WALL', canvas.width / 2, 555);
 
     ctx.restore();
 }
@@ -1317,8 +1501,9 @@ function handleClimbClick(x, y) {
 
         if (state.activeModal === 'select_shape') {
             let clickedTarget = false;
+            const visibleWallH = isMobileMode ? 460 : canvas.height;
+            const cameraY = Math.max(0, Math.min(state.wallHeight - visibleWallH, state.player.y - visibleWallH / 2));
             state.targetShapes.forEach((shape, idx) => {
-                const cameraY = Math.max(0, Math.min(state.wallHeight - canvas.height, state.player.y - canvas.height / 2));
                 const sy = shape.y - cameraY;
                 if (Math.hypot(x - shape.x, y - sy) < 25) {
                     state.highlightedTargetIndex = idx;
@@ -1333,106 +1518,236 @@ function handleClimbClick(x, y) {
             return;
         }
 
-        if (x >= state.cardAreaX + 275 && x <= state.cardAreaX + 380 && y >= 20 && y <= 125) {
-            triggerClimbGiveUp();
-            return;
-        }
-
-        if (x >= state.cardAreaX + 20 && x <= state.cardAreaX + 130 && y >= 75 && y <= 125) {
-            openDrawPileModal();
-            return;
-        }
-        if (x >= state.cardAreaX + 150 && x <= state.cardAreaX + 260 && y >= 75 && y <= 125) {
-            openDiscardPileModal();
-            return;
-        }
-
-        const cardsPerPage = 6;
-        const totalHandPages = Math.ceil(state.hand.length / cardsPerPage) || 1;
-        if (state.hand.length > cardsPerPage) {
-            // Prev Page (<)
-            if (x >= state.cardAreaX + 280 && x <= state.cardAreaX + 305 && y >= 138 && y <= 160) {
-                if (state.handPage > 0) {
-                    state.handPage--;
-                    audio.playSFX('ui');
-                }
+        if (isMobileMode) {
+            // Give Up Button
+            if (x >= 390 && x <= 585 && y >= 472 && y <= 504) {
+                triggerClimbGiveUp();
                 return;
             }
-            // Next Page (>)
-            if (x >= state.cardAreaX + 315 && x <= state.cardAreaX + 340 && y >= 138 && y <= 160) {
-                if (state.handPage < totalHandPages - 1) {
-                    state.handPage++;
-                    audio.playSFX('ui');
-                }
+            // Draw Pile Button
+            if (x >= 140 && x <= 255 && y >= 472 && y <= 504) {
+                openDrawPileModal();
                 return;
             }
-        }
-
-        const handY = 170;
-        const cardW = 100, cardH = 140;
-        const startIndex = state.handPage * cardsPerPage;
-        const visibleCards = state.hand.slice(startIndex, startIndex + cardsPerPage);
-
-        visibleCards.forEach((card, localIdx) => {
-            const actualIdx = startIndex + localIdx;
-            const col = localIdx % 3;
-            const row = Math.floor(localIdx / 3);
-            const cx = state.cardAreaX + 20 + col * 120;
-            const cy = handY + row * 155;
-            if (x >= cx && x <= cx + cardW && y >= cy && y <= cy + cardH) {
-                state.selectedCardIndex = actualIdx;
-                state.activeModal = 'card_modal';
-                audio.playSFX('ui');
+            // Discard Pile Button
+            if (x >= 265 && x <= 380 && y >= 472 && y <= 504) {
+                openDiscardPileModal();
+                return;
             }
-        });
+
+            // Hand Pagination
+            const cardsPerPage = 6;
+            const totalHandPages = Math.ceil(state.hand.length / cardsPerPage) || 1;
+            if (state.hand.length > cardsPerPage) {
+                // Prev (<)
+                if (x >= 480 && x <= 525 && y >= 510 && y <= 534) {
+                    if (state.handPage > 0) {
+                        state.handPage--;
+                        audio.playSFX('ui');
+                    }
+                    return;
+                }
+                // Next (>)
+                if (x >= 535 && x <= 580 && y >= 510 && y <= 534) {
+                    if (state.handPage < totalHandPages - 1) {
+                        state.handPage++;
+                        audio.playSFX('ui');
+                    }
+                    return;
+                }
+            }
+
+            // Hand Cards (2 rows of 3 columns)
+            const startIndex = state.handPage * cardsPerPage;
+            const visibleCards = state.hand.slice(startIndex, startIndex + cardsPerPage);
+            const cardW = 175, cardH = 118;
+
+            visibleCards.forEach((card, localIdx) => {
+                const actualIdx = startIndex + localIdx;
+                const col = localIdx % 3;
+                const row = Math.floor(localIdx / 3);
+                const cx = 15 + col * 192;
+                const cy = 540 + row * 126;
+                if (x >= cx && x <= cx + cardW && y >= cy && y <= cy + cardH) {
+                    state.selectedCardIndex = actualIdx;
+                    state.activeModal = 'card_modal';
+                    audio.playSFX('ui');
+                }
+            });
+        } else {
+            // Desktop Mode
+            if (x >= state.cardAreaX + 275 && x <= state.cardAreaX + 380 && y >= 20 && y <= 125) {
+                triggerClimbGiveUp();
+                return;
+            }
+
+            if (x >= state.cardAreaX + 20 && x <= state.cardAreaX + 130 && y >= 75 && y <= 125) {
+                openDrawPileModal();
+                return;
+            }
+            if (x >= state.cardAreaX + 150 && x <= state.cardAreaX + 260 && y >= 75 && y <= 125) {
+                openDiscardPileModal();
+                return;
+            }
+
+            const cardsPerPage = 6;
+            const totalHandPages = Math.ceil(state.hand.length / cardsPerPage) || 1;
+            if (state.hand.length > cardsPerPage) {
+                if (x >= state.cardAreaX + 280 && x <= state.cardAreaX + 305 && y >= 138 && y <= 160) {
+                    if (state.handPage > 0) {
+                        state.handPage--;
+                        audio.playSFX('ui');
+                    }
+                    return;
+                }
+                if (x >= state.cardAreaX + 315 && x <= state.cardAreaX + 340 && y >= 138 && y <= 160) {
+                    if (state.handPage < totalHandPages - 1) {
+                        state.handPage++;
+                        audio.playSFX('ui');
+                    }
+                    return;
+                }
+            }
+
+            const handY = 170;
+            const cardW = 100, cardH = 140;
+            const startIndex = state.handPage * cardsPerPage;
+            const visibleCards = state.hand.slice(startIndex, startIndex + cardsPerPage);
+
+            visibleCards.forEach((card, localIdx) => {
+                const actualIdx = startIndex + localIdx;
+                const col = localIdx % 3;
+                const row = Math.floor(localIdx / 3);
+                const cx = state.cardAreaX + 20 + col * 120;
+                const cy = handY + row * 155;
+                if (x >= cx && x <= cx + cardW && y >= cy && y <= cy + cardH) {
+                    state.selectedCardIndex = actualIdx;
+                    state.activeModal = 'card_modal';
+                    audio.playSFX('ui');
+                }
+            });
+        }
     } else if (state.subPhase === 'shop') {
-        if (x >= canvas.width / 2 - 100 && x <= canvas.width / 2 + 100 && y >= 525 && y <= 575) {
-            startClimbingRound();
-            return;
-        }
+        if (isMobileMode) {
+            // Next Wall Button
+            if (x >= canvas.width / 2 - 120 && x <= canvas.width / 2 + 120 && y >= 685 && y <= 735) {
+                startClimbingRound();
+                return;
+            }
 
-        // Shop Wares Clicks
-        state.shopWares.forEach((ware, idx) => {
-            const wx = 30 + idx * 260;
-            const wy = 95, ww = 220, wh = 195;
-            if (x >= wx && x <= wx + ww && y >= wy && y <= wy + wh) {
-                if (state.coins >= ware.price) {
-                    confirmWarePurchase(ware);
+            // Shop Wares
+            state.shopWares.forEach((ware, idx) => {
+                const wx = 30, wy = 75 + idx * 135, ww = 540, wh = 122;
+                if (x >= wx && x <= wx + ww && y >= wy && y <= wy + wh) {
+                    if (state.coins >= ware.price) {
+                        confirmWarePurchase(ware);
+                    } else {
+                        audio.playSFX('FAILURE');
+                    }
+                }
+            });
+
+            // Card Removal Scroll
+            const deckY = 510;
+            const maxVisible = 6;
+            const totalCards = state.deck.length;
+
+            // Scroll Left (<)
+            if (x >= 15 && x <= 50 && y >= deckY + 25 && y <= deckY + 70) {
+                if (state.deckScrollOffset > 0) {
+                    state.deckScrollOffset--;
+                    audio.playSFX('ui');
+                }
+                return;
+            }
+            // Scroll Right (>)
+            if (x >= 550 && x <= 585 && y >= deckY + 25 && y <= deckY + 70) {
+                if (state.deckScrollOffset + maxVisible < totalCards) {
+                    state.deckScrollOffset++;
+                    audio.playSFX('ui');
+                }
+                return;
+            }
+
+            // Card Removal Selection
+            const startIdx = state.deckScrollOffset;
+            const endIdx = Math.min(totalCards, startIdx + maxVisible);
+            const cardW = 72, cardH = 100;
+
+            for (let i = startIdx; i < endIdx; i++) {
+                const col = i - startIdx;
+                const cx = 60 + col * 79;
+                if (x >= cx && x <= cx + cardW && y >= deckY && y <= deckY + cardH) {
+                    if (state.coins >= 1 && state.deck.length > 1) {
+                        state.coins -= 1;
+                        state.deck.splice(i, 1);
+                        audio.playSFX('TADA');
+                        if (state.deckScrollOffset > 0 && state.deckScrollOffset >= state.deck.length) {
+                            state.deckScrollOffset = Math.max(0, state.deck.length - 1);
+                        }
+                    } else {
+                        audio.playSFX('FAILURE');
+                    }
+                    return;
                 }
             }
-        });
+        } else {
+            // Desktop Mode Shop Clicks
+            if (x >= canvas.width / 2 - 100 && x <= canvas.width / 2 + 100 && y >= 525 && y <= 575) {
+                startClimbingRound();
+                return;
+            }
 
-        const deckY = 330;
-        const cardW = 75, cardH = 105;
-        const maxVisible = 6;
-        const totalCards = state.deck.length;
+            state.shopWares.forEach((ware, idx) => {
+                const wx = 30 + idx * 260;
+                const wy = 95, ww = 220, wh = 195;
+                if (x >= wx && x <= wx + ww && y >= wy && y <= wy + wh) {
+                    if (state.coins >= ware.price) {
+                        confirmWarePurchase(ware);
+                    } else {
+                        audio.playSFX('FAILURE');
+                    }
+                }
+            });
 
-        // Left Scroll Button (<) Click
-        if (x >= 40 && x <= 75 && y >= deckY + 30 && y <= deckY + 75) {
-            const maxOffset = Math.max(0, totalCards - maxVisible);
-            state.deckScrollOffset = (state.deckScrollOffset - 1 + (maxOffset + 1)) % (maxOffset + 1);
-            audio.playSFX('ui');
-            return;
-        }
+            const deckY = 330;
+            const maxVisible = 6;
+            const totalCards = state.deck.length;
 
-        // Right Scroll Button (>) Click
-        if (x >= 725 && x <= 760 && y >= deckY + 30 && y <= deckY + 75) {
-            const maxOffset = Math.max(0, totalCards - maxVisible);
-            state.deckScrollOffset = (state.deckScrollOffset + 1) % (maxOffset + 1);
-            audio.playSFX('ui');
-            return;
-        }
+            if (x >= 40 && x <= 75 && y >= deckY + 30 && y <= deckY + 75) {
+                if (state.deckScrollOffset > 0) {
+                    state.deckScrollOffset--;
+                    audio.playSFX('ui');
+                }
+                return;
+            }
+            if (x >= 725 && x <= 760 && y >= deckY + 30 && y <= deckY + 75) {
+                if (state.deckScrollOffset + maxVisible < totalCards) {
+                    state.deckScrollOffset++;
+                    audio.playSFX('ui');
+                }
+                return;
+            }
 
-        // Single Row Card Removal Clicks
-        const startIdx = state.deckScrollOffset;
-        const endIdx = Math.min(totalCards, startIdx + maxVisible);
+            const startIdx = state.deckScrollOffset;
+            const endIdx = Math.min(totalCards, startIdx + maxVisible);
+            const cardW = 75, cardH = 105;
 
-        for (let i = startIdx; i < endIdx; i++) {
-            const col = i - startIdx;
-            const cx = 100 + col * 100;
-            if (x >= cx && x <= cx + cardW && y >= deckY && y <= deckY + cardH) {
-                if (state.coins >= 1) {
-                    confirmCardDeletion(state.deck[i], i);
+            for (let i = startIdx; i < endIdx; i++) {
+                const col = i - startIdx;
+                const cx = 100 + col * 100;
+                if (x >= cx && x <= cx + cardW && y >= deckY && y <= deckY + cardH) {
+                    if (state.coins >= 1 && state.deck.length > 1) {
+                        state.coins -= 1;
+                        state.deck.splice(i, 1);
+                        audio.playSFX('TADA');
+                        if (state.deckScrollOffset > 0 && state.deckScrollOffset >= state.deck.length) {
+                            state.deckScrollOffset = Math.max(0, state.deck.length - 1);
+                        }
+                    } else {
+                        audio.playSFX('FAILURE');
+                    }
+                    return;
                 }
             }
         }

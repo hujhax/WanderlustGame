@@ -12,7 +12,7 @@ function startFightingGame(nextPhase, isShadow = false) {
 
     const startFight = () => {
         currentPhase = PHASES.CONFRONTATION_PLAY;
-        const groundY = isMobileMode ? 520 : 400;
+        const groundY = isMobileMode ? 580 : 400;
         const pX = isMobileMode ? 80 : 100;
         const aiX = isMobileMode ? 440 : 600;
         fightingState = {

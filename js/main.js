@@ -45,7 +45,7 @@ function updateTouchState(e) {
     touchState.fightingPunch = false;
     touchState.fightingKick = false;
 
-    const activePointers = e.touches ? Array.from(e.touches) : (e.buttons === 1 ? [e] : []);
+    const activePointers = e.touches ? Array.from(e.touches) : (e.buttons === 1 || e.type === 'mousedown' ? [e] : []);
     activePointers.forEach(pointer => {
         const pos = getCanvasPointerPos(pointer);
         const x = pos.x, y = pos.y;
@@ -70,6 +70,9 @@ if (typeof window !== 'undefined') {
     window.addEventListener('touchmove', updateTouchState, { passive: true });
     window.addEventListener('touchend', updateTouchState, { passive: true });
     window.addEventListener('touchcancel', updateTouchState, { passive: true });
+    window.addEventListener('mousedown', updateTouchState);
+    window.addEventListener('mousemove', updateTouchState);
+    window.addEventListener('mouseup', updateTouchState);
 }
 
 let selectedIndex = 0;
@@ -293,7 +296,7 @@ window.addEventListener('mousedown', (e) => {
             const opts = currentDialog.options;
 
             opts.forEach((optText, idx) => {
-                const optX = isMobileMode ? (30 + 220 + idx * 110) : (450 + idx * 110);
+                const optX = isMobileMode ? (25 + 220 + idx * 110) : (450 + idx * 110);
                 const optW = isMobileMode ? 95 : 90;
                 const optH = isMobileMode ? 34 : 32;
 
@@ -344,7 +347,7 @@ window.addEventListener('mousedown', (e) => {
         }
     } else if (currentPhase === PHASES.IN_THE_CAR) {
         if (inTheCarState.waitingForResponse && isMobileMode) {
-            const boxX = 30, boxY = 200, boxW = 490;
+            const boxX = 25, boxY = 200, boxW = 490;
             inTheCarState.options.forEach((opt, i) => {
                 const cardY = boxY + 55 + i * 110;
                 if (x >= boxX + 15 && x <= boxX + 15 + (boxW - 30) && y >= cardY && y <= cardY + 95) {
@@ -424,7 +427,7 @@ window.addEventListener('mousedown', (e) => {
             startFightingGame(PHASES.TOGETHER_AGAIN, true);
         }
     } else if (currentPhase === PHASES.CLOSING_CREDITS) {
-        if (isMobileMode) {
+        if (isMobileMode && (creditsFinished || (creditsStartTime > 0 && Date.now() - creditsStartTime > 3000))) {
             currentPhase = PHASES.TITLE;
             currentMinigameIndex = 0; score = 0; playedMinigames = [];
             audio.play('CHICAGO', 12); creditsStartTime = 0;

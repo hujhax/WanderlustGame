@@ -115,9 +115,9 @@ function drawDialogBox() {
     const isTop = currentDialog.style === 'top';
     const isCar = currentPhase === PHASES.IN_THE_CAR;
 
-    const boxW = isMobileMode ? 540 : (isCar ? 630 : 700);
+    const boxW = isMobileMode ? 490 : (isCar ? 630 : 700);
     const boxH = isMobileMode ? 220 : 185;
-    const boxX = isMobileMode ? 30 : 50;
+    const boxX = isMobileMode ? 25 : 50;
     const boxY = isTop ? 20 : canvas.height - boxH - 20;
 
     // Optional illustration drawn behind the dialog box
@@ -196,7 +196,7 @@ function drawDialogBox() {
 }
 
 function drawIntimacyBar() {
-    const barX = isMobileMode ? 540 : 710;
+    const barX = isMobileMode ? 545 : 710;
     const barY = isMobileMode ? 60 : 80;
     const barH = isMobileMode ? 240 : 320;
     const barW = isMobileMode ? 26 : 30;
@@ -256,7 +256,7 @@ function drawInTheCar() {
     drawTitle(false);
     drawIntimacyBar();
     if (inTheCarState.waitingForResponse) {
-        const boxX = isMobileMode ? 30 : 50;
+        const boxX = isMobileMode ? 25 : 50;
         const boxY = isMobileMode ? 200 : 180;
         const boxW = isMobileMode ? 490 : 630;
         const boxH = isMobileMode ? 400 : 220;
