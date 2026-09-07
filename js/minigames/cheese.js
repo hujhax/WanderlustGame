@@ -1,8 +1,14 @@
 const CHEESE_TYPES = 8;
 const GRID_SIZE = 8;
 const CELL_SIZE = 55;
-const FIELD_X = 280;
-const FIELD_Y = 100;
+
+function getCheeseFieldX() {
+    return isMobileMode ? Math.floor((canvas.width - GRID_SIZE * CELL_SIZE) / 2) : 280;
+}
+
+function getCheeseFieldY() {
+    return isMobileMode ? 240 : 100;
+}
 
 function initCheeseGrid() {
     minigameState.grid = [];
@@ -12,6 +18,7 @@ function initCheeseGrid() {
     minigameState.chainLevel = 0;
     minigameState.eatPressCount = 0;
 
+    const fx = getCheeseFieldX(), fy = getCheeseFieldY();
     for (let r = 0; r < GRID_SIZE; r++) {
         minigameState.grid[r] = [];
         minigameState.visualGrid[r] = [];
@@ -20,8 +27,8 @@ function initCheeseGrid() {
             minigameState.grid[r][c] = type;
             minigameState.visualGrid[r][c] = { 
                 type, 
-                x: FIELD_X + c * CELL_SIZE, 
-                y: FIELD_Y + r * CELL_SIZE, 
+                x: fx + c * CELL_SIZE, 
+                y: fy + r * CELL_SIZE, 
                 wobble: 0 
             };
         }
@@ -83,11 +90,12 @@ function drawCheese(type, x, y, size, wobble = 0) {
 
 function updateVisuals() {
     let anyMoving = false;
+    const fx = getCheeseFieldX(), fy = getCheeseFieldY();
     for (let r = 0; r < GRID_SIZE; r++) {
         for (let c = 0; c < GRID_SIZE; c++) {
             const v = minigameState.visualGrid[r][c];
-            const targetX = FIELD_X + c * CELL_SIZE;
-            const targetY = FIELD_Y + r * CELL_SIZE;
+            const targetX = fx + c * CELL_SIZE;
+            const targetY = fy + r * CELL_SIZE;
             const speed = 0.2;
             
             if (Math.abs(v.x - targetX) > 1) { v.x += (targetX - v.x) * speed; anyMoving = true; } 
@@ -104,6 +112,7 @@ function updateVisuals() {
 
 function drawCheeseGame() {
     updateVisuals();
+    const fx = getCheeseFieldX(), fy = getCheeseFieldY();
     
     if (minigameState.shouldWinEnd && !minigameState.isAnimating && (!minigameState.fadingMatches || minigameState.fadingMatches.length === 0)) {
         minigameState.shouldWinEnd = false;
@@ -131,20 +140,33 @@ function drawCheeseGame() {
     }
 
     ctx.fillStyle = COLORS.BLACK; ctx.fillRect(0, 50, canvas.width, canvas.height - 50);
-    if (marketStallImg.complete) ctx.drawImage(marketStallImg, 10, 150, 220, 220);
-    const barX = 240, barY = 150, barW = 20, barH = 300;
-    ctx.strokeStyle = COLORS.WHITE; ctx.strokeRect(barX, barY, barW, barH);
-    const fillH = (minigameState.progress / 500) * barH;
-    ctx.fillStyle = COLORS.GREEN; ctx.fillRect(barX + 2, barY + barH - fillH, barW - 4, fillH);
-    const btnX = 225, btnY = 80, btnSize = 50;
-    ctx.fillStyle = COLORS.RED; ctx.fillRect(btnX, btnY, btnSize, btnSize);
-    ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
-    ctx.fillText("EAT", btnX + 25, btnY + 30);
-    ctx.strokeStyle = COLORS.WHITE; ctx.strokeRect(FIELD_X, FIELD_Y, GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE);
+    
+    if (isMobileMode) {
+        if (marketStallImg.complete) ctx.drawImage(marketStallImg, 220, 70, 160, 160);
+        const barX = 30, barY = 240, barW = 30, barH = 440;
+        ctx.strokeStyle = COLORS.WHITE; ctx.strokeRect(barX, barY, barW, barH);
+        const fillH = (minigameState.progress / 500) * barH;
+        ctx.fillStyle = COLORS.GREEN; ctx.fillRect(barX + 2, barY + barH - fillH, barW - 4, fillH);
+
+        const btnX = 30, btnY = 140, btnW = 160, btnH = 60;
+        drawTouchButton(btnX, btnY, btnW, btnH, 'EAT CHEESE', { bgColor: '#AA0000', font: '10px "Press Start 2P"' });
+    } else {
+        if (marketStallImg.complete) ctx.drawImage(marketStallImg, 10, 150, 220, 220);
+        const barX = 240, barY = 150, barW = 20, barH = 300;
+        ctx.strokeStyle = COLORS.WHITE; ctx.strokeRect(barX, barY, barW, barH);
+        const fillH = (minigameState.progress / 500) * barH;
+        ctx.fillStyle = COLORS.GREEN; ctx.fillRect(barX + 2, barY + barH - fillH, barW - 4, fillH);
+        const btnX = 225, btnY = 80, btnSize = 50;
+        ctx.fillStyle = COLORS.RED; ctx.fillRect(btnX, btnY, btnSize, btnSize);
+        ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
+        ctx.fillText("EAT", btnX + 25, btnY + 30);
+    }
+
+    ctx.strokeStyle = COLORS.WHITE; ctx.strokeRect(fx, fy, GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE);
 
     for (let r = 0; r < GRID_SIZE; r++) {
         for (let c = 0; c < GRID_SIZE; c++) {
-            const x = FIELD_X + c * CELL_SIZE, y = FIELD_Y + r * CELL_SIZE;
+            const x = fx + c * CELL_SIZE, y = fy + r * CELL_SIZE;
             ctx.fillStyle = 'rgba(255, 255, 255, 0.05)'; ctx.fillRect(x + 1, y + 1, CELL_SIZE - 2, CELL_SIZE - 2);
             if (minigameState.selected && minigameState.selected.r === r && minigameState.selected.c === c) {
                 ctx.fillStyle = 'rgba(255, 255, 0, 0.4)'; ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
@@ -180,20 +202,23 @@ function drawCheeseGame() {
             ctx.strokeStyle = `rgba(255, 255, 255, ${Math.max(0, m.alpha)})`;
             ctx.lineWidth = 4;
             m.cells.forEach(p => {
-                ctx.strokeRect(FIELD_X + p.c * CELL_SIZE + 4, FIELD_Y + p.r * CELL_SIZE + 4, CELL_SIZE - 8, CELL_SIZE - 8);
+                ctx.strokeRect(fx + p.c * CELL_SIZE + 4, fy + p.r * CELL_SIZE + 4, CELL_SIZE - 8, CELL_SIZE - 8);
             });
         });
     }
 
     ctx.fillStyle = COLORS.WHITE; ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
-    ctx.fillText("Click two adjacent cheeses to exchange positions.", canvas.width / 2, canvas.height - 40);
+    const prompt1 = isMobileMode ? "Tap two adjacent cheeses to swap positions." : "Click two adjacent cheeses to exchange positions.";
+    ctx.fillText(prompt1, canvas.width / 2, canvas.height - 40);
     ctx.fillText("Generate groups of three cheeses to win!", canvas.width / 2, canvas.height - 25);
 }
 
 function handleCheeseClick(x, y) {
     if (minigameState.isAnimating || (minigameState.fadingMatches && minigameState.fadingMatches.length > 0)) return;
-    const btnX = 225, btnY = 80, btnSize = 50;
-    if (x >= btnX && x <= btnX + btnSize && y >= btnY && y <= btnY + btnSize) {
+    const fx = getCheeseFieldX(), fy = getCheeseFieldY();
+
+    const isEatBtn = isMobileMode ? (x >= 30 && x <= 190 && y >= 140 && y <= 200) : (x >= 225 && x <= 275 && y >= 80 && y <= 130);
+    if (isEatBtn) {
         minigameState.eatMode = true;
         minigameState.eatPressCount = (minigameState.eatPressCount || 0) + 1;
         
@@ -213,7 +238,7 @@ function handleCheeseClick(x, y) {
         });
         return;
     }
-    const c = Math.floor((x - FIELD_X) / CELL_SIZE), r = Math.floor((y - FIELD_Y) / CELL_SIZE);
+    const c = Math.floor((x - fx) / CELL_SIZE), r = Math.floor((y - fy) / CELL_SIZE);
     if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE && minigameState.grid) {
         if (minigameState.eatMode) {
             if (minigameState.grid[r]) {
@@ -318,7 +343,7 @@ function dropCheeses(award = true, chainLevel = 0) {
         for (let r = 0; r < emptyCount; r++) {
             const type = Math.floor(Math.random() * CHEESE_TYPES) + 1;
             minigameState.grid[r][c] = type;
-            minigameState.visualGrid[r][c] = { type: type, x: FIELD_X + c * CELL_SIZE, y: FIELD_Y - (emptyCount - r) * CELL_SIZE, wobble: 0.2 };
+            minigameState.visualGrid[r][c] = { type: type, x: getCheeseFieldX() + c * CELL_SIZE, y: getCheeseFieldY() - (emptyCount - r) * CELL_SIZE, wobble: 0.2 };
         }
     }
     if (award) setTimeout(() => checkMatches(true, chainLevel), 500);

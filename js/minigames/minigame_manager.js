@@ -251,7 +251,7 @@ function drawMinigameMap() {
         ctx.fillText(titleText, canvas.width / 2, 140);
     }
     if (canadaMapImg.complete && canadaMapImg.naturalWidth > 0) {
-        ctx.imageSmoothingEnabled = false; const imgWidth = 500; const imgHeight = 300;
+        ctx.imageSmoothingEnabled = false; const imgWidth = isMobileMode ? 440 : 500; const imgHeight = isMobileMode ? 280 : 300;
         const ix = (canvas.width - imgWidth) / 2; const iy = 200; ctx.drawImage(canadaMapImg, ix, iy, imgWidth, imgHeight);
         const ox = ix + imgWidth * 0.85; const oy = iy + imgHeight * 0.75;
         const vx = ix + imgWidth * 0.15; const vy = iy + imgHeight * 0.45;
@@ -260,9 +260,12 @@ function drawMinigameMap() {
         const xPos = [0.25, 0.5, 0.75][currentMinigameIndex];
         const tx = ox + (vx - ox) * xPos; const ty = oy + (vy - oy) * xPos - Math.sin(xPos * Math.PI) * 40;
         ctx.fillStyle = COLORS.RED; ctx.font = '30px "Press Start 2P"'; ctx.fillText('X', tx, ty);
-    } else { ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 2; ctx.strokeRect(150, 200, 500, 300); }
+    } else { ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 2; ctx.strokeRect(50, 200, canvas.width - 100, 300); }
     ctx.fillStyle = COLORS.WHITE; ctx.font = '16px "Press Start 2P"';
-    if (Math.floor(Date.now() / 500) % 2 === 0) ctx.fillText('Press Enter to Continue', canvas.width / 2, 550);
+    if (Math.floor(Date.now() / 500) % 2 === 0) {
+        const prompt = isMobileMode ? 'Tap to Continue' : 'Press Enter to Continue';
+        ctx.fillText(prompt, canvas.width / 2, isMobileMode ? 720 : 550);
+    }
 }
 
 function drawMinigamePlay() {
@@ -312,13 +315,14 @@ function drawMinigamePlay() {
 
 function drawMinigamePost() {
     ctx.fillStyle = COLORS.BLACK; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = COLORS.WHITE; ctx.font = '32px "Press Start 2P"'; ctx.textAlign = 'center';
+    ctx.fillStyle = COLORS.WHITE; ctx.font = isMobileMode ? '24px "Press Start 2P"' : '32px "Press Start 2P"'; ctx.textAlign = 'center';
     ctx.fillText(minigameState.won ? "Great job!" : "Too bad!", canvas.width / 2, canvas.height / 2 - 50);
     
-    // Only show "Press Enter to Continue" when closing dialog is complete
+    // Only show "Press Enter to Continue" / "Tap to Continue" when closing dialog is complete
     if (!currentDialog) {
-        ctx.font = '16px "Press Start 2P"'; 
-        ctx.fillText('Press Enter to Continue', canvas.width / 2, canvas.height / 2 + 100);
+        ctx.font = '16px "Press Start 2P"';
+        const prompt = isMobileMode ? 'Tap to Continue' : 'Press Enter to Continue';
+        ctx.fillText(prompt, canvas.width / 2, canvas.height / 2 + 100);
     }
 }
 

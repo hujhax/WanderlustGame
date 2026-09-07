@@ -298,14 +298,17 @@ function drawGolfGame() {
     ctx.fillStyle = COLORS.BLACK;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+    const greenX = isMobileMode ? Math.floor((canvas.width - 400) / 2) : 200;
+    const greenY = isMobileMode ? 220 : 130;
+
     // Draw the green
     const hole = GOLF_HOLES_DATA[golf.currentHoleIdx];
     const greenImg = golfGreenImgs[golf.currentHoleIdx + 1];
     if (greenImg.complete && greenImg.naturalWidth > 0) {
-        ctx.drawImage(greenImg, 200, 130, 400, 400);
+        ctx.drawImage(greenImg, greenX, greenY, 400, 400);
     } else {
         ctx.fillStyle = '#2e5c1e';
-        ctx.fillRect(200, 130, 400, 400);
+        ctx.fillRect(greenX, greenY, 400, 400);
     }
     
     // Update movement if in moving state
@@ -314,8 +317,8 @@ function drawGolfGame() {
     }
     
     // Screen coordinates of the ball
-    const bx = 200 + (golf.ball.x / 1254) * 400;
-    const by = 130 + (golf.ball.y / 1254) * 400;
+    const bx = greenX + (golf.ball.x / 1254) * 400;
+    const by = greenY + (golf.ball.y / 1254) * 400;
     
     // Draw ball
     ctx.fillStyle = COLORS.WHITE;
@@ -356,12 +359,12 @@ function drawGolfGame() {
     
     // Draw hole labels
     ctx.fillStyle = COLORS.WHITE;
-    ctx.font = '12px "Press Start 2P"';
+    ctx.font = isMobileMode ? '10px "Press Start 2P"' : '12px "Press Start 2P"';
     ctx.textAlign = 'center';
-    ctx.fillText(`Hole #${hole.number}: ${hole.name}`, 400, 65);
+    ctx.fillText(`Hole #${hole.number}: ${hole.name}`, canvas.width / 2, isMobileMode ? 80 : 65);
     
     ctx.textAlign = 'left';
-    ctx.fillText(`Stroke #${golf.stroke}`, 480, 30);
+    ctx.fillText(`Stroke #${golf.stroke}`, isMobileMode ? 400 : 480, 30);
     
     // Draw power bar
     if (golf.state === 'power_windup') {
@@ -375,28 +378,35 @@ function drawGolfGame() {
         }
     }
     
+    const barX = isMobileMode ? 180 : 280;
+    const barY = isMobileMode ? 150 : 105;
     ctx.strokeStyle = COLORS.WHITE;
     ctx.lineWidth = 2;
-    ctx.strokeRect(280, 105, 240, 15);
+    ctx.strokeRect(barX, barY, 240, 15);
     
     ctx.fillStyle = COLORS.WHITE;
     ctx.font = '10px "Press Start 2P"';
     ctx.textAlign = 'center';
-    ctx.fillText("POWER", 400, 95);
+    ctx.fillText("POWER", barX + 120, barY - 10);
     
     if (golf.power > 0) {
-        const grad = ctx.createLinearGradient(280, 0, 520, 0);
+        const grad = ctx.createLinearGradient(barX, 0, barX + 240, 0);
         grad.addColorStop(0, '#0000FF');
         grad.addColorStop(1, '#FF0000');
         ctx.fillStyle = grad;
-        ctx.fillRect(280, 105, 240 * golf.power, 15);
+        ctx.fillRect(barX, barY, 240 * golf.power, 15);
     }
     
-    // Draw instructions
+    // Draw instructions & touch buttons
     ctx.fillStyle = COLORS.WHITE;
     ctx.font = '8px "Press Start 2P"';
     ctx.textAlign = 'center';
-    ctx.fillText("Click & drag to aim; SPACE to start wind-up, SPACE again to hit.", 400, 545);
+    const prompt = isMobileMode ? "Drag to aim. Tap SWING to start wind-up and hit." : "Click & drag to aim; SPACE to start wind-up, SPACE again to hit.";
+    ctx.fillText(prompt, canvas.width / 2, isMobileMode ? 645 : 545);
+    
+    if (isMobileMode) {
+        drawTouchButton(180, 675, 240, 85, 'SWING / HIT', { bgColor: '#004400', font: '14px "Press Start 2P"' });
+    }
     
     // Success / Water Hazard text indicators
     if (golf.state === 'hole_in') {
@@ -500,12 +510,15 @@ function handleGolfMouseUp(e) {
 }
 
 function updateGolfAim(e) {
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
+    const pos = getCanvasPointerPos(e);
+    const mx = pos.x;
+    const my = pos.y;
     
-    const bx = 200 + (minigameState.golf.ball.x / 1254) * 400;
-    const by = 130 + (minigameState.golf.ball.y / 1254) * 400;
+    const greenX = isMobileMode ? Math.floor((canvas.width - 400) / 2) : 200;
+    const greenY = isMobileMode ? 220 : 130;
+
+    const bx = greenX + (minigameState.golf.ball.x / 1254) * 400;
+    const by = greenY + (minigameState.golf.ball.y / 1254) * 400;
     
     minigameState.golf.aimAngle = Math.atan2(my - by, mx - bx);
 }

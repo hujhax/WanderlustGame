@@ -387,21 +387,21 @@ function drawGooseGame() {
 
     const { cols, rows, grid, player, target, geese } = gs;
 
-    // Compute cell size to fit board inside canvas (leaving room for HUD at top)
+    // Compute cell size to fit board inside canvas
     const HUD_HEIGHT = 50;
     const PAD = 20;
-    const availW = 800 - PAD * 2;
-    const availH = 600 - HUD_HEIGHT - PAD * 2;
+    const availW = canvas.width - PAD * 2;
+    const availH = canvas.height - HUD_HEIGHT - (isMobileMode ? 160 : PAD * 2);
     const cellW = Math.floor(Math.min(availW / cols, availH / rows));
     const cellH = cellW;
     const boardW = cols * cellW;
     const boardH = rows * cellH;
-    const ox = Math.floor((800 - boardW) / 2);
-    const oy = HUD_HEIGHT + Math.floor((600 - HUD_HEIGHT - boardH) / 2);
+    const ox = Math.floor((canvas.width - boardW) / 2);
+    const oy = HUD_HEIGHT + Math.floor((availH - boardH) / 2);
 
     // ── Background ──
     ctx.fillStyle = '#1a3300';
-    ctx.fillRect(0, 0, 800, 600);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // ── Draw tiles ──
     for (let gy = 0; gy < rows; gy++) {
@@ -452,6 +452,16 @@ function drawGooseGame() {
     ctx.textAlign = 'left';
     ctx.fillText(`Level ${gs.levelIdx + 1}`, 20, 45);
 
+    if (isMobileMode) {
+        // Touch D-pad & Wait button
+        drawTouchButton(20, 680, 70, 70, '▲', { bgColor: '#222244' });
+        drawTouchButton(20, 755, 70, 40, '▼', { bgColor: '#222244' });
+        drawTouchButton(95, 715, 70, 70, '◄', { bgColor: '#222244' });
+        drawTouchButton(170, 715, 70, 70, '►', { bgColor: '#222244' });
+
+        drawTouchButton(340, 695, 230, 90, 'WAIT TURN', { bgColor: '#444400', font: '12px "Press Start 2P"' });
+    }
+
     // ── Result flash ──
     if (gs.showResult) {
         const elapsed = Date.now() - gs.resultTimer;
@@ -459,8 +469,17 @@ function drawGooseGame() {
         ctx.fillStyle = gs.showResult === 'success'
             ? `rgba(0,255,0,${alpha * 0.3})`
             : `rgba(255,0,0,${alpha * 0.3})`;
-        ctx.fillRect(0, 0, 800, 600);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
+}
+
+function handleGooseTouch(x, y) {
+    if (!isMobileMode) return;
+    if (x >= 20 && x <= 90 && y >= 680 && y <= 750) handleGooseInput('ArrowUp');
+    else if (x >= 20 && x <= 90 && y >= 755 && y <= 795) handleGooseInput('ArrowDown');
+    else if (x >= 95 && x <= 165 && y >= 715 && y <= 785) handleGooseInput('ArrowLeft');
+    else if (x >= 170 && x <= 240 && y >= 715 && y <= 785) handleGooseInput('ArrowRight');
+    else if (x >= 340 && x <= 570 && y >= 695 && y <= 785) handleGooseInput(' ');
 }
 
 // ── Cone-of-recognition renderer ─────────────────────────────

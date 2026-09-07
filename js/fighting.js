@@ -12,9 +12,12 @@ function startFightingGame(nextPhase, isShadow = false) {
 
     const startFight = () => {
         currentPhase = PHASES.CONFRONTATION_PLAY;
+        const groundY = isMobileMode ? 520 : 400;
+        const pX = isMobileMode ? 80 : 100;
+        const aiX = isMobileMode ? 440 : 600;
         fightingState = {
-            player: { actor: CAST[selectedIndex].actor.toLowerCase(), x: 100, y: 400, health: 100, facing: 1, state: 'idle', frame: 0, attacking: 0, attackType: null, isShadow: false },
-            ai: { actor: (isShadow ? CAST[selectedIndex].actor : partner.actor).toLowerCase(), x: 600, y: 400, health: 100, facing: -1, state: 'idle', frame: 0, attacking: 0, attackType: null, isShadow: isShadow },
+            player: { actor: CAST[selectedIndex].actor.toLowerCase(), x: pX, y: groundY, health: 100, facing: 1, state: 'idle', frame: 0, attacking: 0, attackType: null, isShadow: false },
+            ai: { actor: (isShadow ? CAST[selectedIndex].actor : partner.actor).toLowerCase(), x: aiX, y: groundY, health: 100, facing: -1, state: 'idle', frame: 0, attacking: 0, attackType: null, isShadow: isShadow },
             gameOver: false, won: false, nextPhase: nextPhase
         };
         audio.play('FIGHT_BGM', 30);
@@ -97,17 +100,27 @@ function updateFighting() {
     const p = fightingState.player;
     const ai = fightingState.ai;
 
-    // Use keysJustPressed for instantaneous attack triggering
-    if (keysJustPressed.has('a')) performAttack(p, 'punch');
-    else if (keysJustPressed.has('s')) performAttack(p, 'kick');
+    let punch = keysJustPressed.has('a');
+    let kick = keysJustPressed.has('s');
+    let moveLeft = keysPressed.has('ArrowLeft');
+    let moveRight = keysPressed.has('ArrowRight');
 
-    // Continuous movement polling
+    if (isMobileMode && typeof touchState !== 'undefined') {
+        if (touchState.fightingPunch) { punch = true; touchState.fightingPunch = false; }
+        if (touchState.fightingKick) { kick = true; touchState.fightingKick = false; }
+        if (touchState.fightingLeft) moveLeft = true;
+        if (touchState.fightingRight) moveRight = true;
+    }
+
+    if (punch) performAttack(p, 'punch');
+    else if (kick) performAttack(p, 'kick');
+
     let isMoving = false;
-    if (keysPressed.has('ArrowLeft')) { 
+    if (moveLeft) { 
         p.x -= 7; p.facing = -1; 
         if (p.attacking <= 0) p.state = 'walk_left'; 
         isMoving = true; 
-    } else if (keysPressed.has('ArrowRight')) { 
+    } else if (moveRight) { 
         p.x += 7; p.facing = 1; 
         if (p.attacking <= 0) p.state = 'walk_right'; 
         isMoving = true; 
@@ -160,16 +173,20 @@ function performAttack(char, type) {
 
 function drawConfrontationTitle() {
     ctx.fillStyle = COLORS.BLACK; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = COLORS.WHITE; ctx.font = '32px "Press Start 2P"'; ctx.textAlign = 'center';
+    ctx.fillStyle = COLORS.WHITE; ctx.font = isMobileMode ? '24px "Press Start 2P"' : '32px "Press Start 2P"'; ctx.textAlign = 'center';
     ctx.fillText("The Confrontation", canvas.width / 2, canvas.height / 2 - 50);
-    ctx.font = '16px "Press Start 2P"'; ctx.fillText('Press Enter to Continue', canvas.width / 2, canvas.height / 2 + 50);
+    ctx.font = '16px "Press Start 2P"';
+    const prompt = isMobileMode ? 'Tap to Continue' : 'Press Enter to Continue';
+    ctx.fillText(prompt, canvas.width / 2, canvas.height / 2 + 50);
 }
 
 function drawOnYourOwnTitle() {
     ctx.fillStyle = COLORS.BLACK; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = COLORS.WHITE; ctx.font = '32px "Press Start 2P"'; ctx.textAlign = 'center';
+    ctx.fillStyle = COLORS.WHITE; ctx.font = isMobileMode ? '24px "Press Start 2P"' : '32px "Press Start 2P"'; ctx.textAlign = 'center';
     ctx.fillText("On Your Own?", canvas.width / 2, canvas.height / 2 - 50);
-    ctx.font = '16px "Press Start 2P"'; ctx.fillText('Press Enter to Continue', canvas.width / 2, canvas.height / 2 + 50);
+    ctx.font = '16px "Press Start 2P"';
+    const prompt = isMobileMode ? 'Tap to Continue' : 'Press Enter to Continue';
+    ctx.fillText(prompt, canvas.width / 2, canvas.height / 2 + 50);
 }
 
 function drawConfrontationPlay() {
@@ -189,9 +206,12 @@ function drawConfrontationPlay() {
     if (!fightingState.player || !fightingState.ai) return;
 
     // Health bars
-    ctx.fillStyle = COLORS.RED; ctx.fillRect(50, 50, 300, 20); ctx.fillRect(450, 50, 300, 20);
-    ctx.fillStyle = COLORS.GREEN; ctx.fillRect(50, 50, 3 * fightingState.player.health, 20);
-    ctx.fillRect(450 + 3 * (100 - fightingState.ai.health), 50, 3 * fightingState.ai.health, 20);
+    const barW = isMobileMode ? 240 : 300;
+    const p1X = isMobileMode ? 20 : 50;
+    const p2X = isMobileMode ? 340 : 450;
+    ctx.fillStyle = COLORS.RED; ctx.fillRect(p1X, 50, barW, 20); ctx.fillRect(p2X, 50, barW, 20);
+    ctx.fillStyle = COLORS.GREEN; ctx.fillRect(p1X, 50, (barW / 100) * fightingState.player.health, 20);
+    ctx.fillRect(p2X + (barW / 100) * (100 - fightingState.ai.health), 50, (barW / 100) * fightingState.ai.health, 20);
 
     // Characters
     [fightingState.player, fightingState.ai].forEach((char) => {
@@ -209,9 +229,20 @@ function drawConfrontationPlay() {
     if (fightingState.gameOver) {
         ctx.fillStyle = COLORS.WHITE; ctx.font = '30px "Press Start 2P"'; ctx.textAlign = 'center';
         ctx.fillText(fightingState.won ? 'YOU WIN!' : 'YOU LOSE!', canvas.width / 2, canvas.height / 2);
-        ctx.font = '16px "Press Start 2P"'; ctx.fillText('Press Enter to Continue', canvas.width / 2, canvas.height / 2 + 50);
+        ctx.font = '16px "Press Start 2P"';
+        const prompt = isMobileMode ? 'Tap to Continue' : 'Press Enter to Continue';
+        ctx.fillText(prompt, canvas.width / 2, canvas.height / 2 + 50);
     } else {
-        ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
-        ctx.fillText("press 'a' to punch, 's' to kick", canvas.width / 2, canvas.height - 30);
+        if (isMobileMode) {
+            // Touch controls for fighting
+            drawTouchButton(20, 680, 110, 90, '◄ LEFT', { bgColor: '#222244', font: '12px "Press Start 2P"' });
+            drawTouchButton(145, 680, 110, 90, 'RIGHT ►', { bgColor: '#222244', font: '12px "Press Start 2P"' });
+
+            drawTouchButton(345, 680, 110, 90, 'PUNCH', { bgColor: '#004400', font: '12px "Press Start 2P"' });
+            drawTouchButton(470, 680, 110, 90, 'KICK', { bgColor: '#440000', font: '12px "Press Start 2P"' });
+        } else {
+            ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
+            ctx.fillText("press 'a' to punch, 's' to kick", canvas.width / 2, canvas.height - 30);
+        }
     }
 }

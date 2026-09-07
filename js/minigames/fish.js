@@ -71,11 +71,11 @@ function drawFishGame() {
     const state = minigameState;
 
     // Draw background
-    if (fishingBgImg.complete) ctx.drawImage(fishingBgImg, 0, 0, 800, 600);
+    if (fishingBgImg.complete) ctx.drawImage(fishingBgImg, 0, 0, canvas.width, canvas.height);
 
     // Draw boat
-    const cellW = 800 / 16;
-    const cellH = 600 / 12;
+    const cellW = canvas.width / 16;
+    const cellH = canvas.height / 12;
     const bx = state.boat.gridX * cellW + cellW / 2;
     const by = state.boat.gridY * cellH + cellH / 2;
     
@@ -108,6 +108,16 @@ function drawFishGame() {
         }
     }
 
+    if (isMobileMode && !state.fishWindow) {
+        // Render touch D-pad and CAST button
+        drawTouchButton(20, 680, 70, 70, '▲', { bgColor: '#222244' });
+        drawTouchButton(20, 755, 70, 40, '▼', { bgColor: '#222244' });
+        drawTouchButton(95, 715, 70, 70, '◄', { bgColor: '#222244' });
+        drawTouchButton(170, 715, 70, 70, '►', { bgColor: '#222244' });
+
+        drawTouchButton(360, 680, 210, 100, 'CAST HOOK', { bgColor: '#004400', font: '14px "Press Start 2P"' });
+    }
+
     if (state.fishWindow) {
         drawFishingWindow();
     }
@@ -115,38 +125,68 @@ function drawFishGame() {
 
 function drawFishingWindow() {
     const win = minigameState.fishWindow;
+    const winX = isMobileMode ? 30 : 50;
+    const winY = isMobileMode ? 100 : 50;
+    const winW = isMobileMode ? 540 : 700;
+    const winH = isMobileMode ? 600 : 500;
+
     ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
-    ctx.fillRect(50, 50, 700, 500);
+    ctx.fillRect(winX, winY, winW, winH);
     ctx.strokeStyle = COLORS.WHITE;
     ctx.lineWidth = 4;
-    ctx.strokeRect(50, 50, 700, 500);
+    ctx.strokeRect(winX, winY, winW, winH);
 
-    if (fishingBoatLargeImg.complete) {
-        ctx.drawImage(fishingBoatLargeImg, 100, 100, 300, 225);
-    }
+    if (isMobileMode) {
+        if (fishingBoatLargeImg.complete) {
+            ctx.drawImage(fishingBoatLargeImg, winX + 30, winY + 40, 220, 165);
+        }
+        if (win.img && win.img.complete) {
+            ctx.drawImage(win.img, winX + 280, winY + 40, 180, 180);
+        } else if (win.type === 'nothing') {
+            ctx.strokeStyle = COLORS.RED; ctx.lineWidth = 12; ctx.beginPath();
+            ctx.moveTo(winX + 280, winY + 40); ctx.lineTo(winX + 460, winY + 220);
+            ctx.moveTo(winX + 460, winY + 40); ctx.lineTo(winX + 280, winY + 220);
+            ctx.stroke();
+        }
 
-    if (win.img && win.img.complete) {
-        ctx.drawImage(win.img, 450, 100, 200, 200);
-    } else if (win.type === 'nothing') {
-        ctx.strokeStyle = COLORS.RED;
-        ctx.lineWidth = 15;
-        ctx.beginPath();
-        ctx.moveTo(450, 100); ctx.lineTo(650, 300);
-        ctx.moveTo(650, 100); ctx.lineTo(450, 300);
-        ctx.stroke();
-    }
+        ctx.fillStyle = COLORS.WHITE; ctx.font = '20px "Press Start 2P"'; ctx.textAlign = 'center';
+        ctx.fillText(win.title, winX + winW / 2, winY + 270);
+        
+        ctx.font = '12px "Press Start 2P"';
+        const lines = wrapTextLines(win.desc, winW - 60, '12px "Press Start 2P"');
+        lines.forEach((line, i) => ctx.fillText(line, winX + winW / 2, winY + 330 + i * 24));
 
-    ctx.fillStyle = COLORS.WHITE;
-    ctx.font = '24px "Press Start 2P"';
-    ctx.textAlign = 'center';
-    ctx.fillText(win.title, 400, 380);
-    
-    ctx.font = '16px "Press Start 2P"';
-    ctx.fillText(win.desc, 400, 430);
+        if (Math.floor(Date.now() / 500) % 2 === 0) {
+            drawTouchButton(winX + (winW - 240) / 2, winY + 480, 240, 65, 'TAP TO CLOSE', { bgColor: '#004400', font: '10px "Press Start 2P"' });
+        }
+    } else {
+        if (fishingBoatLargeImg.complete) {
+            ctx.drawImage(fishingBoatLargeImg, 100, 100, 300, 225);
+        }
 
-    ctx.font = '14px "Press Start 2P"';
-    if (Math.floor(Date.now() / 500) % 2 === 0) {
-        ctx.fillText('Press Enter to Continue', 400, 520);
+        if (win.img && win.img.complete) {
+            ctx.drawImage(win.img, 450, 100, 200, 200);
+        } else if (win.type === 'nothing') {
+            ctx.strokeStyle = COLORS.RED;
+            ctx.lineWidth = 15;
+            ctx.beginPath();
+            ctx.moveTo(450, 100); ctx.lineTo(650, 300);
+            ctx.moveTo(650, 100); ctx.lineTo(450, 300);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = COLORS.WHITE;
+        ctx.font = '24px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.fillText(win.title, 400, 380);
+        
+        ctx.font = '16px "Press Start 2P"';
+        ctx.fillText(win.desc, 400, 430);
+
+        ctx.font = '14px "Press Start 2P"';
+        if (Math.floor(Date.now() / 500) % 2 === 0) {
+            ctx.fillText('Press Enter to Continue', 400, 520);
+        }
     }
 }
 
@@ -182,6 +222,22 @@ function handleFishInput(key) {
         }
     }
 }
+
+function handleFishTouch(x, y) {
+    if (!isMobileMode) return;
+    const state = minigameState;
+    if (state.fishWindow) {
+        state.fishWindow = null;
+        return;
+    }
+
+    if (x >= 20 && x <= 90 && y >= 680 && y <= 750) handleFishInput('ArrowUp');
+    else if (x >= 20 && x <= 90 && y >= 755 && y <= 795) handleFishInput('ArrowDown');
+    else if (x >= 95 && x <= 165 && y >= 715 && y <= 785) handleFishInput('ArrowLeft');
+    else if (x >= 170 && x <= 240 && y >= 715 && y <= 785) handleFishInput('ArrowRight');
+    else if (x >= 360 && x <= 570 && y >= 680 && y <= 780) attemptFish();
+}
+
 
 function attemptFish() {
     const state = minigameState;

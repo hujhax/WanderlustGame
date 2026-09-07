@@ -58,12 +58,24 @@ function drawBumpGame() {
     }
 
     // Update Player Car
-    if (keysPressed.has('ArrowLeft')) car.angle -= 0.05;
-    if (keysPressed.has('ArrowRight')) car.angle += 0.05;
-    if (keysPressed.has('ArrowUp')) {
+    let turnLeft = keysPressed.has('ArrowLeft');
+    let turnRight = keysPressed.has('ArrowRight');
+    let gas = keysPressed.has('ArrowUp');
+    let reverse = keysPressed.has('ArrowDown');
+
+    if (isMobileMode && touchState) {
+        if (touchState.bumpSteerLeft) turnLeft = true;
+        if (touchState.bumpSteerRight) turnRight = true;
+        if (touchState.bumpGas) gas = true;
+        if (touchState.bumpReverse) reverse = true;
+    }
+
+    if (turnLeft) car.angle -= 0.05;
+    if (turnRight) car.angle += 0.05;
+    if (gas) {
         car.speed = Math.min(car.speed + 0.1, 4);
         if (Math.random() < 0.1) audio.playSFX('engine');
-    } else if (keysPressed.has('ArrowDown')) {
+    } else if (reverse) {
         car.speed = Math.max(car.speed - 0.2, -2);
         if (car.speed > 0) audio.playSFX('screech');
     } else {
@@ -166,6 +178,16 @@ function drawBumpGame() {
     allCars.forEach(c => {
         drawRotatedCar(window.carImgs[c.color], c.x, c.y, c.angle, c.color);
     });
+
+    if (isMobileMode) {
+        // Left & Right Steering buttons on bottom-left
+        drawTouchButton(20, 680, 110, 90, '◄ LEFT', { bgColor: '#222244', font: '12px "Press Start 2P"' });
+        drawTouchButton(145, 680, 110, 90, 'RIGHT ►', { bgColor: '#222244', font: '12px "Press Start 2P"' });
+
+        // Gas & Reverse buttons on bottom-right
+        drawTouchButton(345, 680, 110, 90, 'GAS ▲', { bgColor: '#004400', font: '12px "Press Start 2P"' });
+        drawTouchButton(470, 680, 110, 90, 'REV ▼', { bgColor: '#440000', font: '12px "Press Start 2P"' });
+    }
 }
 
 function checkEnvCollision(c, isPlayer) {

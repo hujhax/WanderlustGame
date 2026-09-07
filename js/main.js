@@ -1,6 +1,77 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+if (typeof window !== 'undefined') {
+    const urlParams = new URLSearchParams(window.location.search);
+    const deviceParam = urlParams.get('device');
+    if (deviceParam === 'mobile') {
+        isMobileMode = true;
+    } else if (deviceParam === 'desktop') {
+        isMobileMode = false;
+    } else {
+        isMobileMode = (typeof navigator !== 'undefined' && navigator.userAgentData && navigator.userAgentData.mobile) || 
+                       (typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) || 
+                       (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0 && window.innerWidth < 768);
+    }
+}
+
+if (isMobileMode) {
+    canvas.width = 600;
+    canvas.height = 800;
+} else {
+    canvas.width = 800;
+    canvas.height = 600;
+}
+
+window.touchState = {
+    bumpSteerLeft: false,
+    bumpSteerRight: false,
+    bumpGas: false,
+    bumpReverse: false,
+    fightingLeft: false,
+    fightingRight: false,
+    fightingPunch: false,
+    fightingKick: false
+};
+
+function updateTouchState(e) {
+    if (!isMobileMode) return;
+    touchState.bumpSteerLeft = false;
+    touchState.bumpSteerRight = false;
+    touchState.bumpGas = false;
+    touchState.bumpReverse = false;
+    touchState.fightingLeft = false;
+    touchState.fightingRight = false;
+    touchState.fightingPunch = false;
+    touchState.fightingKick = false;
+
+    const activePointers = e.touches ? Array.from(e.touches) : (e.buttons === 1 ? [e] : []);
+    activePointers.forEach(pointer => {
+        const pos = getCanvasPointerPos(pointer);
+        const x = pos.x, y = pos.y;
+        
+        if (currentPhase === PHASES.MINIGAME_PLAY && minigameState && minigameState.type === 'bump') {
+            if (x >= 20 && x <= 130 && y >= 680 && y <= 770) touchState.bumpSteerLeft = true;
+            if (x >= 145 && x <= 255 && y >= 680 && y <= 770) touchState.bumpSteerRight = true;
+            if (x >= 345 && x <= 455 && y >= 680 && y <= 770) touchState.bumpGas = true;
+            if (x >= 470 && x <= 580 && y >= 680 && y <= 770) touchState.bumpReverse = true;
+        }
+        if (currentPhase === PHASES.CONFRONTATION_PLAY) {
+            if (x >= 20 && x <= 130 && y >= 680 && y <= 770) touchState.fightingLeft = true;
+            if (x >= 145 && x <= 255 && y >= 680 && y <= 770) touchState.fightingRight = true;
+            if (x >= 345 && x <= 455 && y >= 680 && y <= 770) touchState.fightingPunch = true;
+            if (x >= 470 && x <= 580 && y >= 680 && y <= 770) touchState.fightingKick = true;
+        }
+    });
+}
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('touchstart', updateTouchState, { passive: true });
+    window.addEventListener('touchmove', updateTouchState, { passive: true });
+    window.addEventListener('touchend', updateTouchState, { passive: true });
+    window.addEventListener('touchcancel', updateTouchState, { passive: true });
+}
+
 let selectedIndex = 0;
 let score = 0;
 let currentMinigameIndex = 0;
@@ -210,28 +281,28 @@ function startInTheCar() {
 }
 
 window.addEventListener('mousedown', (e) => {
+    const pos = getCanvasPointerPos(e);
+    const x = pos.x, y = pos.y;
+
     if (currentDialog) {
         if (currentDialog.options && Array.isArray(currentDialog.options)) {
-            const rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
             const isTop = currentDialog.style === 'top';
-            const boxH = 185;
+            const boxH = isMobileMode ? 220 : 185;
             const boxY = isTop ? 20 : canvas.height - boxH - 20;
             const optY = boxY + boxH - 45;
+            const opts = currentDialog.options;
 
-            // Yes (opt 0: 450..540), No (opt 1: 560..650)
-            if (y >= optY && y <= optY + 32) {
-                if (x >= 450 && x <= 540) {
+            opts.forEach((optText, idx) => {
+                const optX = isMobileMode ? (30 + 220 + idx * 110) : (450 + idx * 110);
+                const optW = isMobileMode ? 95 : 90;
+                const optH = isMobileMode ? 34 : 32;
+
+                if (x >= optX && x <= optX + optW && y >= optY && y <= optY + optH) {
                     const cb = dialogCallback; currentDialog = null; dialogCallback = null;
                     audio.playSFX('ui');
-                    if (cb) cb('yes');
-                    return;
-                } else if (x >= 560 && x <= 650) {
-                    const cb = dialogCallback; currentDialog = null; dialogCallback = null;
-                    audio.playSFX('ui');
-                    if (cb) cb('no');
-                    return;
+                    if (cb) cb(idx === 0 ? 'yes' : 'no');
                 }
-            }
+            });
             return;
         } else {
             audio.playSFX('ui');
@@ -245,21 +316,119 @@ window.addEventListener('mousedown', (e) => {
 
     if (currentPhase === PHASES.INTRO) {
         currentPhase = PHASES.TITLE; audio.play('CHICAGO', 12);
-        companionSitsBg.play().catch(e => {}); playerSitsBg.play().catch(e => {});
-    } else if (currentPhase === PHASES.CHOOSE_TRAVELLER) {
-        const rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
-        for (let i = 0; i < 8; i++) {
-            const bx = 100 + (i % 4) * 150, by = 150 + Math.floor(i / 4) * 200;
-            if (x >= bx && x <= bx + 120 && y >= by && y <= by + 120) { selectedIndex = i; audio.playSFX('ui'); selectTraveller(); break; }
+        companionSitsBg.play().catch(err => {}); playerSitsBg.play().catch(err => {});
+    } else if (currentPhase === PHASES.TITLE) {
+        if (isMobileMode) {
+            currentPhase = PHASES.CHOOSE_TRAVELLER; audio.play('BEST_FRIEND');
         }
-    } else if (currentPhase === PHASES.MINIGAME_PLAY && minigameState.type === 'cheese') {
-        const rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
-        handleCheeseClick(x, y);
-    } else if (currentPhase === PHASES.MINIGAME_PLAY && minigameState.type === 'golf') {
-        handleGolfMouseDown(e);
-    } else if (currentPhase === PHASES.MINIGAME_PLAY && minigameState.type === 'climb') {
-        const rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
-        handleClimbClick(x, y);
+    } else if (currentPhase === PHASES.CHOOSE_TRAVELLER) {
+        if (isMobileMode) {
+            for (let i = 0; i < 8; i++) {
+                const col = i % 2, row = Math.floor(i / 2);
+                const bx = 80 + col * 260, by = 110 + row * 165;
+                if (x >= bx && x <= bx + 180 && y >= by && y <= by + 125) { selectedIndex = i; audio.playSFX('ui'); selectTraveller(); break; }
+            }
+        } else {
+            for (let i = 0; i < 8; i++) {
+                const bx = 100 + (i % 4) * 150, by = 150 + Math.floor(i / 4) * 200;
+                if (x >= bx && x <= bx + 120 && y >= by && y <= by + 120) { selectedIndex = i; audio.playSFX('ui'); selectTraveller(); break; }
+            }
+        }
+    } else if (currentPhase === PHASES.PARTNER_ANNOUNCEMENT) {
+        if (isMobileMode) {
+            currentPhase = PHASES.DEPARTURE_CUTSCENE; cutsceneStartTime = Date.now(); audio.play('CHICAGO', 30);
+        }
+    } else if (currentPhase === PHASES.DEPARTURE_CUTSCENE) {
+        if (isMobileMode) {
+            startInTheCar();
+        }
+    } else if (currentPhase === PHASES.IN_THE_CAR) {
+        if (inTheCarState.waitingForResponse && isMobileMode) {
+            const boxX = 30, boxY = 200, boxW = 490;
+            inTheCarState.options.forEach((opt, i) => {
+                const cardY = boxY + 55 + i * 110;
+                if (x >= boxX + 15 && x <= boxX + 15 + (boxW - 30) && y >= cardY && y <= cardY + 95) {
+                    inTheCarState.selectedIndex = i;
+                    const choice = inTheCarState.options[i];
+                    inTheCarState.waitingForResponse = false;
+                    if (choice.type === 'insult') {
+                        score -= 100; audio.playSFX('SAD_TROMBONE'); intimacy = Math.max(0, intimacy - 1);
+                    } else if (choice.type === 'truth') {
+                        score += 200; audio.playSFX('TADA'); intimacy = Math.min(8, intimacy + 1);
+                    }
+                    showDialog(CAST[selectedIndex].firstName, CAST[selectedIndex].actor, choice.text, () => {
+                        inTheCarState.cycle++; nextCarCycle();
+                    }, 'top');
+                }
+            });
+        }
+    } else if (currentPhase === PHASES.MINIGAME_MAP) {
+        if (isMobileMode) {
+            startMinigame();
+        }
+    } else if (currentPhase === PHASES.MINIGAME_PLAY && minigameState) {
+        const type = minigameState.type;
+        if (type === 'chicken') {
+            if (!minigameState.isJumping) {
+                minigameState.isJumping = true;
+                minigameState.jumpVel = -14;
+                audio.playSFX('jump');
+            }
+        } else if (type === 'math') {
+            handleMathTouch(x, y);
+        } else if (type === 'karaoke') {
+            handleKaraokeTouch(x, y);
+        } else if (type === 'cheese') {
+            handleCheeseClick(x, y);
+        } else if (type === 'fish') {
+            handleFishTouch(x, y);
+        } else if (type === 'golf') {
+            handleGolfMouseDown(e);
+        } else if (type === 'jeopardy') {
+            handleJeopardyClick(x, y);
+        } else if (type === 'goose') {
+            handleGooseTouch(x, y);
+        } else if (type === 'climb') {
+            handleClimbClick(x, y);
+        }
+    } else if (currentPhase === PHASES.MINIGAME_POST) {
+        if (isMobileMode) {
+            playedMinigames.push({ name: minigameState.type, won: minigameState.won });
+            currentMinigameIndex++;
+            if (currentMinigameIndex < minigameOrder.length) currentPhase = PHASES.MINIGAME_MAP;
+            else startFightingGame(PHASES.SEPARATE_WAYS);
+        }
+    } else if (currentPhase === PHASES.THE_CONFRONTATION || currentPhase === PHASES.ON_YOUR_OWN) {
+        if (isMobileMode) {
+            currentPhase = PHASES.CONFRONTATION_PLAY;
+        }
+    } else if (currentPhase === PHASES.CONFRONTATION_PLAY) {
+        if (fightingState.gameOver && isMobileMode) {
+            audio.stop();
+            if (fightingState.nextPhase === PHASES.SEPARATE_WAYS) {
+                currentPhase = PHASES.NEXT_DAY;
+            } else {
+                startTogetherAgain();
+            }
+        }
+    } else if (currentPhase === PHASES.NEXT_DAY) {
+        if (isMobileMode) {
+            currentPhase = PHASES.SEPARATE_WAYS;
+            separateWaysState.startTime = Date.now();
+            companionSitsBg.play().catch(err => {});
+            playerSitsBg.play().catch(err => {});
+            audio.play('KARAOKE_BGM');
+        }
+    } else if (currentPhase === PHASES.SEPARATE_WAYS) {
+        if (isMobileMode && Date.now() - separateWaysState.startTime >= 30000) {
+            startFightingGame(PHASES.TOGETHER_AGAIN, true);
+        }
+    } else if (currentPhase === PHASES.CLOSING_CREDITS) {
+        if (isMobileMode) {
+            currentPhase = PHASES.TITLE;
+            currentMinigameIndex = 0; score = 0; playedMinigames = [];
+            audio.play('CHICAGO', 12); creditsStartTime = 0;
+        }
     }
 });
 

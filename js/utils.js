@@ -101,3 +101,39 @@ function captureScreen() {
         }
     }
 }
+
+function getCanvasPointerPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+    if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
+    }
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+    };
+}
+
+function drawTouchButton(x, y, w, h, text, options = {}) {
+    ctx.save();
+    ctx.fillStyle = options.bgColor || '#222222';
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = options.borderColor || '#FFFFFF';
+    ctx.lineWidth = options.borderWidth || 3;
+    ctx.strokeRect(x, y, w, h);
+
+    ctx.fillStyle = options.textColor || '#FFFFFF';
+    ctx.font = options.font || '12px "Press Start 2P"';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x + w / 2, y + h / 2);
+    ctx.restore();
+}
+

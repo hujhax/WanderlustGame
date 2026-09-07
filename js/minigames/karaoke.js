@@ -1,7 +1,8 @@
 function drawKaraokeGame() {
     const state = minigameState; ctx.fillStyle = COLORS.BLACK; ctx.fillRect(0, 50, canvas.width, canvas.height - 50);
-    ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 2; const staffTop = 250, lineSpacing = 30;
-    for (let i = 0; i < 5; i++) { const y = staffTop + i * lineSpacing; ctx.beginPath(); ctx.moveTo(50, y); ctx.lineTo(750, y); ctx.stroke(); }
+    ctx.strokeStyle = COLORS.WHITE; ctx.lineWidth = 2; const staffTop = isMobileMode ? 280 : 250, lineSpacing = 30;
+    const staffRight = canvas.width - 50;
+    for (let i = 0; i < 5; i++) { const y = staffTop + i * lineSpacing; ctx.beginPath(); ctx.moveTo(50, y); ctx.lineTo(staffRight, y); ctx.stroke(); }
     
     if (gClefImg.complete) {
         const tempCanvas = document.createElement('canvas');
@@ -39,4 +40,28 @@ function drawKaraokeGame() {
             note.color = COLORS.RED; 
         }
     });
+
+    if (isMobileMode) {
+        drawTouchButton(70, 640, 210, 90, '▲ UP', { bgColor: '#004400', font: '16px "Press Start 2P"' });
+        drawTouchButton(320, 640, 210, 90, '▼ DOWN', { bgColor: '#440000', font: '16px "Press Start 2P"' });
+    }
 }
+
+function handleKaraokeTouch(x, y) {
+    if (!isMobileMode) return;
+    const state = minigameState;
+    if (x >= 70 && x <= 280 && y >= 640 && y <= 730) {
+        state.diamondPos = Math.min(8, state.diamondPos + 1);
+        audio.playSFX('ui');
+    } else if (x >= 320 && x <= 530 && y >= 640 && y <= 730) {
+        state.diamondPos = Math.max(0, state.diamondPos - 1);
+        audio.playSFX('ui');
+    } else if (y >= 150 && y <= 500) {
+        // Direct tap on staff height
+        const staffTop = 280, lineSpacing = 30;
+        const pitch = Math.round(10 - (y - staffTop) / (0.5 * lineSpacing));
+        state.diamondPos = Math.max(0, Math.min(8, pitch));
+        audio.playSFX('ui');
+    }
+}
+

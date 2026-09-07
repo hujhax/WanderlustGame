@@ -9,15 +9,26 @@ body, html {
     justify-content: center;
     align-items: center;
     font-family: 'Press Start 2P', cursive;
+    touch-action: manipulation;
 }
 
 #game-container {
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     border: 4px solid #333;
+    max-width: 100vw;
+    max-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
 }
 
 canvas {
     background-color: #000;
     display: block;
     image-rendering: pixelated;
+    max-width: 100vw;
+    max-height: 100vh;
+    object-fit: contain;
 }
+

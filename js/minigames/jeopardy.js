@@ -234,7 +234,49 @@ function _drawClueScreen() {
     // Prompt
     ctx.fillStyle = '#AAAAFF';
     ctx.font = '11px "Press Start 2P"';
-    ctx.fillText('Press Enter to see the choices', canvas.width / 2, canvas.height - 30);
+    const prompt = isMobileMode ? 'Tap to see choices' : 'Press Enter to see the choices';
+    ctx.fillText(prompt, canvas.width / 2, canvas.height - 30);
+}
+
+function handleJeopardyClick(x, y) {
+    const j = minigameState.jeopardy;
+    if (!j) return;
+
+    if (j.phase === 'board') {
+        const COLS = 6, ROWS = 5, headerH = 48, cellH = 52, boardTop = 50;
+        const cellW = Math.floor(canvas.width / COLS);
+        const col = Math.floor(x / cellW);
+        const row = Math.floor((y - (boardTop + headerH)) / cellH);
+
+        if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
+            const clue = j.board[col].clues[row];
+            if (clue && !clue.revealed) {
+                j.selectedCol = col;
+                j.selectedRow = row;
+                j.activeCol = col;
+                j.activeRow = row;
+                j.currentClue = clue;
+                j.selectedOption = 0;
+                j.phase = 'show_clue';
+                audio.playSFX('ui');
+            }
+        }
+    } else if (j.phase === 'show_clue') {
+        j.phase = 'show_options';
+        audio.playSFX('ui');
+    } else if (j.phase === 'show_options') {
+        const c = j.currentClue;
+        if (!c) return;
+        for (let i = 0; i < c.options.length; i++) {
+            const optY = 195 + i * 110;
+            if (y >= optY && y <= optY + 95) {
+                j.selectedOption = i;
+                audio.playSFX('ui');
+                _jeopardySubmitAnswer();
+                break;
+            }
+        }
+    }
 }
 
 function _drawOptionsScreen() {
