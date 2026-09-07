@@ -204,7 +204,8 @@ function _drawBoard() {
     ctx.fillStyle = '#AAAAFF';
     ctx.font = '10px "Press Start 2P"';
     ctx.textAlign = 'center';
-    ctx.fillText('Arrow keys to select a clue, Enter to choose', canvas.width / 2, boardTop + headerH + ROWS * cellH + 25);
+    const boardPrompt = isMobileMode ? 'Tap a clue to choose' : 'Arrow keys to select a clue, Enter to choose';
+    ctx.fillText(boardPrompt, canvas.width / 2, boardTop + headerH + ROWS * cellH + 25);
 }
 
 function _drawClueScreen() {
@@ -355,7 +356,8 @@ function _drawOptionsScreen() {
     ctx.fillStyle = '#AAAAFF';
     ctx.font = '10px "Press Start 2P"';
     ctx.textAlign = 'center';
-    ctx.fillText('↑ ↓ to choose, Enter to answer', canvas.width / 2, canvas.height - 12);
+    const choicePrompt = isMobileMode ? 'Tap an option to answer' : '↑ ↓ to choose, Enter to answer';
+    ctx.fillText(choicePrompt, canvas.width / 2, canvas.height - 12);
 }
 
 // ---- Input ------------------------------------------------------------------

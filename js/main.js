@@ -57,10 +57,10 @@ function updateTouchState(e) {
             if (x >= 470 && x <= 580 && y >= 680 && y <= 770) touchState.bumpReverse = true;
         }
         if (currentPhase === PHASES.CONFRONTATION_PLAY) {
-            if (x >= 20 && x <= 130 && y >= 680 && y <= 770) touchState.fightingLeft = true;
-            if (x >= 145 && x <= 255 && y >= 680 && y <= 770) touchState.fightingRight = true;
-            if (x >= 345 && x <= 455 && y >= 680 && y <= 770) touchState.fightingPunch = true;
-            if (x >= 470 && x <= 580 && y >= 680 && y <= 770) touchState.fightingKick = true;
+            if (x >= 20 && x <= 135 && y >= 660 && y <= 780) touchState.fightingLeft = true;
+            if (x >= 145 && x <= 260 && y >= 660 && y <= 780) touchState.fightingRight = true;
+            if (x >= 340 && x <= 455 && y >= 660 && y <= 780) touchState.fightingPunch = true;
+            if (x >= 465 && x <= 580 && y >= 660 && y <= 780) touchState.fightingKick = true;
         }
     });
 }
@@ -213,9 +213,20 @@ function preloadAssets() {
 const companionSitsBg = document.createElement('video');
 companionSitsBg.src = 'images/backgrounds/companion_alone.mp4';
 companionSitsBg.loop = true; companionSitsBg.muted = true;
+companionSitsBg.playsInline = true;
+companionSitsBg.setAttribute('playsinline', '');
+companionSitsBg.setAttribute('webkit-playsinline', '');
+companionSitsBg.controls = false;
+companionSitsBg.setAttribute('disablePictureInPicture', '');
+
 const playerSitsBg = document.createElement('video');
 playerSitsBg.src = 'images/backgrounds/player_alone.mp4';
 playerSitsBg.loop = true; playerSitsBg.muted = true;
+playerSitsBg.playsInline = true;
+playerSitsBg.setAttribute('playsinline', '');
+playerSitsBg.setAttribute('webkit-playsinline', '');
+playerSitsBg.controls = false;
+playerSitsBg.setAttribute('disablePictureInPicture', '');
 
 function showDialog(character, actor, text, callback, style = null, illustration = null, options = null) {
     const castMember = CAST.find(c => c.actor === actor);
@@ -283,7 +294,13 @@ function startInTheCar() {
     audio.play('IN_THE_CAR', 45); nextCarCycle();
 }
 
-window.addEventListener('mousedown', (e) => {
+let lastPointerTime = 0;
+function handleCanvasPointerDown(e) {
+    if (audio) audio.unlockAudio();
+    const now = Date.now();
+    if (now - lastPointerTime < 150) return;
+    lastPointerTime = now;
+
     const pos = getCanvasPointerPos(e);
     const x = pos.x, y = pos.y;
 
@@ -433,7 +450,12 @@ window.addEventListener('mousedown', (e) => {
             audio.play('CHICAGO', 12); creditsStartTime = 0;
         }
     }
-});
+}
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('pointerdown', handleCanvasPointerDown);
+    window.addEventListener('mousedown', handleCanvasPointerDown);
+}
 
 window.addEventListener('mousemove', (e) => {
     if (currentPhase === PHASES.MINIGAME_PLAY && minigameState && minigameState.type === 'golf') {

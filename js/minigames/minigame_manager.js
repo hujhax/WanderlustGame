@@ -21,8 +21,8 @@ function startMinigame() {
     };
 
     if (gameType === 'chicken') {
-        audio.play('CHICKEN_BGM');
-        showDialog('Farmer Lucky', 'Jason', "Thanks for stopping at my farm — all my chickens are running loose! Can you help me catch them? Just don't hit any skulls — press the enter key to jump!", () => {
+        const jumpText = isMobileMode ? "tap screen to jump!" : "press the enter key to jump!";
+        showDialog('Farmer Lucky', 'Jason', "Thanks for stopping at my farm — all my chickens are running loose! Can you help me catch them? Just don't hit any skulls — " + jumpText, () => {
             currentPhase = PHASES.MINIGAME_PLAY;
             for (let i = 0; i < 5; i++) minigameState.parallax.trees.push({ x: i * 400, y: 400, speed: 2, scale: 0.8 + Math.random() * 0.4, flipped: Math.random() < 0.5 });
             for (let i = 0; i < 100; i++) {
@@ -130,6 +130,7 @@ function failure() {
 }
 
 function endMinigame() {
+    captureScreen();
     audio.stop(); currentPhase = PHASES.MINIGAME_POST;
     let msg = "", actor = "", char = "";
     if (minigameState.type === 'chicken') { actor = 'Jason'; char = 'Farmer Lucky'; msg = minigameState.won ? "Thanks for catching my chickens!" : "You have failed this farm. Never return here again."; }

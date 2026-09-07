@@ -63,7 +63,8 @@ function drawSeparateWays() {
     if (currentCycle >= totalCycles) {
         ctx.fillStyle = COLORS.BLACK; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = COLORS.WHITE; ctx.font = '16px "Press Start 2P"'; ctx.textAlign = 'center';
-        ctx.fillText('Press Enter to Continue', canvas.width / 2, canvas.height / 2);
+        const prompt = isMobileMode ? 'Tap to Continue' : 'Press Enter to Continue';
+        ctx.fillText(prompt, canvas.width / 2, canvas.height / 2);
         return;
     }
 
@@ -308,7 +309,7 @@ function drawCredits() {
             : [];
             
         if (photos.length === 0) {
-            photos = [departureBgImg, farmBgImg, marketStallImg, confrontationBgImg, countryRoadImg].filter(img => img && img.complete);
+            photos = [departureBgImg, farmBgImg, countryRoadImg, confrontationBgImg, bumperCarLotImg].filter(img => img && img.complete);
         }
         if (photos.length === 0) {
             photos = [departureBgImg];
@@ -334,6 +335,20 @@ function drawCredits() {
 
     const renderPolaroid = (p, offsetY = 0) => {
         if (!p.img || !p.img.complete || p.img.naturalWidth === 0) return;
+        
+        if (!isMobileMode) {
+            ctx.save();
+            ctx.translate(p.x + 100, p.y + 100 + offsetY);
+            ctx.rotate(p.rotation);
+            ctx.fillStyle = COLORS.WHITE;
+            ctx.fillRect(-110, -110, 220, 240);
+            ctx.fillStyle = COLORS.BLACK;
+            ctx.fillRect(-100, -100, 200, 150);
+            ctx.drawImage(p.img, -100, -100, 200, 150);
+            ctx.restore();
+            return;
+        }
+
         const imgW = p.img.naturalWidth || p.img.width || 1;
         const imgH = p.img.naturalHeight || p.img.height || 1;
         

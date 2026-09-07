@@ -185,7 +185,9 @@ function drawFishingWindow() {
 
         ctx.font = '14px "Press Start 2P"';
         if (Math.floor(Date.now() / 500) % 2 === 0) {
-            ctx.fillText('Press Enter to Continue', 400, 520);
+            const prompt = isMobileMode ? 'Tap to Continue' : 'Press Enter to Continue';
+            const promptX = isMobileMode ? (canvas.width / 2) : 400;
+            ctx.fillText(prompt, promptX, 520);
         }
     }
 }

@@ -12,9 +12,9 @@ function startFightingGame(nextPhase, isShadow = false) {
 
     const startFight = () => {
         currentPhase = PHASES.CONFRONTATION_PLAY;
-        const groundY = isMobileMode ? 580 : 400;
-        const pX = isMobileMode ? 80 : 100;
-        const aiX = isMobileMode ? 440 : 600;
+        const groundY = isMobileMode ? 475 : 400;
+        const pX = isMobileMode ? 60 : 100;
+        const aiX = isMobileMode ? 420 : 600;
         fightingState = {
             player: { actor: CAST[selectedIndex].actor.toLowerCase(), x: pX, y: groundY, health: 100, facing: 1, state: 'idle', frame: 0, attacking: 0, attackType: null, isShadow: false },
             ai: { actor: (isShadow ? CAST[selectedIndex].actor : partner.actor).toLowerCase(), x: aiX, y: groundY, health: 100, facing: -1, state: 'idle', frame: 0, attacking: 0, attackType: null, isShadow: isShadow },
@@ -125,6 +125,7 @@ function updateFighting() {
         if (p.attacking <= 0) p.state = 'walk_right'; 
         isMoving = true; 
     }
+    p.x = Math.max(0, Math.min(canvas.width - 128, p.x));
     if (!isMoving && p.attacking <= 0) p.state = 'idle';
 
     // AI logic (simplified physics)
@@ -137,6 +138,7 @@ function updateFighting() {
         if (ai.attacking <= 0) ai.state = 'idle';
         if (Math.random() < 0.05 && ai.attacking <= 0) performAttack(ai, Math.random() < 0.5 ? 'punch' : 'kick');
     }
+    ai.x = Math.max(0, Math.min(canvas.width - 128, ai.x));
 
     // Process attacks and collisions
     [p, ai].forEach(char => {
@@ -193,53 +195,115 @@ function drawConfrontationPlay() {
     const isShadowFight = fightingState.ai && fightingState.ai.isShadow;
     const bg = isShadowFight ? onYourOwnBgImg : confrontationBgImg;
     
-    // Maintain Aspect Ratio and check image state
-    if (bg.complete && bg.naturalWidth > 0) {
-        const scale = Math.max(canvas.width / bg.naturalWidth, canvas.height / bg.naturalHeight);
-        const w = bg.naturalWidth * scale, h = bg.naturalHeight * scale;
-        const x = (canvas.width - w) / 2, y = (canvas.height - h) / 2;
-        ctx.drawImage(bg, x, y, w, h);
-    } else {
-        ctx.fillStyle = '#333'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    
-    if (!fightingState.player || !fightingState.ai) return;
+    if (isMobileMode) {
+        const playH = 650;
 
-    // Health bars
-    const barW = isMobileMode ? 240 : 300;
-    const p1X = isMobileMode ? 20 : 50;
-    const p2X = isMobileMode ? 340 : 450;
-    ctx.fillStyle = COLORS.RED; ctx.fillRect(p1X, 50, barW, 20); ctx.fillRect(p2X, 50, barW, 20);
-    ctx.fillStyle = COLORS.GREEN; ctx.fillRect(p1X, 50, (barW / 100) * fightingState.player.health, 20);
-    ctx.fillRect(p2X + (barW / 100) * (100 - fightingState.ai.health), 50, (barW / 100) * fightingState.ai.health, 20);
+        // Dark background behind whole canvas
+        ctx.fillStyle = '#12121c';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Characters
-    [fightingState.player, fightingState.ai].forEach((char) => {
-        let sprite = combatSprites[char.actor], row = char.facing === 1 ? 3 : 1, frames = 1;
-        if (char.state.startsWith('walk')) { sprite = walkSprites[char.actor]; frames = 6; }
-        else if (char.state === 'punch') { sprite = halfSlashSprites[char.actor]; frames = 6; }
-        else if (char.state === 'kick') { sprite = kickSprites[char.actor]; frames = 5; row = char.facing === 1 ? 0 : 1; }
+        // Upper playground viewport clip
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, canvas.width, playH);
+        ctx.clip();
 
-        if (sprite && sprite.complete && sprite.naturalWidth > 0) {
-            if (!fightingState.gameOver) char.frame = (char.frame + 0.2) % frames;
-            drawPixelatedImage(sprite, Math.floor(char.frame) * 64, row * 64, 64, 64, char.x, char.y, 128, 128, char.isShadow ? 'inverted' : null);
+        if (bg.complete && bg.naturalWidth > 0) {
+            const scale = Math.max(canvas.width / bg.naturalWidth, playH / bg.naturalHeight);
+            const w = bg.naturalWidth * scale, h = bg.naturalHeight * scale;
+            const x = (canvas.width - w) / 2, y = (playH - h) / 2;
+            ctx.drawImage(bg, x, y, w, h);
+        } else {
+            ctx.fillStyle = '#333'; ctx.fillRect(0, 0, canvas.width, playH);
         }
-    });
 
-    if (fightingState.gameOver) {
-        ctx.fillStyle = COLORS.WHITE; ctx.font = '30px "Press Start 2P"'; ctx.textAlign = 'center';
-        ctx.fillText(fightingState.won ? 'YOU WIN!' : 'YOU LOSE!', canvas.width / 2, canvas.height / 2);
-        ctx.font = '16px "Press Start 2P"';
-        const prompt = isMobileMode ? 'Tap to Continue' : 'Press Enter to Continue';
-        ctx.fillText(prompt, canvas.width / 2, canvas.height / 2 + 50);
+        if (!fightingState.player || !fightingState.ai) {
+            ctx.restore();
+            return;
+        }
+
+        // Health bars inside upper viewport
+        const barW = 230;
+        const p1X = 20;
+        const p2X = 350;
+        const barY = 30;
+        ctx.fillStyle = COLORS.RED; ctx.fillRect(p1X, barY, barW, 20); ctx.fillRect(p2X, barY, barW, 20);
+        ctx.fillStyle = COLORS.GREEN; ctx.fillRect(p1X, barY, (barW / 100) * fightingState.player.health, 20);
+        ctx.fillRect(p2X + (barW / 100) * (100 - fightingState.ai.health), barY, (barW / 100) * fightingState.ai.health, 20);
+
+        // Characters
+        [fightingState.player, fightingState.ai].forEach((char) => {
+            let sprite = combatSprites[char.actor], row = char.facing === 1 ? 3 : 1, frames = 1;
+            if (char.state.startsWith('walk')) { sprite = walkSprites[char.actor]; frames = 6; }
+            else if (char.state === 'punch') { sprite = halfSlashSprites[char.actor]; frames = 6; }
+            else if (char.state === 'kick') { sprite = kickSprites[char.actor]; frames = 5; row = char.facing === 1 ? 0 : 1; }
+
+            if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+                if (!fightingState.gameOver) char.frame = (char.frame + 0.2) % frames;
+                drawPixelatedImage(sprite, Math.floor(char.frame) * 64, row * 64, 64, 64, char.x, char.y, 128, 128, char.isShadow ? 'inverted' : null);
+            }
+        });
+
+        if (fightingState.gameOver) {
+            ctx.fillStyle = COLORS.WHITE; ctx.font = '30px "Press Start 2P"'; ctx.textAlign = 'center';
+            ctx.fillText(fightingState.won ? 'YOU WIN!' : 'YOU LOSE!', canvas.width / 2, playH / 2);
+            ctx.font = '16px "Press Start 2P"';
+            ctx.fillText('Tap to Continue', canvas.width / 2, playH / 2 + 50);
+        }
+
+        ctx.restore();
+
+        // Control strip divider line
+        ctx.strokeStyle = '#333355'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, playH); ctx.lineTo(canvas.width, playH); ctx.stroke();
+
+        if (!fightingState.gameOver) {
+            // Touch control buttons in blank bottom control strip
+            drawTouchButton(20, 675, 115, 95, '◄ LEFT', { bgColor: '#222244', font: '12px "Press Start 2P"' });
+            drawTouchButton(145, 675, 115, 95, 'RIGHT ►', { bgColor: '#222244', font: '12px "Press Start 2P"' });
+
+            drawTouchButton(340, 675, 115, 95, 'PUNCH', { bgColor: '#004400', font: '12px "Press Start 2P"' });
+            drawTouchButton(465, 675, 115, 95, 'KICK', { bgColor: '#440000', font: '12px "Press Start 2P"' });
+        }
     } else {
-        if (isMobileMode) {
-            // Touch controls for fighting
-            drawTouchButton(20, 680, 110, 90, '◄ LEFT', { bgColor: '#222244', font: '12px "Press Start 2P"' });
-            drawTouchButton(145, 680, 110, 90, 'RIGHT ►', { bgColor: '#222244', font: '12px "Press Start 2P"' });
+        // Desktop rendering (100% UNCHANGED)
+        if (bg.complete && bg.naturalWidth > 0) {
+            const scale = Math.max(canvas.width / bg.naturalWidth, canvas.height / bg.naturalHeight);
+            const w = bg.naturalWidth * scale, h = bg.naturalHeight * scale;
+            const x = (canvas.width - w) / 2, y = (canvas.height - h) / 2;
+            ctx.drawImage(bg, x, y, w, h);
+        } else {
+            ctx.fillStyle = '#333'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        if (!fightingState.player || !fightingState.ai) return;
 
-            drawTouchButton(345, 680, 110, 90, 'PUNCH', { bgColor: '#004400', font: '12px "Press Start 2P"' });
-            drawTouchButton(470, 680, 110, 90, 'KICK', { bgColor: '#440000', font: '12px "Press Start 2P"' });
+        // Health bars
+        const barW = 300;
+        const p1X = 50;
+        const p2X = 450;
+        ctx.fillStyle = COLORS.RED; ctx.fillRect(p1X, 50, barW, 20); ctx.fillRect(p2X, 50, barW, 20);
+        ctx.fillStyle = COLORS.GREEN; ctx.fillRect(p1X, 50, (barW / 100) * fightingState.player.health, 20);
+        ctx.fillRect(p2X + (barW / 100) * (100 - fightingState.ai.health), 50, (barW / 100) * fightingState.ai.health, 20);
+
+        // Characters
+        [fightingState.player, fightingState.ai].forEach((char) => {
+            let sprite = combatSprites[char.actor], row = char.facing === 1 ? 3 : 1, frames = 1;
+            if (char.state.startsWith('walk')) { sprite = walkSprites[char.actor]; frames = 6; }
+            else if (char.state === 'punch') { sprite = halfSlashSprites[char.actor]; frames = 6; }
+            else if (char.state === 'kick') { sprite = kickSprites[char.actor]; frames = 5; row = char.facing === 1 ? 0 : 1; }
+
+            if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+                if (!fightingState.gameOver) char.frame = (char.frame + 0.2) % frames;
+                drawPixelatedImage(sprite, Math.floor(char.frame) * 64, row * 64, 64, 64, char.x, char.y, 128, 128, char.isShadow ? 'inverted' : null);
+            }
+        });
+
+        if (fightingState.gameOver) {
+            ctx.fillStyle = COLORS.WHITE; ctx.font = '30px "Press Start 2P"'; ctx.textAlign = 'center';
+            ctx.fillText(fightingState.won ? 'YOU WIN!' : 'YOU LOSE!', canvas.width / 2, canvas.height / 2);
+            ctx.font = '16px "Press Start 2P"';
+            ctx.fillText('Press Enter to Continue', canvas.width / 2, canvas.height / 2 + 50);
         } else {
             ctx.fillStyle = COLORS.WHITE; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
             ctx.fillText("press 'a' to punch, 's' to kick", canvas.width / 2, canvas.height - 30);

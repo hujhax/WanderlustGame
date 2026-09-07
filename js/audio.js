@@ -30,7 +30,16 @@ class AudioManager {
         this.currentTrack = null;
         this.audioCtx = null;
     }
+    unlockAudio() {
+        if (!this.audioCtx) {
+            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this.audioCtx && this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+    }
     play(trackName, startTime = 0) {
+        this.unlockAudio();
         if (this.currentTrack === this.tracks[trackName] && !this.currentTrack.paused) {
             return;
         }
