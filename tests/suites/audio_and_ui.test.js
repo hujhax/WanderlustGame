@@ -136,4 +136,22 @@ describe('Audio Manager & UI Engine (js/audio.js & js/ui.js)', () => {
         assertEquals(callbackFired, true, 'Callback should have fired');
         assertEquals(choiceReceived, 'yes', 'Choice received should be yes');
     });
+
+    it('drawMinigameDebugMenu renders without errors and selectDebugMinigame updates game state', () => {
+        currentPhase = PHASES.MINIGAME_DEBUG_MENU;
+        debugMinigameIndex = 0;
+        
+        try {
+            drawMinigameDebugMenu();
+        } catch (err) {
+            assert(false, `drawMinigameDebugMenu threw an error: ${err.message}`);
+        }
+
+        assert(DEBUG_MINIGAMES.length === 10, 'DEBUG_MINIGAMES should contain all 10 minigames');
+        
+        selectDebugMinigame(3); // Cheese minigame
+        assertEquals(minigameOrder[0], 'cheese', 'selectDebugMinigame should set minigameOrder');
+        assertEquals(currentMinigameIndex, 0, 'selectDebugMinigame should reset currentMinigameIndex');
+        assertEquals(currentPhase, PHASES.MINIGAME_MAP, 'selectDebugMinigame should transition to MINIGAME_MAP');
+    });
 });

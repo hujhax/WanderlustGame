@@ -305,3 +305,79 @@ function drawNextDay() {
     }
 }
 
+let debugMinigameIndex = 0;
+const DEBUG_MINIGAMES = [
+    { key: 'chicken', name: 'Catch That Chicken' },
+    { key: 'math', name: 'Math' },
+    { key: 'karaoke', name: 'Karaoke' },
+    { key: 'cheese', name: "Mme. Tremblay's Cheese" },
+    { key: 'bump', name: 'Bump' },
+    { key: 'fish', name: 'Lake Fish-a-Lot' },
+    { key: 'golf', name: 'Golf' },
+    { key: 'jeopardy', name: 'Jeopardy' },
+    { key: 'goose', name: 'Goose' },
+    { key: 'climb', name: 'The Climbatorium' }
+];
+
+function getDebugMenuBounds(i) {
+    if (isMobileMode) {
+        const col = i >= 5 ? 1 : 0;
+        const row = i % 5;
+        const x = col === 0 ? 25 : 305;
+        const y = 150 + row * 90;
+        const w = 270;
+        const h = 75;
+        return { x, y, w, h };
+    } else {
+        const col = i >= 5 ? 1 : 0;
+        const row = i % 5;
+        const x = col === 0 ? 50 : 410;
+        const y = 140 + row * 70;
+        const w = 340;
+        const h = 55;
+        return { x, y, w, h };
+    }
+}
+
+function drawMinigameDebugMenu() {
+    ctx.fillStyle = COLORS.BLACK;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = COLORS.WHITE;
+    ctx.textAlign = 'center';
+    ctx.font = isMobileMode ? '18px "Press Start 2P"' : '24px "Press Start 2P"';
+    ctx.fillText('MINIGAME DEBUG MENU', canvas.width / 2, 60);
+
+    ctx.fillStyle = COLORS.TEXT_GREY || '#BBBBBB';
+    ctx.font = isMobileMode ? '10px "Press Start 2P"' : '12px "Press Start 2P"';
+    ctx.fillText('Select a minigame to play:', canvas.width / 2, isMobileMode ? 100 : 95);
+
+    DEBUG_MINIGAMES.forEach((mg, i) => {
+        const { x, y, w, h } = getDebugMenuBounds(i);
+        const isSel = (i === debugMinigameIndex);
+
+        ctx.fillStyle = isSel ? 'rgba(255, 255, 0, 0.15)' : '#111111';
+        ctx.fillRect(x, y, w, h);
+
+        ctx.strokeStyle = isSel ? COLORS.SELECTION_YELLOW : '#555555';
+        ctx.lineWidth = isSel ? 3 : 1;
+        ctx.strokeRect(x, y, w, h);
+
+        ctx.fillStyle = isSel ? COLORS.SELECTION_YELLOW : COLORS.WHITE;
+        ctx.font = isMobileMode ? '10px "Press Start 2P"' : '11px "Press Start 2P"';
+        ctx.textAlign = 'left';
+
+        const label = (isSel ? '> ' : '  ') + mg.name;
+        ctx.fillText(label, x + 10, y + h / 2 + 4);
+    });
+
+    if (Math.floor(Date.now() / 500) % 2 === 0) {
+        ctx.fillStyle = COLORS.WHITE;
+        ctx.textAlign = 'center';
+        ctx.font = isMobileMode ? '10px "Press Start 2P"' : '12px "Press Start 2P"';
+        const prompt = isMobileMode ? 'Tap or Press Enter to Play' : 'Click or Press Enter to Play';
+        ctx.fillText(prompt, canvas.width / 2, canvas.height - (isMobileMode ? 40 : 35));
+    }
+}
+
+

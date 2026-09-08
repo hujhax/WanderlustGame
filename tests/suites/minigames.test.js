@@ -761,6 +761,27 @@ describe('Individual Minigames Implementation', () => {
             assert(!isClimbCardPlayable(circleCard), 'Circle card should be unplayable when no circle shape in reach');
         });
 
+        it('confirmCardRemoval presents interactive YES/NO dialog before removing card from deck', () => {
+            minigameState = { type: 'climb', successes: 0, failures: 0 };
+            initClimbGame();
+            minigameState.climb.coins = 5;
+            const initialDeckLen = minigameState.climb.deck.length;
+
+            confirmCardRemoval(0);
+            assert(currentDialog !== null, 'confirmCardRemoval should open dialog modal');
+            assertEquals(currentDialog.options.length, 2, 'Dialog should present YES/NO options');
+            assertEquals(minigameState.climb.deck.length, initialDeckLen, 'Deck length should not change before confirmation');
+
+            // Simulate selecting 'yes'
+            const cb = dialogCallback;
+            currentDialog = null;
+            dialogCallback = null;
+            if (cb) cb('yes');
+
+            assertEquals(minigameState.climb.coins, 4, 'Removing card should deduct 1 coin');
+            assertEquals(minigameState.climb.deck.length, initialDeckLen - 1, 'Deck length should decrease by 1 after confirming removal');
+        });
+
         it('3 failures in Climbatorium transitions game to MINIGAME_POST phase with Rocky loss dialog', () => {
             minigameState = { type: 'climb', successes: 0, failures: 2, maxFailures: 3 };
             initClimbGame();

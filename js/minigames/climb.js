@@ -1678,16 +1678,7 @@ function handleClimbClick(x, y) {
                 const col = i - startIdx;
                 const cx = 60 + col * 79;
                 if (x >= cx && x <= cx + cardW && y >= deckY && y <= deckY + cardH) {
-                    if (state.coins >= 1 && state.deck.length > 1) {
-                        state.coins -= 1;
-                        state.deck.splice(i, 1);
-                        audio.playSFX('TADA');
-                        if (state.deckScrollOffset > 0 && state.deckScrollOffset >= state.deck.length) {
-                            state.deckScrollOffset = Math.max(0, state.deck.length - 1);
-                        }
-                    } else {
-                        audio.playSFX('FAILURE');
-                    }
+                    confirmCardRemoval(i);
                     return;
                 }
             }
@@ -1737,16 +1728,7 @@ function handleClimbClick(x, y) {
                 const col = i - startIdx;
                 const cx = 100 + col * 100;
                 if (x >= cx && x <= cx + cardW && y >= deckY && y <= deckY + cardH) {
-                    if (state.coins >= 1 && state.deck.length > 1) {
-                        state.coins -= 1;
-                        state.deck.splice(i, 1);
-                        audio.playSFX('TADA');
-                        if (state.deckScrollOffset > 0 && state.deckScrollOffset >= state.deck.length) {
-                            state.deckScrollOffset = Math.max(0, state.deck.length - 1);
-                        }
-                    } else {
-                        audio.playSFX('FAILURE');
-                    }
+                    confirmCardRemoval(i);
                     return;
                 }
             }
@@ -2136,6 +2118,36 @@ function confirmWarePurchase(ware) {
             }
             applyClimbWare(ware);
             audio.playSFX('SUCCESS');
+        }
+    }, null, null, ['YES', 'NO']);
+}
+
+function confirmCardRemoval(cardIndex) {
+    const state = minigameState.climb;
+    if (!state || currentDialog) return;
+    if (state.coins < 1 || state.deck.length <= 1) {
+        audio.playSFX('FAILURE');
+        return;
+    }
+
+    const card = state.deck[cardIndex];
+    if (!card) return;
+
+    const cardName = card.title || (card.type ? capitalizeClimbStr(card.type) : 'this card');
+    const promptText = `Would you like to remove ${cardName} from your deck for 1¢?`;
+
+    showDialog('Rocky', 'Leichelle', promptText, (choice) => {
+        if (choice === 'yes' || choice === true) {
+            if (state.coins >= 1 && state.deck.length > 1 && cardIndex < state.deck.length) {
+                state.coins -= 1;
+                state.deck.splice(cardIndex, 1);
+                audio.playSFX('TADA');
+                if (state.deckScrollOffset > 0 && state.deckScrollOffset >= state.deck.length) {
+                    state.deckScrollOffset = Math.max(0, state.deck.length - 1);
+                }
+            } else {
+                audio.playSFX('FAILURE');
+            }
         }
     }, null, null, ['YES', 'NO']);
 }

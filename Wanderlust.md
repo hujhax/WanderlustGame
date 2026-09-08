@@ -174,7 +174,7 @@ Either way, the game then proceeds to the post-minigame screen, which shuts off 
 
 If the player presses enter, they proceed either to (1) the next minigame (for the first two minigames) or (2) the The Confrontation phase (for the third minigame).
 
-Note: for debugging purposes, each minigame has a "query string name".  If a game has a query string name of "foo", and the full game is started with the query parameter "minigame=foo", then the game will start directly with that minigame as if it's stop number 1, and after the post-minigame screen, we just restart that same minigame as stop number 1.  Otherwise, the game runs normally.
+Note: for debugging purposes, each minigame has a "query string name".  If a game has a query string name of "foo", and the full game is started with the query parameter "minigame=foo", then the game will start directly with that minigame as if it's stop number 1, and after the post-minigame screen, we just restart that same minigame as stop number 1.  If the query params have `minigame=debug`, instead of getting the intro, you get a menu that lets you select any of the minigame. You can then play the minigame, and when it's done, you go back to the menu. Otherwise, the game runs normally.
 
 ### Catch That Chicken
 Query string name is "chicken".

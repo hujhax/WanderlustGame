@@ -273,6 +273,7 @@ function gameLoop() {
         case PHASES.MINIGAME_MAP: drawMinigameMap(); break;
         case PHASES.MINIGAME_PLAY: drawMinigamePlay(); break;
         case PHASES.MINIGAME_POST: drawMinigamePost(); break;
+        case PHASES.MINIGAME_DEBUG_MENU: drawMinigameDebugMenu(); break;
         case PHASES.THE_CONFRONTATION: drawConfrontationTitle(); break;
         case PHASES.ON_YOUR_OWN: drawOnYourOwnTitle(); break;
         case PHASES.CONFRONTATION_PLAY: updateFighting(); drawConfrontationPlay(); break;
@@ -411,12 +412,25 @@ function handleCanvasPointerDown(e) {
         } else if (type === 'climb') {
             handleClimbClick(x, y);
         }
+    } else if (currentPhase === PHASES.MINIGAME_DEBUG_MENU) {
+        for (let i = 0; i < DEBUG_MINIGAMES.length; i++) {
+            const { x: bx, y: by, w: bw, h: bh } = getDebugMenuBounds(i);
+            if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
+                debugMinigameIndex = i;
+                selectDebugMinigame(i);
+                break;
+            }
+        }
     } else if (currentPhase === PHASES.MINIGAME_POST) {
-        if (isMobileMode) {
-            playedMinigames.push({ name: minigameState.type, won: minigameState.won });
-            currentMinigameIndex++;
-            if (currentMinigameIndex < minigameOrder.length) currentPhase = PHASES.MINIGAME_MAP;
-            else startFightingGame(PHASES.SEPARATE_WAYS);
+        playedMinigames.push({ name: minigameState.type, won: minigameState.won });
+        currentMinigameIndex++;
+        if (typeof minigameOverride !== 'undefined' && minigameOverride === 'debug') {
+            currentPhase = PHASES.MINIGAME_DEBUG_MENU;
+            audio.stop();
+        } else if (currentMinigameIndex < minigameOrder.length) {
+            currentPhase = PHASES.MINIGAME_MAP;
+        } else {
+            startFightingGame(PHASES.SEPARATE_WAYS);
         }
     } else if (currentPhase === PHASES.THE_CONFRONTATION || currentPhase === PHASES.ON_YOUR_OWN) {
         if (isMobileMode) {
@@ -565,13 +579,32 @@ window.addEventListener('keydown', (e) => {
                 showDialog(CAST[selectedIndex].firstName, CAST[selectedIndex].actor, choice.text, () => { inTheCarState.cycle++; nextCarCycle(); }, 'top');
             }
         }
+    } else if (currentPhase === PHASES.MINIGAME_DEBUG_MENU) {
+        if (e.key === 'ArrowRight') {
+            if (debugMinigameIndex < 5) debugMinigameIndex += 5;
+            audio.playSFX('ui');
+        } else if (e.key === 'ArrowLeft') {
+            if (debugMinigameIndex >= 5) debugMinigameIndex -= 5;
+            audio.playSFX('ui');
+        } else if (e.key === 'ArrowDown') {
+            debugMinigameIndex = (debugMinigameIndex + 1) % DEBUG_MINIGAMES.length;
+            audio.playSFX('ui');
+        } else if (e.key === 'ArrowUp') {
+            debugMinigameIndex = (debugMinigameIndex - 1 + DEBUG_MINIGAMES.length) % DEBUG_MINIGAMES.length;
+            audio.playSFX('ui');
+        } else if (e.key === 'Enter') {
+            selectDebugMinigame(debugMinigameIndex);
+        }
     } else if (currentPhase === PHASES.MINIGAME_MAP) { if (e.key === 'Enter') startMinigame(); }
     else if (currentPhase === PHASES.MINIGAME_PLAY) { handleMinigameInput(e.key); }
     else if (currentPhase === PHASES.MINIGAME_POST) {
         if (e.key === 'Enter') {
             playedMinigames.push({ name: minigameState.type, won: minigameState.won });
             currentMinigameIndex++;
-            if (currentMinigameIndex < minigameOrder.length) currentPhase = PHASES.MINIGAME_MAP;
+            if (minigameOverride === 'debug') {
+                currentPhase = PHASES.MINIGAME_DEBUG_MENU;
+                audio.stop();
+            } else if (currentMinigameIndex < minigameOrder.length) currentPhase = PHASES.MINIGAME_MAP;
             else startFightingGame(PHASES.SEPARATE_WAYS);
         }
     } else if (currentPhase === PHASES.THE_CONFRONTATION || currentPhase === PHASES.ON_YOUR_OWN) {
@@ -602,11 +635,20 @@ window.addEventListener('keyup', (e) => { keysPressed.delete(e.key); });
 
 function selectTraveller() { currentPhase = PHASES.PARTNER_ANNOUNCEMENT; audio.play('ZELDA_VICTORY'); }
 
+function selectDebugMinigame(index) {
+    if (typeof audio !== 'undefined' && audio.playSFX) audio.playSFX('ui');
+    const selectedKey = DEBUG_MINIGAMES[index].key;
+    minigameOrder = [selectedKey];
+    currentMinigameIndex = 0;
+    currentPhase = PHASES.MINIGAME_MAP;
+}
+
 const urlParams = new URLSearchParams(window.location.search);
 const minigameOverride = urlParams.get('minigame');
 if (minigameOverride) {
     selectedIndex = 5;
-    if (minigameOverride === 'confrontation') currentPhase = PHASES.THE_CONFRONTATION;
+    if (minigameOverride === 'debug') currentPhase = PHASES.MINIGAME_DEBUG_MENU;
+    else if (minigameOverride === 'confrontation') currentPhase = PHASES.THE_CONFRONTATION;
     else if (minigameOverride === 'separate') { currentPhase = PHASES.NEXT_DAY; }
     else if (minigameOverride === 'alone' || minigameOverride === 'own') startFightingGame(PHASES.TOGETHER_AGAIN, true);
     else if (minigameOverride === 'reunited') startTogetherAgain();
@@ -617,3 +659,4 @@ if (minigameOverride) {
 
 preloadAssets();
 gameLoop();
+
