@@ -317,10 +317,16 @@ describe('Individual Minigames Implementation', () => {
                 const by = Math.floor(hole.startY / 6);
                 const cellVal = grid[by * 209 + bx];
                 assertEquals(cellVal, 0, `Hole ${hole.number} start position (${hole.startX}, ${hole.startY}) must be on grass (0), found ${cellVal}`);
+
+                // Verify fairway grass cell count dominates course grid per Wanderlust.md spec
+                const grassCount = grid.filter(c => c === 0).length;
+                const wallCount = grid.filter(c => c === 1).length;
+                assert(grassCount > 25000, `Hole ${hole.number} must have vast fairway grass area (>25000 cells), found ${grassCount}`);
+                assert(wallCount < 10000, `Hole ${hole.number} wall cells should be limited (<10000 cells), found ${wallCount}`);
             });
         });
 
-        it('Space key triggers windup, swing, and moves golf ball in physics update', () => {
+        it('Space key triggers windup, swing, and moves golf ball across multiple physics steps', () => {
             initGolfGame();
             assertEquals(minigameState.golf.state, 'aiming', 'Game should start in aiming state');
 
@@ -335,8 +341,15 @@ describe('Individual Minigames Implementation', () => {
             assertEquals(minigameState.golf.state, 'moving', 'Second SPACE press should initiate stroke movement');
             assert(minigameState.golf.ball.vx !== 0 || minigameState.golf.ball.vy !== 0, 'Ball velocity should be non-zero after stroke');
 
-            updateGolfPhysics();
-            assert(minigameState.golf.ball.x !== startX || minigameState.golf.ball.y !== startY, 'Ball position should advance after physics update step');
+            // Run 10 physics steps to simulate ball travel across fairway
+            for (let i = 0; i < 10; i++) {
+                if (minigameState.golf.state === 'moving') {
+                    updateGolfPhysics();
+                }
+            }
+
+            const distTraveled = Math.hypot(minigameState.golf.ball.x - startX, minigameState.golf.ball.y - startY);
+            assert(distTraveled > 30, `Ball should travel substantially (>30px) across fairway, actually traveled ${distTraveled.toFixed(1)}px`);
         });
     });
 
