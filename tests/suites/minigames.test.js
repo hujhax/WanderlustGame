@@ -309,6 +309,35 @@ describe('Individual Minigames Implementation', () => {
             }
             assertEquals(minigameState.failures, 1, 'Exceeding 3 strokes should register failure');
         });
+
+        it('All golf holes have valid start positions on fairway grass (0)', () => {
+            GOLF_HOLES_DATA.forEach(hole => {
+                const grid = unpackRLE(hole.gridRLE);
+                const bx = Math.floor(hole.startX / 6);
+                const by = Math.floor(hole.startY / 6);
+                const cellVal = grid[by * 209 + bx];
+                assertEquals(cellVal, 0, `Hole ${hole.number} start position (${hole.startX}, ${hole.startY}) must be on grass (0), found ${cellVal}`);
+            });
+        });
+
+        it('Space key triggers windup, swing, and moves golf ball in physics update', () => {
+            initGolfGame();
+            assertEquals(minigameState.golf.state, 'aiming', 'Game should start in aiming state');
+
+            handleGolfInput(' ');
+            assertEquals(minigameState.golf.state, 'power_windup', 'First SPACE press should start power windup');
+
+            minigameState.golf.power = 0.5;
+            const startX = minigameState.golf.ball.x;
+            const startY = minigameState.golf.ball.y;
+
+            handleGolfInput(' ');
+            assertEquals(minigameState.golf.state, 'moving', 'Second SPACE press should initiate stroke movement');
+            assert(minigameState.golf.ball.vx !== 0 || minigameState.golf.ball.vy !== 0, 'Ball velocity should be non-zero after stroke');
+
+            updateGolfPhysics();
+            assert(minigameState.golf.ball.x !== startX || minigameState.golf.ball.y !== startY, 'Ball position should advance after physics update step');
+        });
     });
 
     // --- CANADIAN JEOPARDY ---
