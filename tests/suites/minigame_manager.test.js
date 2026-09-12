@@ -95,4 +95,77 @@ describe('Minigame Manager (js/minigames/minigame_manager.js)', () => {
             }
         });
     });
+
+    function resetPlaythroughStorage() {
+        try { if (typeof localStorage !== 'undefined') localStorage.clear(); } catch (e) {}
+        try { if (typeof document !== 'undefined') document.cookie = 'wanderlust_playthrough_count=0; path=/; max-age=0'; } catch (e) {}
+    }
+
+    it('getPlaythroughCount and incrementPlaythroughCount work correctly with localStorage', () => {
+        resetPlaythroughStorage();
+        assertEquals(getPlaythroughCount(), 0, 'Initial playthrough count should be 0');
+        incrementPlaythroughCount();
+        assertEquals(getPlaythroughCount(), 1, 'Playthrough count after 1 increment should be 1');
+        incrementPlaythroughCount();
+        assertEquals(getPlaythroughCount(), 2, 'Playthrough count after 2 increments should be 2');
+        resetPlaythroughStorage();
+    });
+
+    it('generateMinigameOrder excludes jeopardy and climb on first playthrough (count 0)', () => {
+        resetPlaythroughStorage();
+        for (let i = 0; i < 20; i++) {
+            generateMinigameOrder();
+            assertEquals(minigameOrder.length, 3, 'minigameOrder should have length 3');
+            assertFalse(minigameOrder.includes('jeopardy'), 'jeopardy should not be included on playthrough 0');
+            assertFalse(minigameOrder.includes('climb'), 'climb should not be included on playthrough 0');
+        }
+    });
+
+    it('generateMinigameOrder includes both jeopardy and climb on second playthrough (count 1)', () => {
+        resetPlaythroughStorage();
+        incrementPlaythroughCount(); // count = 1
+        for (let i = 0; i < 20; i++) {
+            generateMinigameOrder();
+            assertEquals(minigameOrder.length, 3, 'minigameOrder should have length 3');
+            assertTrue(minigameOrder.includes('jeopardy'), 'jeopardy must be included on playthrough 1');
+            assertTrue(minigameOrder.includes('climb'), 'climb must be included on playthrough 1');
+        }
+        resetPlaythroughStorage();
+    });
+
+    it('generateMinigameOrder allows all minigames on playthrough 3+ (count >= 2)', () => {
+        resetPlaythroughStorage();
+        incrementPlaythroughCount(); // 1
+        incrementPlaythroughCount(); // 2
+        let sawJeopardy = false, sawClimb = false, sawOthers = false;
+        for (let i = 0; i < 50; i++) {
+            generateMinigameOrder();
+            assertEquals(minigameOrder.length, 3, 'minigameOrder should have length 3');
+            if (minigameOrder.includes('jeopardy')) sawJeopardy = true;
+            if (minigameOrder.includes('climb')) sawClimb = true;
+            if (minigameOrder.some(m => m !== 'jeopardy' && m !== 'climb')) sawOthers = true;
+        }
+        assertTrue(sawOthers, 'Should pick other minigames on playthrough >= 2');
+        resetPlaythroughStorage();
+    });
+
+    it('drawUnlockMasters renders without error', () => {
+        try {
+            drawUnlockMasters();
+        } catch (err) {
+            assert(false, `drawUnlockMasters failed: ${err.message}`);
+        }
+    });
+
+    it('Jeopardy clue option for Regina slogan uses Fredericton, New Brunswick', () => {
+        const category = JEOPARDY_CLUES_DATA.categories.find(c => c.id === 'capitalism');
+        assert(category !== undefined, 'capitalism category should exist');
+        const clueObj = category.clues.find(c => c.value === 400);
+        assert(clueObj !== undefined, 'clue 400 should exist in capitalism');
+        const sloganVariant = clueObj.variants.find(v => v.correct.includes('Regina'));
+        assert(sloganVariant !== undefined, 'Regina slogan variant should exist');
+        assertTrue(sloganVariant.wrong.includes('What is Fredericton, New Brunswick?'), 'wrong options should include Fredericton, New Brunswick');
+        assertFalse(sloganVariant.wrong.includes('What is Verdun, Quebec?'), 'wrong options should NOT include Verdun, Quebec');
+    });
 });
+

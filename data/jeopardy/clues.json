@@ -230,7 +230,7 @@
           "value": 1000,
           "variants": [
             {
-              "clue": "In 1995, Labatt ran a bold ad campaign featuring a beer-loving loon mascot named 'Bob.' The campaign failed spectacularly, and Bob became a symbol of over-engineered Canadian brand mascots of this decade.",
+              "clue": "Labatt once had a beer-loving loon mascot named 'Bob.' The campaign featuring Bob failed spectacularly in this decade.",
               "correct": "What is the 1990s?",
               "wrong": ["What is the 1980s?", "What is the 2000s?"]
             },
@@ -592,7 +592,7 @@
             {
               "clue": "A short-lived tourism slogan for this provincial capital described it as 'the city that rhymes with fun.'",
               "correct": "What is Regina, Saskatchewan?",
-              "wrong": ["What is Sexsmith, Alberta?", "What is Verdun, Quebec?"]
+              "wrong": ["What is Sexsmith, Alberta?", "What is Fredericton, New Brunswick?"]
             },
             {
               "clue": "This island city is both the capital of B.C. and the southernmost city in the province — known for its British-influenced architecture and mild, rain-shadow climate.",

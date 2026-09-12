@@ -3,6 +3,8 @@
 ## Project Overview
 Wanderlust is a web-based video game that uses NES-style pixel-art graphics and chiptune-style music/sound effects. It is built using **Vanilla JavaScript** and the **HTML5 Canvas API**. The project is structured as a single-page application where `game.js` manages state transitions between different game phases.
 
+NEVER PUSH ANY CHANGES TO GITHUB UNLESS THE USER EXPLICITLY REQUESTS THAT.
+
 ### Core Technologies
 - **Language:** JavaScript (ES6+)
 - **Rendering:** HTML5 Canvas

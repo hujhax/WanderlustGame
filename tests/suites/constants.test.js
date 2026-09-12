@@ -14,7 +14,7 @@ describe('Constants & Configuration Data', () => {
             'INTRO', 'TITLE', 'CHOOSE_TRAVELLER', 'PARTNER_ANNOUNCEMENT',
             'DEPARTURE_CUTSCENE', 'MINIGAME_MAP', 'MINIGAME_PLAY', 'MINIGAME_POST',
             'IN_THE_CAR', 'THE_CONFRONTATION', 'CONFRONTATION_PLAY', 'NEXT_DAY',
-            'SEPARATE_WAYS', 'ON_YOUR_OWN', 'TOGETHER_AGAIN', 'CLOSING_INTERVIEW', 'CLOSING_CREDITS'
+            'SEPARATE_WAYS', 'ON_YOUR_OWN', 'TOGETHER_AGAIN', 'CLOSING_INTERVIEW', 'UNLOCK_MASTERS', 'CLOSING_CREDITS'
         ];
         requiredPhases.forEach(phase => {
             assertEquals(PHASES[phase], phase, `PHASES.${phase} should match key name`);

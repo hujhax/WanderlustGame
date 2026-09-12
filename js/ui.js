@@ -165,24 +165,26 @@ function drawDialogBox() {
     
     // Draw Yes/No Options if provided
     if (currentDialog.options && Array.isArray(currentDialog.options)) {
-        const optY = boxY + boxH - 45;
+        const optY = boxY + boxH - 52;
         const opts = currentDialog.options;
         const selIdx = currentDialog.selectedOption || 0;
 
         opts.forEach((optText, idx) => {
-            const optX = isMobileMode ? (boxX + 220 + idx * 110) : (450 + idx * 110);
+            const optX = isMobileMode ? (boxX + 210 + idx * 125) : (440 + idx * 120);
+            const optW = isMobileMode ? 115 : 110;
+            const optH = isMobileMode ? 44 : 40;
             const isSel = (idx === selIdx);
             
             ctx.fillStyle = isSel ? COLORS.SELECTION_YELLOW : '#333333';
-            ctx.fillRect(optX, optY, 95, 34);
+            ctx.fillRect(optX, optY, optW, optH);
             ctx.strokeStyle = COLORS.WHITE;
             ctx.lineWidth = 2;
-            ctx.strokeRect(optX, optY, 95, 34);
+            ctx.strokeRect(optX, optY, optW, optH);
 
             ctx.fillStyle = isSel ? COLORS.BLACK : COLORS.WHITE;
-            ctx.font = '10px "Press Start 2P"';
+            ctx.font = isMobileMode ? '11px "Press Start 2P"' : '11px "Press Start 2P"';
             ctx.textAlign = 'center';
-            ctx.fillText(optText, optX + 47, optY + 21);
+            ctx.fillText(optText, optX + optW / 2, optY + optH / 2 + 4);
         });
     } else {
         // Blinking continuation indicator at bottom right of the black box
@@ -316,25 +318,26 @@ const DEBUG_MINIGAMES = [
     { key: 'golf', name: 'Golf' },
     { key: 'jeopardy', name: 'Jeopardy' },
     { key: 'goose', name: 'Goose' },
-    { key: 'climb', name: 'The Climbatorium' }
+    { key: 'climb', name: 'The Climbatorium' },
+    { key: 'unlock', name: 'Unlock Game Masters' }
 ];
 
 function getDebugMenuBounds(i) {
     if (isMobileMode) {
-        const col = i >= 5 ? 1 : 0;
-        const row = i % 5;
+        const col = i >= 6 ? 1 : 0;
+        const row = i % 6;
         const x = col === 0 ? 25 : 305;
-        const y = 150 + row * 90;
+        const y = 130 + row * 90;
         const w = 270;
         const h = 75;
         return { x, y, w, h };
     } else {
-        const col = i >= 5 ? 1 : 0;
-        const row = i % 5;
+        const col = i >= 6 ? 1 : 0;
+        const row = i % 6;
         const x = col === 0 ? 50 : 410;
-        const y = 140 + row * 70;
+        const y = 125 + row * 65;
         const w = 340;
-        const h = 55;
+        const h = 50;
         return { x, y, w, h };
     }
 }
@@ -379,5 +382,55 @@ function drawMinigameDebugMenu() {
         ctx.fillText(prompt, canvas.width / 2, canvas.height - (isMobileMode ? 40 : 35));
     }
 }
+
+function drawUnlockMasters() {
+    ctx.fillStyle = COLORS.BLACK;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = COLORS.SELECTION_YELLOW;
+    ctx.font = isMobileMode ? '14px "Press Start 2P"' : '20px "Press Start 2P"';
+    ctx.textAlign = 'center';
+    ctx.fillText("You have unlocked", canvas.width / 2, isMobileMode ? 110 : 90);
+    ctx.fillText("two new game masters!", canvas.width / 2, isMobileMode ? 145 : 125);
+
+    const masters = [
+        CAST.find(c => c.firstName === 'Lindsey'),
+        CAST.find(c => c.firstName === 'Leichelle')
+    ];
+
+    const boxSize = isMobileMode ? 150 : 160;
+    const yPos = isMobileMode ? 250 : 210;
+
+    masters.forEach((master, i) => {
+        if (!master) return;
+        const xPos = i === 0 
+            ? (isMobileMode ? canvas.width / 2 - 170 : canvas.width / 2 - 200)
+            : (isMobileMode ? canvas.width / 2 + 20 : canvas.width / 2 + 40);
+
+        ctx.fillStyle = COLORS.BLACK;
+        ctx.fillRect(xPos, yPos, boxSize, boxSize);
+        ctx.strokeStyle = COLORS.WHITE;
+        ctx.lineWidth = 4;
+        ctx.strokeRect(xPos, yPos, boxSize, boxSize);
+
+        if (master.img && master.img.complete) {
+            drawPixelatedImage(master.img, 0, 0, master.img.width, master.img.height, xPos, yPos, boxSize, boxSize);
+        }
+
+        ctx.fillStyle = COLORS.WHITE;
+        ctx.font = '14px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.fillText(master.firstName, xPos + boxSize / 2, yPos + boxSize + 28);
+    });
+
+    if (Math.floor(Date.now() / 500) % 2 === 0) {
+        ctx.fillStyle = COLORS.WHITE;
+        ctx.font = '16px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        const prompt = isMobileMode ? 'Tap to Continue' : 'Press Enter to Continue';
+        ctx.fillText(prompt, canvas.width / 2, isMobileMode ? 720 : 540);
+    }
+}
+
 
 

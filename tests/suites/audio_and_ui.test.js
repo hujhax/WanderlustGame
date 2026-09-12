@@ -147,11 +147,14 @@ describe('Audio Manager & UI Engine (js/audio.js & js/ui.js)', () => {
             assert(false, `drawMinigameDebugMenu threw an error: ${err.message}`);
         }
 
-        assert(DEBUG_MINIGAMES.length === 10, 'DEBUG_MINIGAMES should contain all 10 minigames');
+        assert(DEBUG_MINIGAMES.length === 11, 'DEBUG_MINIGAMES should contain 11 items including Unlock Game Masters');
         
         selectDebugMinigame(3); // Cheese minigame
         assertEquals(minigameOrder[0], 'cheese', 'selectDebugMinigame should set minigameOrder');
         assertEquals(currentMinigameIndex, 0, 'selectDebugMinigame should reset currentMinigameIndex');
         assertEquals(currentPhase, PHASES.MINIGAME_MAP, 'selectDebugMinigame should transition to MINIGAME_MAP');
+
+        selectDebugMinigame(10); // Unlock Game Masters
+        assertEquals(currentPhase, PHASES.UNLOCK_MASTERS, 'selectDebugMinigame(10) should trigger startUnlockMasters and transition to UNLOCK_MASTERS');
     });
 });

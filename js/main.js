@@ -78,8 +78,43 @@ if (typeof window !== 'undefined') {
 let selectedIndex = 0;
 let score = 0;
 let currentMinigameIndex = 0;
-let minigameOrder = ['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish', 'golf', 'jeopardy', 'goose', 'climb'].sort(() => Math.random() - 0.5).slice(0, 3);
+let minigameOrder = [];
 let playedMinigames = []; // Tracks {name, won} for confrontation
+
+function generateMinigameOrder() {
+    if (typeof window !== 'undefined' && window.location) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const override = urlParams.get('minigame');
+        if (override) {
+            if (override === 'debug') return;
+            if (['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish', 'golf', 'jeopardy', 'goose', 'climb'].includes(override)) {
+                minigameOrder = [override];
+                return;
+            }
+        }
+    }
+
+    const count = typeof getPlaythroughCount === 'function' ? getPlaythroughCount() : 0;
+    const standard8 = ['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish', 'golf', 'goose'];
+    const all10 = ['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish', 'golf', 'goose', 'jeopardy', 'climb'];
+
+    if (count === 0) {
+        // First playthrough: jeopardy and climbatorium aren't available
+        const shuffled = [...standard8].sort(() => Math.random() - 0.5);
+        minigameOrder = shuffled.slice(0, 3);
+    } else if (count === 1) {
+        // Second playthrough: two of the minigames are jeopardy and climbatorium
+        const mandatory = ['jeopardy', 'climb'];
+        const remaining = [...standard8].sort(() => Math.random() - 0.5);
+        const third = remaining[0];
+        minigameOrder = [...mandatory, third].sort(() => Math.random() - 0.5);
+    } else {
+        // Subsequent playthroughs: all minigames available for random choice
+        const shuffled = [...all10].sort(() => Math.random() - 0.5);
+        minigameOrder = shuffled.slice(0, 3);
+    }
+}
+generateMinigameOrder();
 
 let currentPhase = PHASES.INTRO;
 let keysPressed = new Set();
@@ -281,6 +316,7 @@ function gameLoop() {
         case PHASES.SEPARATE_WAYS: drawSeparateWays(); break;
         case PHASES.TOGETHER_AGAIN: drawTogetherAgain(); break;
         case PHASES.CLOSING_INTERVIEW: drawClosingInterview(); break;
+        case PHASES.UNLOCK_MASTERS: drawUnlockMasters(); break;
         case PHASES.CLOSING_CREDITS: drawCredits(); break;
     }
     if (currentDialog) drawDialogBox();
@@ -309,16 +345,18 @@ function handleCanvasPointerDown(e) {
         if (currentDialog.options && Array.isArray(currentDialog.options)) {
             const isTop = currentDialog.style === 'top';
             const boxH = isMobileMode ? 220 : 185;
+            const boxX = isMobileMode ? 25 : 50;
             const boxY = isTop ? 20 : canvas.height - boxH - 20;
-            const optY = boxY + boxH - 45;
+            const optY = boxY + boxH - 52;
             const opts = currentDialog.options;
+            const pad = 15; // Generous touch padding
 
             opts.forEach((optText, idx) => {
-                const optX = isMobileMode ? (25 + 220 + idx * 110) : (450 + idx * 110);
-                const optW = isMobileMode ? 95 : 90;
-                const optH = isMobileMode ? 34 : 32;
+                const optX = isMobileMode ? (boxX + 210 + idx * 125) : (440 + idx * 120);
+                const optW = isMobileMode ? 115 : 110;
+                const optH = isMobileMode ? 44 : 40;
 
-                if (x >= optX && x <= optX + optW && y >= optY && y <= optY + optH) {
+                if (x >= optX - pad && x <= optX + optW + pad && y >= optY - pad && y <= optY + optH + pad) {
                     const cb = dialogCallback; currentDialog = null; dialogCallback = null;
                     audio.playSFX('ui');
                     if (cb) cb(idx === 0 ? 'yes' : 'no');
@@ -457,10 +495,14 @@ function handleCanvasPointerDown(e) {
         if (isMobileMode && Date.now() - separateWaysState.startTime >= 30000) {
             startFightingGame(PHASES.TOGETHER_AGAIN, true);
         }
+    } else if (currentPhase === PHASES.UNLOCK_MASTERS) {
+        currentPhase = PHASES.CLOSING_CREDITS;
+        creditsY = canvas.height; creditsFinished = false; audio.play('MOON');
     } else if (currentPhase === PHASES.CLOSING_CREDITS) {
         if (isMobileMode && (creditsFinished || (creditsStartTime > 0 && Date.now() - creditsStartTime > 3000))) {
             currentPhase = PHASES.TITLE;
             currentMinigameIndex = 0; score = 0; playedMinigames = [];
+            generateMinigameOrder();
             audio.play('CHICAGO', 12); creditsStartTime = 0;
         }
     }
@@ -517,6 +559,8 @@ window.addEventListener('keydown', (e) => {
             startTogetherAgain();
         } else if (nextPhase === PHASES.CLOSING_INTERVIEW) {
             startClosingInterview();
+        } else if (nextPhase === PHASES.UNLOCK_MASTERS) {
+            startUnlockMasters();
         } else if (nextPhase === PHASES.TITLE) {
             currentPhase = nextPhase;
             audio.play('CHICAGO', 12);
@@ -581,10 +625,11 @@ window.addEventListener('keydown', (e) => {
         }
     } else if (currentPhase === PHASES.MINIGAME_DEBUG_MENU) {
         if (e.key === 'ArrowRight') {
-            if (debugMinigameIndex < 5) debugMinigameIndex += 5;
+            if (debugMinigameIndex < 6 && debugMinigameIndex + 6 < DEBUG_MINIGAMES.length) debugMinigameIndex += 6;
+            else if (debugMinigameIndex < 6) debugMinigameIndex = DEBUG_MINIGAMES.length - 1;
             audio.playSFX('ui');
         } else if (e.key === 'ArrowLeft') {
-            if (debugMinigameIndex >= 5) debugMinigameIndex -= 5;
+            if (debugMinigameIndex >= 6) debugMinigameIndex -= 6;
             audio.playSFX('ui');
         } else if (e.key === 'ArrowDown') {
             debugMinigameIndex = (debugMinigameIndex + 1) % DEBUG_MINIGAMES.length;
@@ -627,20 +672,29 @@ window.addEventListener('keydown', (e) => {
                 startFightingGame(PHASES.TOGETHER_AGAIN, true);
             }
         }
+    } else if (currentPhase === PHASES.UNLOCK_MASTERS) {
+        if (e.key === 'Enter') {
+            currentPhase = PHASES.CLOSING_CREDITS;
+            creditsY = canvas.height; creditsFinished = false; audio.play('MOON');
+        }
     }
-    else if (currentPhase === PHASES.CLOSING_CREDITS) { if (e.key === 'Enter') { currentPhase = PHASES.TITLE; currentMinigameIndex = 0; score = 0; playedMinigames = []; audio.play('CHICAGO', 12); creditsStartTime = 0; } }
+    else if (currentPhase === PHASES.CLOSING_CREDITS) { if (e.key === 'Enter') { currentPhase = PHASES.TITLE; currentMinigameIndex = 0; score = 0; playedMinigames = []; generateMinigameOrder(); audio.play('CHICAGO', 12); creditsStartTime = 0; } }
 });
 
 window.addEventListener('keyup', (e) => { keysPressed.delete(e.key); });
 
-function selectTraveller() { currentPhase = PHASES.PARTNER_ANNOUNCEMENT; audio.play('ZELDA_VICTORY'); }
+function selectTraveller() { currentPhase = PHASES.PARTNER_ANNOUNCEMENT; audio.play('ZELDA_VICTORY'); generateMinigameOrder(); }
 
 function selectDebugMinigame(index) {
     if (typeof audio !== 'undefined' && audio.playSFX) audio.playSFX('ui');
     const selectedKey = DEBUG_MINIGAMES[index].key;
-    minigameOrder = [selectedKey];
-    currentMinigameIndex = 0;
-    currentPhase = PHASES.MINIGAME_MAP;
+    if (selectedKey === 'unlock') {
+        startUnlockMasters();
+    } else {
+        minigameOrder = [selectedKey];
+        currentMinigameIndex = 0;
+        currentPhase = PHASES.MINIGAME_MAP;
+    }
 }
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -653,6 +707,7 @@ if (minigameOverride) {
     else if (minigameOverride === 'alone' || minigameOverride === 'own') startFightingGame(PHASES.TOGETHER_AGAIN, true);
     else if (minigameOverride === 'reunited') startTogetherAgain();
     else if (minigameOverride === 'interview') startClosingInterview();
+    else if (minigameOverride === 'unlock') startUnlockMasters();
     else if (minigameOverride === 'credits') { currentPhase = PHASES.CLOSING_CREDITS; creditsY = canvas.height; creditsFinished = false; audio.play('MOON'); }
     else if (['chicken', 'math', 'karaoke', 'cheese', 'bump', 'fish', 'golf', 'jeopardy', 'goose', 'climb'].includes(minigameOverride)) { minigameOrder = [minigameOverride]; currentPhase = PHASES.MINIGAME_MAP; }
 }

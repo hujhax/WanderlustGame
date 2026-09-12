@@ -290,11 +290,22 @@ function startClosingInterview() {
             const d = dialogs[currentD++];
             showDialog(d[0], d[1], d[2], nextDialog, d[3]);
         } else {
-            currentPhase = PHASES.CLOSING_CREDITS;
-            creditsY = canvas.height; creditsFinished = false; audio.play('MOON');
+            if (getPlaythroughCount() === 0) {
+                startUnlockMasters();
+            } else {
+                currentPhase = PHASES.CLOSING_CREDITS;
+                creditsY = canvas.height; creditsFinished = false; audio.play('MOON');
+                incrementPlaythroughCount();
+            }
         }
     };
     nextDialog();
+}
+
+function startUnlockMasters() {
+    currentPhase = PHASES.UNLOCK_MASTERS;
+    audio.play('ZELDA_VICTORY');
+    incrementPlaythroughCount();
 }
 
 function drawClosingInterview() { drawTitle(false); }

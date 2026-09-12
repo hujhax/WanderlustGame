@@ -1141,11 +1141,11 @@ function drawCardDetailModal(card) {
     });
 
     if (playable) {
-        drawModalBtn(mx + 50, my + 230, 140, 40, 'PLAY CARD', '#00AA00');
+        drawModalBtn(mx + 40, my + 228, 150, 46, 'PLAY CARD', '#00AA00');
     } else {
-        drawModalBtn(mx + 50, my + 230, 140, 40, 'UNPLAYABLE', '#666666');
+        drawModalBtn(mx + 40, my + 228, 150, 46, 'UNPLAYABLE', '#666666');
     }
-    drawModalBtn(mx + 230, my + 230, 140, 40, 'CANCEL', '#AA0000');
+    drawModalBtn(mx + 230, my + 228, 150, 46, 'CANCEL', '#AA0000');
 
     ctx.restore();
 }
@@ -1485,13 +1485,23 @@ function handleClimbClick(x, y) {
         if (state.activeModal === 'card_modal') {
             const mw = 420, mh = 300;
             const mx = (canvas.width - mw) / 2, my = (canvas.height - mh) / 2;
-            if (x >= mx + 50 && x <= mx + 190 && y >= my + 230 && y <= my + 270) {
+            const pad = 15;
+
+            // PLAY CARD button
+            if (x >= mx + 40 - pad && x <= mx + 40 + 150 + pad && y >= my + 228 - pad && y <= my + 228 + 46 + pad) {
                 const card = state.hand[state.selectedCardIndex];
                 if (isClimbCardPlayable(card)) {
                     activateSelectedClimbCard();
                 } else {
                     audio.playSFX('FAILURE');
                 }
+                return;
+            }
+            // CANCEL button
+            if (x >= mx + 230 - pad && x <= mx + 230 + 150 + pad && y >= my + 228 - pad && y <= my + 228 + 46 + pad) {
+                audio.playSFX('ui');
+                state.activeModal = null;
+                state.selectedCardIndex = -1;
                 return;
             }
             state.activeModal = null;
@@ -1503,9 +1513,10 @@ function handleClimbClick(x, y) {
             let clickedTarget = false;
             const visibleWallH = isMobileMode ? 460 : canvas.height;
             const cameraY = Math.max(0, Math.min(state.wallHeight - visibleWallH, state.player.y - visibleWallH / 2));
+            const hitRadius = isMobileMode ? 42 : 38;
             state.targetShapes.forEach((shape, idx) => {
                 const sy = shape.y - cameraY;
-                if (Math.hypot(x - shape.x, y - sy) < 25) {
+                if (Math.hypot(x - shape.x, y - sy) < hitRadius) {
                     state.highlightedTargetIndex = idx;
                     executeClimbMove(shape);
                     clickedTarget = true;
@@ -1520,17 +1531,17 @@ function handleClimbClick(x, y) {
 
         if (isMobileMode) {
             // Give Up Button
-            if (x >= 390 && x <= 585 && y >= 472 && y <= 504) {
+            if (x >= 380 && x <= 595 && y >= 460 && y <= 515) {
                 triggerClimbGiveUp();
                 return;
             }
             // Draw Pile Button
-            if (x >= 140 && x <= 255 && y >= 472 && y <= 504) {
+            if (x >= 130 && x <= 260 && y >= 460 && y <= 515) {
                 openDrawPileModal();
                 return;
             }
             // Discard Pile Button
-            if (x >= 265 && x <= 380 && y >= 472 && y <= 504) {
+            if (x >= 260 && x <= 385 && y >= 460 && y <= 515) {
                 openDiscardPileModal();
                 return;
             }
@@ -1540,7 +1551,7 @@ function handleClimbClick(x, y) {
             const totalHandPages = Math.ceil(state.hand.length / cardsPerPage) || 1;
             if (state.hand.length > cardsPerPage) {
                 // Prev (<)
-                if (x >= 480 && x <= 525 && y >= 510 && y <= 534) {
+                if (x >= 470 && x <= 530 && y >= 505 && y <= 540) {
                     if (state.handPage > 0) {
                         state.handPage--;
                         audio.playSFX('ui');
@@ -1548,7 +1559,7 @@ function handleClimbClick(x, y) {
                     return;
                 }
                 // Next (>)
-                if (x >= 535 && x <= 580 && y >= 510 && y <= 534) {
+                if (x >= 530 && x <= 590 && y >= 505 && y <= 540) {
                     if (state.handPage < totalHandPages - 1) {
                         state.handPage++;
                         audio.playSFX('ui');

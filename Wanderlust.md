@@ -146,6 +146,8 @@ After this cycle is done four times, automatically proceed to the first minigame
 ## Minigames
 In the Minigames phase, we play three minigames, chosen from the subsections below, with no repeats.
 
+On the first playthrough from a browser, the Jeopardy and Climbatorium minigames are not available for selection. On the second playthrough from that browser, two of the selected minigames are guaranteed to be Jeopardy and Climbatorium (with the third chosen randomly from the remaining minigames), shuffled in random order. On all subsequent playthroughs from that browser, all minigames are available for random selection.
+
 The opening screen of each minigame shows:
 1. A string that reads "Stop #" and then the number of this stop (1, 2, or 3 -- set the stop number to 1 when the player starts or restarts the game).
 2. The title of the minigame
@@ -1032,6 +1034,17 @@ Show the title screen again, without the "Wanderlust" title.
 [Player's First Name]([Player's First Name]){top}: It was a crazy time.
 [Companion's First Name]([Companion's First Name]){top}: But we learned a lot about ourselves.
 [Player's First Name]([Player's First Name]){top}: I gained [score] points worth of self-knowledge!
+
+## Unlock Game Masters
+Access this directly via "?minigame=unlock"
+
+At the end of the first playthrough (after the Closing Interview, but before the Closing Credits), show a screen with a black background that says "You have unlocked two new game masters!".
+
+Show the headshots of Lindsey and Leichelle, each in a box labeled with their respective first names below.
+
+The background music for this phase is music/zelda_victory.mp3.
+
+Display the instructions "Press Enter to Continue" (or "Tap to Continue" on mobile). When the player presses Enter or taps, proceed to Closing Credits.
 
 ## Closing Credits
 Access this directly via "?minigame=credits"

@@ -137,3 +137,42 @@ function drawTouchButton(x, y, w, h, text, options = {}) {
     ctx.restore();
 }
 
+function getPlaythroughCount() {
+    try {
+        if (typeof localStorage !== 'undefined') {
+            const val = localStorage.getItem('wanderlust_playthrough_count');
+            if (val !== null) {
+                const parsed = parseInt(val, 10);
+                if (!isNaN(parsed)) return parsed;
+            }
+        }
+    } catch (e) {}
+    try {
+        if (typeof document !== 'undefined' && document.cookie) {
+            const match = document.cookie.match(/(?:^|; )wanderlust_playthrough_count=([^;]*)/);
+            if (match) {
+                const parsed = parseInt(match[1], 10);
+                if (!isNaN(parsed)) return parsed;
+            }
+        }
+    } catch (e) {}
+    return 0;
+}
+
+function incrementPlaythroughCount() {
+    const current = getPlaythroughCount();
+    const next = current + 1;
+    try {
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('wanderlust_playthrough_count', next.toString());
+        }
+    } catch (e) {}
+    try {
+        if (typeof document !== 'undefined') {
+            document.cookie = `wanderlust_playthrough_count=${next}; path=/; max-age=315360000`;
+        }
+    } catch (e) {}
+    return next;
+}
+
+
