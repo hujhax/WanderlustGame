@@ -319,15 +319,19 @@ function drawCredits() {
             ? screenCaptures.filter(img => img && img.complete) 
             : [];
             
-        if (photos.length === 0) {
-            photos = [departureBgImg, farmBgImg, countryRoadImg, confrontationBgImg, bumperCarLotImg].filter(img => img && img.complete);
-        }
-        if (photos.length === 0) {
-            photos = [departureBgImg];
-        }
+        const defaultPool = [departureBgImg, farmBgImg, countryRoadImg, confrontationBgImg, bumperCarLotImg, fishingBgImg, marketStallImg].filter(img => img && img.complete);
+        
+        defaultPool.forEach(dImg => {
+            if (photos.length < 5 && !photos.includes(dImg)) {
+                photos.push(dImg);
+            }
+        });
+        if (photos.length === 0) photos = [departureBgImg];
+
+        const availablePool = [...photos].sort(() => Math.random() - 0.5);
 
         for (let i = 0; i < 5; i++) {
-            const img = photos[Math.floor(Math.random() * photos.length)];
+            const img = availablePool[i % availablePool.length];
             const x = isMobileMode ? (30 + Math.random() * 320) : (50 + Math.random() * 500);
             const y = isMobileMode ? (40 + Math.random() * 380) : (50 + Math.random() * 300);
             polaroids.push({

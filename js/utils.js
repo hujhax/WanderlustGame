@@ -61,13 +61,26 @@ function wrapText(text, maxWidth) {
 }
 
 function getCurrentBackground() {
+    if (typeof currentPhase === 'undefined') return null;
+
+    if (currentPhase === PHASES.MINIGAME_PLAY || currentPhase === PHASES.MINIGAME_MAP) {
+        const gameType = (typeof minigameOrder !== 'undefined' && typeof currentMinigameIndex !== 'undefined') ? minigameOrder[currentMinigameIndex] : null;
+        if (gameType === 'chicken') return farmBgImg;
+        if (gameType === 'cheese') return marketStallImg;
+        if (gameType === 'bump') return bumperCarLotImg;
+        if (gameType === 'fish') return fishingBgImg;
+        if (gameType === 'golf') return (typeof golfGreenImgs !== 'undefined' && golfGreenImgs[1]) ? golfGreenImgs[1] : countryRoadImg;
+        if (gameType === 'karaoke') return countryRoadImg;
+        if (gameType === 'math') return countryRoadImg;
+        if (gameType === 'jeopardy') return canadaMapImg;
+        if (gameType === 'goose') return canadaMapImg;
+        if (gameType === 'climb') return boulderImg;
+        return canadaMapImg;
+    }
+
     switch (currentPhase) {
         case PHASES.DEPARTURE_CUTSCENE: return departureBgImg;
-        case PHASES.MINIGAME_PLAY:
-            const gameType = minigameOrder[currentMinigameIndex];
-            if (gameType === 'chicken') return farmBgImg;
-            if (gameType === 'cheese') return marketStallImg;
-            return null;
+        case PHASES.IN_THE_CAR: return countryRoadImg;
         case PHASES.THE_CONFRONTATION:
         case PHASES.ON_YOUR_OWN:
             return currentPhase === PHASES.ON_YOUR_OWN ? onYourOwnBgImg : confrontationBgImg;
@@ -91,7 +104,6 @@ function captureScreen() {
         screenCaptures.push(img);
         if (screenCaptures.length > 20) screenCaptures.shift();
     } catch (e) {
-        console.warn("Could not capture screen, using background fallback");
         const bg = getCurrentBackground();
         if (bg && bg.src && !(bg instanceof HTMLVideoElement)) {
             const img = new Image();

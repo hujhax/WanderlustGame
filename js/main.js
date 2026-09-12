@@ -683,7 +683,12 @@ window.addEventListener('keydown', (e) => {
 
 window.addEventListener('keyup', (e) => { keysPressed.delete(e.key); });
 
-function selectTraveller() { currentPhase = PHASES.PARTNER_ANNOUNCEMENT; audio.play('ZELDA_VICTORY'); generateMinigameOrder(); }
+function selectTraveller() { 
+    screenCaptures = [];
+    currentPhase = PHASES.PARTNER_ANNOUNCEMENT; 
+    audio.play('ZELDA_VICTORY'); 
+    generateMinigameOrder(); 
+}
 
 function selectDebugMinigame(index) {
     if (typeof audio !== 'undefined' && audio.playSFX) audio.playSFX('ui');
