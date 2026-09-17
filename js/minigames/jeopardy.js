@@ -454,7 +454,7 @@ function _jeopardySubmitAnswer() {
         audio.playSFX('SUCCESS');
 
         showDialog('Not Alex Trebek', 'Lindsey', msg, () => {
-            if (minigameState.successes >= 4) {
+            if (!minigameState.isEternalMode && minigameState.successes >= 4) {
                 // Win!
                 showDialog('Not Alex Trebek', 'Lindsey',
                     "Congratulations! You really know your stuff!",
@@ -465,7 +465,7 @@ function _jeopardySubmitAnswer() {
                     }
                 );
             } else {
-                j.phase = _jeopardyCheckBoardDone() ? 'board' : 'board';
+                j.phase = 'board';
                 _jeopardyReturnToBoard();
             }
         });
@@ -481,7 +481,7 @@ function _jeopardySubmitAnswer() {
         const msg = wrongLines[Math.floor(Math.random() * wrongLines.length)];
 
         showDialog('Not Alex Trebek', 'Lindsey', msg, () => {
-            if (minigameState.failures >= 3) {
+            if (!minigameState.isEternalMode && minigameState.failures >= 3) {
                 showDialog('Not Alex Trebek', 'Lindsey',
                     `I'm so sorry, you have lost.  You will receive our second-place consolation prize of just $3,000, and a lifetime spent thinking back on "${j.lastWrongClue}".`,
                     () => {
@@ -501,6 +501,18 @@ function _jeopardyReturnToBoard() {
     const j = minigameState.jeopardy;
     // Check if board is exhausted
     if (_jeopardyCheckBoardDone()) {
+        if (minigameState.isEternalMode) {
+            // Refill board in Eternal Mode
+            j.board.forEach(col => {
+                col.clues.forEach(c => {
+                    if (c) c.revealed = false;
+                });
+            });
+            j.phase = 'board';
+            j.selectedCol = 0;
+            j.selectedRow = 0;
+            return;
+        }
         // Board cleared without hitting 4 successes or 3 failures — end by current state
         if (minigameState.successes >= 4) {
             minigameState.won = true;

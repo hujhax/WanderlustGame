@@ -61,6 +61,19 @@ describe('Individual Minigames Implementation', () => {
 
             assertEquals(minigameState.failures, 1, 'Skull collision should increment failure counter');
         });
+
+        it('Eternal Mode ignores 4-success win and 3-failure loss limits', () => {
+            minigameState = { type: 'math', successes: 3, failures: 2, isEternalMode: true };
+            currentPhase = PHASES.MINIGAME_PLAY;
+
+            success(100);
+            assertEquals(minigameState.successes, 4, 'Success count should increment to 4');
+            assertEquals(currentPhase, PHASES.MINIGAME_PLAY, 'Eternal mode should not transition away on 4 successes');
+
+            failure();
+            assertEquals(minigameState.failures, 3, 'Failure count should increment to 3');
+            assertEquals(currentPhase, PHASES.MINIGAME_PLAY, 'Eternal mode should not transition away on 3 failures');
+        });
     });
 
     // --- MATHEMAGIC ---
@@ -231,29 +244,119 @@ describe('Individual Minigames Implementation', () => {
 
     // --- LAKE FISH-A-LOT (FISH) ---
     describe('Lake Fish-a-Lot (fish.js)', () => {
-        it('initFishGame initializes lake grid and boat position', () => {
+        it('initFishGame initializes lake grid, boat position, and fishModal state', () => {
             minigameState = { type: 'fish', boat: {} };
             initFishGame();
 
             assert(Array.isArray(minigameState.grid), 'Lake grid should be initialized');
             assert(minigameState.boat !== undefined, 'Boat object should be initialized');
+            assert(minigameState.fishModal !== undefined, 'Fish modal object should be initialized');
+            assertEquals(minigameState.fishModal.active, false, 'Modal should start inactive');
+            assertEquals(minigameState.fishModal.timer, 20.0, 'Modal timer should default to 20.0s');
         });
 
-        it('Catch probabilities match water zone specs (deep, normal, shallow)', () => {
-            // Deep water: 20% catch, 100% fish
-            const deepProb = getWaterProbabilities('deep');
-            assertEquals(deepProb.catchRate, 0.2);
-            assertEquals(deepProb.fishRate, 1.0);
+        it('attemptFish opens fishing modal and presents Blair intro dialog on first cast', () => {
+            minigameState = { type: 'fish', boat: { gridX: 4, gridY: 4 } };
+            initFishGame();
 
-            // Normal water: 50% catch, 100% fish
-            const normalProb = getWaterProbabilities('normal');
-            assertEquals(normalProb.catchRate, 0.5);
-            assertEquals(normalProb.fishRate, 1.0);
+            attemptFish();
+            assert(currentDialog !== null, 'First cast should present Blair intro dialogue');
+            assert(currentDialog.fullText.includes("Move the hook around"), 'Dialogue should explain hook controls');
+            assertEquals(minigameState.fishModal.introShown, true, 'introShown flag should set to true');
 
-            // Shallow water: 100% catch, 20% fish
+            // Complete dialogue callback
+            if (dialogCallback) dialogCallback();
+            assertEquals(minigameState.fishModal.active, true, 'Fishing modal should be active after dialogue');
+            assertEquals(minigameState.fishModal.timer, 20.0, 'Timer should start at 20.0 seconds');
+            assertEquals(minigameState.fishModal.catchMeter, 0, 'Catch meter should start at 0%');
+        });
+
+        it('Water zone probabilities match specs (shallow 50% fish, deep 90% fish, normal 70% fish)', () => {
             const shallowProb = getWaterProbabilities('shallow');
-            assertEquals(shallowProb.catchRate, 1.0);
-            assertEquals(shallowProb.fishRate, 0.2);
+            assertEquals(shallowProb.fishRate, 0.5, 'Shallow water should have 50% fish rate');
+            assertEquals(shallowProb.junkRate, 0.5, 'Shallow water should have 50% junk rate');
+
+            const deepProb = getWaterProbabilities('deep');
+            assertEquals(deepProb.fishRate, 0.9, 'Deep water should have 90% fish rate');
+            assertEquals(deepProb.junkRate, 0.1, 'Deep water should have 10% junk rate');
+
+            const normalProb = getWaterProbabilities('normal');
+            assertEquals(normalProb.fishRate, 0.7, 'Normal water should have 70% fish rate');
+            assertEquals(normalProb.junkRate, 0.3, 'Normal water should have 30% junk rate');
+        });
+
+        it('Reach circle collision increases catch meter when fish is inside, decreases when outside', () => {
+            minigameState = { type: 'fish', boat: { gridX: 4, gridY: 4 } };
+            initFishGame();
+            startFishingModal('SHALLOW');
+
+            const modal = minigameState.fishModal;
+            // Place fish inside reach circle (same location) & freeze velocity for test
+            modal.hookX = 200;
+            modal.hookY = 200;
+            modal.fishX = 200;
+            modal.fishY = 200;
+            modal.fishVx = 0;
+            modal.fishVy = 0;
+            modal.catchMeter = 10;
+
+            // Simulate 1 second inside reach circle (+28% per sec)
+            updateFishingModal(1.0);
+            assertEquals(modal.catchMeter, 38, 'Catch meter should increase by +28% per second inside reach circle');
+
+            // Move fish far outside reach circle & freeze velocity
+            modal.fishX = 400;
+            modal.fishY = 400;
+            modal.fishVx = 0;
+            modal.fishVy = 0;
+
+            // Simulate 1 second outside reach circle (-10% per sec)
+            updateFishingModal(1.0);
+            assertEquals(modal.catchMeter, 28, 'Catch meter should decrease by -10% per second outside reach circle');
+        });
+
+        it('Fish movement AI varies speed/chaos between Shallow and Deep water', () => {
+            minigameState = { type: 'fish', boat: { gridX: 4, gridY: 4 } };
+            initFishGame();
+
+            // Shallow water start
+            startFishingModal('SHALLOW');
+            updateFishingModal(0.1);
+            const shallowSpeed = Math.round(Math.hypot(minigameState.fishModal.fishVx, minigameState.fishModal.fishVy));
+            assertEquals(shallowSpeed, 66, 'Shallow water fish speed should be 66 px/s');
+
+            // Deep water start
+            startFishingModal('DEEP');
+            updateFishingModal(0.1);
+            const deepSpeed = Math.round(Math.hypot(minigameState.fishModal.fishVx, minigameState.fishModal.fishVy));
+            assertEquals(deepSpeed, 143, 'Deep water fish speed should be 143 px/s');
+        });
+
+        it('Catch meter reaching 100% resolves catch window; timer hitting 0s resolves failure', () => {
+            minigameState = { type: 'fish', successes: 0, failures: 0, boat: { gridX: 4, gridY: 4 } };
+            initFishGame();
+
+            // Test 100% Catch Meter resolution
+            startFishingModal('DEEP');
+            minigameState.fishModal.catchMeter = 99;
+            minigameState.fishModal.hookX = 200;
+            minigameState.fishModal.hookY = 200;
+            minigameState.fishModal.fishX = 200;
+            minigameState.fishModal.fishY = 200;
+
+            updateFishingModal(0.1); // Pushes meter to 100%
+            assertEquals(minigameState.fishModal.active, false, 'Modal should close when catch meter hits 100%');
+            assert(minigameState.fishWindow !== null, 'Outcome window should open upon catch');
+
+            // Test 0s Timeout failure
+            startFishingModal('SHALLOW');
+            minigameState.fishModal.timer = 0.05;
+            minigameState.fishModal.catchMeter = 10;
+
+            updateFishingModal(0.1); // Timer drops to 0s
+            assertEquals(minigameState.fishModal.active, false, 'Modal should close when timer expires');
+            assertEquals(minigameState.failures, 1, 'Timer expiration should register failure()');
+            assertEquals(minigameState.fishWindow.type, 'nothing', 'Outcome type should be "nothing" on timeout');
         });
 
         it('Fish catch yields success; empty catch yields failure; trash yields neutral', () => {
@@ -272,7 +375,94 @@ describe('Individual Minigames Implementation', () => {
             assertEquals(minigameState.successes, 1, 'Trash catch should not alter success count');
             assertEquals(minigameState.failures, 1, 'Trash catch should not alter failure count');
         });
+
+        it('drawFishingModal and drawFishGame render active fishing modal scene without throwing errors', () => {
+            minigameState = { type: 'fish', boat: { gridX: 4, gridY: 4, dir: 'north' } };
+            initFishGame();
+            startFishingModal('SHALLOW');
+            assert(minigameState.fishModal && minigameState.fishModal.active, 'Fishing modal must be active');
+
+            let error = null;
+            try {
+                drawFishingModal();
+                drawFishGame();
+            } catch (err) {
+                error = err;
+            }
+            assertEquals(error, null, `drawFishingModal and drawFishGame should not throw errors during active modal render, got: ${error ? (error.stack || error.message) : ''}`);
+        });
+
+        it('drawFishingModal safely handles missing or NaN modal properties without crashing canvas CTM', () => {
+            minigameState = { type: 'fish', boat: { gridX: 4, gridY: 4, dir: 'north' } };
+            initFishGame();
+            minigameState.fishModal = {
+                active: true,
+                timer: undefined,
+                catchMeter: NaN,
+                hookX: undefined,
+                hookY: NaN,
+                fishX: NaN,
+                fishY: undefined
+            };
+
+            let error = null;
+            try {
+                updateFishingModal(0.1);
+                drawFishingModal();
+            } catch (err) {
+                error = err;
+            }
+            assertEquals(error, null, `drawFishingModal should handle NaN/undefined values gracefully without throwing: ${error ? error.message : ''}`);
+        });
+
+        it('Fish sprite retains horizontal facing direction during vertical movement without swimming backwards', () => {
+            minigameState = { type: 'fish', boat: { gridX: 4, gridY: 4, dir: 'north' } };
+            initFishGame();
+            startFishingModal('SHALLOW');
+
+            // 1. Swim Left
+            minigameState.fishModal.fishVx = -60;
+            minigameState.fishModal.fishVy = 0;
+            updateFishingModal(0.1);
+            assertEquals(minigameState.fishModal.lastFacingLeft, true, 'Fish moving left should set lastFacingLeft to true');
+
+            // 2. Swim pure Vertical (Up) - should retain lastFacingLeft = true
+            minigameState.fishModal.fishVx = 0;
+            minigameState.fishModal.fishVy = -60;
+            updateFishingModal(0.1);
+            assertEquals(minigameState.fishModal.lastFacingLeft, true, 'Fish moving vertically should retain previous lastFacingLeft (true)');
+
+            // 3. Swim Right
+            minigameState.fishModal.fishVx = 60;
+            minigameState.fishModal.fishVy = 0;
+            updateFishingModal(0.1);
+            assertEquals(minigameState.fishModal.lastFacingLeft, false, 'Fish moving right should set lastFacingLeft to false');
+
+            // 4. Swim pure Vertical (Down) - should retain lastFacingLeft = false
+            minigameState.fishModal.fishVx = 0;
+            minigameState.fishModal.fishVy = 60;
+            updateFishingModal(0.1);
+            assertEquals(minigameState.fishModal.lastFacingLeft, false, 'Fish moving vertically should retain previous lastFacingLeft (false)');
+        });
+
+        it('Fishing modal initializes with 20s timer and spongy hook physics decay over time', () => {
+            minigameState = { type: 'fish', boat: { gridX: 4, gridY: 4, dir: 'north' } };
+            initFishGame();
+            startFishingModal('SHALLOW');
+
+            assertEquals(minigameState.fishModal.timer, 20.0, 'Fishing modal timer should start at 20.0 seconds');
+
+            // Apply left nudge
+            handleFishInput('ArrowLeft');
+            assert(minigameState.fishModal.hookVx < 0, 'Impulse to left should set negative hookVx');
+
+            const initialVx = minigameState.fishModal.hookVx;
+            // Update physics over 0.2s without pressing key
+            updateFishingModal(0.2);
+            assert(Math.abs(minigameState.fishModal.hookVx) < Math.abs(initialVx), 'Drag should cause spongy hook velocity to decay over time');
+        });
     });
+
 
     // --- BOB'S INTENSE MINI-GOLF ---
     describe("Bob's Intense Mini-Golf (golf.js)", () => {
@@ -408,6 +598,92 @@ describe('Individual Minigames Implementation', () => {
                 success(100);
             }
             assertEquals(minigameState.successes, 1, 'Reaching goal circle should trigger success');
+        });
+
+        it('All goose levels (1 through GOOSE_LEVELS.length) are theoretically winnable', () => {
+            function solveGooseLevel(level, maxDepth = 50) {
+                const startStateKey = (px, py, geese) => `${px},${py}|` + geese.map(g => `${g.x},${g.y},${g.dir},${g.alertTimer || 0}`).join(';');
+                const startKey = startStateKey(level.player.x, level.player.y, level.geese.map(g => ({ ...g, alertTimer: 0 })));
+                const queue = [{ px: level.player.x, py: level.player.y, geese: level.geese.map(g => ({ ...g, alertTimer: 0 })), path: [] }];
+                const visited = new Set([startKey]);
+
+                while (queue.length > 0) {
+                    const curr = queue.shift();
+                    if (curr.px === level.target.x && curr.py === level.target.y) return curr.path;
+                    if (curr.path.length >= maxDepth) continue;
+
+                    const moves = [
+                        { dir: GOOSE_DIR.N, dx: 0, dy: -1 },
+                        { dir: GOOSE_DIR.S, dx: 0, dy: 1 },
+                        { dir: GOOSE_DIR.W, dx: -1, dy: 0 },
+                        { dir: GOOSE_DIR.E, dx: 1, dy: 0 }
+                    ];
+
+                    for (let m of moves) {
+                        const nx = curr.px + m.dx;
+                        const ny = curr.py + m.dy;
+                        if (nx < 0 || nx >= level.cols || ny < 0 || ny >= level.rows) continue;
+                        if (gooseTileAt(level.grid, nx, ny) === GOOSE_TILE.BOULDER || gooseTileAt(level.grid, nx, ny) === GOOSE_TILE.WATER) continue;
+
+                        const nextGeese = [];
+                        for (let g of curr.geese) {
+                            let gx = g.x, gy = g.y, gdir = g.dir, alertTimer = g.alertTimer || 0;
+                            const startLos = gooseSpots(g, curr.px, curr.py, level.grid, level.cols, level.rows);
+                            const currLos  = gooseSpots(g, nx, ny, level.grid, level.cols, level.rows);
+                            if (startLos) gdir = currLos ? getClosestCardinalDirection(gx, gy, nx, ny) : getClosestCardinalDirection(gx, gy, curr.px, curr.py);
+
+                            if (currLos) {
+                                if (alertTimer === 0) {
+                                    alertTimer = 1;
+                                    gdir = getClosestCardinalDirection(gx, gy, nx, ny);
+                                } else {
+                                    const dx = nx > gx ? 1 : (nx < gx ? -1 : 0);
+                                    const dy = ny > gy ? 1 : (ny < gy ? -1 : 0);
+                                    if (canGooseEnter(gx + dx, gy + dy, level.grid, level.cols, level.rows)) {
+                                        gx += dx; gy += dy;
+                                    } else {
+                                        const absDx = Math.abs(nx - gx), absDy = Math.abs(ny - gy);
+                                        if (absDx >= absDy) {
+                                            if (canGooseEnter(gx + dx, gy, level.grid, level.cols, level.rows)) gx += dx;
+                                            else if (canGooseEnter(gx, gy + dy, level.grid, level.cols, level.rows)) gy += dy;
+                                        } else {
+                                            if (canGooseEnter(gx, gy + dy, level.grid, level.cols, level.rows)) gy += dy;
+                                            else if (canGooseEnter(gx + dx, gy, level.grid, level.cols, level.rows)) gx += dx;
+                                        }
+                                    }
+                                }
+                                if (gooseSpots({ x: gx, y: gy, dir: gdir }, nx, ny, level.grid, level.cols, level.rows)) {
+                                    gdir = getClosestCardinalDirection(gx, gy, nx, ny);
+                                }
+                            } else {
+                                alertTimer = 0;
+                                const { dx, dy } = gooseDelta(gdir);
+                                if (!canGooseEnter(gx + dx, gy + dy, level.grid, level.cols, level.rows)) {
+                                    gdir = gooseReverse(gdir);
+                                } else {
+                                    gx += dx; gy += dy;
+                                }
+                            }
+                            nextGeese.push({ x: gx, y: gy, dir: gdir, alertTimer });
+                        }
+
+                        if (nextGeese.some(g => g.x === nx && g.y === ny)) continue;
+
+                        const key = startStateKey(nx, ny, nextGeese);
+                        if (!visited.has(key)) {
+                            visited.add(key);
+                            queue.push({ px: nx, py: ny, geese: nextGeese, path: [...curr.path, m.dir] });
+                        }
+                    }
+                }
+                return null;
+            }
+
+            GOOSE_LEVELS.forEach((level, idx) => {
+                const solution = solveGooseLevel(level, 50);
+                assert(solution !== null, `Goose Level ${idx + 1} must be winnable, but BFS solver found no path.`);
+                assert(solution.length > 0, `Goose Level ${idx + 1} solution path should contain moves.`);
+            });
         });
     });
 
@@ -871,13 +1147,6 @@ function calculateCheesePoints(count) {
     if (count === 4) return 200;
     if (count > 4) return 400;
     return 0;
-}
-
-function getWaterProbabilities(type) {
-    if (type === 'deep') return { catchRate: 0.2, fishRate: 1.0 };
-    if (type === 'normal') return { catchRate: 0.5, fishRate: 1.0 };
-    if (type === 'shallow') return { catchRate: 1.0, fishRate: 0.2 };
-    return { catchRate: 0, fishRate: 0 };
 }
 
 function handleFishingOutcome(outcome) {

@@ -451,6 +451,13 @@ function handleCanvasPointerDown(e) {
             handleClimbClick(x, y);
         }
     } else if (currentPhase === PHASES.MINIGAME_DEBUG_MENU) {
+        const cbBounds = getEternalModeCheckboxBounds();
+        if (x >= cbBounds.x && x <= cbBounds.x + cbBounds.w && y >= cbBounds.y && y <= cbBounds.y + cbBounds.h) {
+            isEternalMode = !isEternalMode;
+            if (typeof audio !== 'undefined' && audio.playSFX) audio.playSFX('ui');
+            return;
+        }
+
         for (let i = 0; i < DEBUG_MINIGAMES.length; i++) {
             const { x: bx, y: by, w: bw, h: bh } = getDebugMenuBounds(i);
             if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) {
@@ -624,7 +631,10 @@ window.addEventListener('keydown', (e) => {
             }
         }
     } else if (currentPhase === PHASES.MINIGAME_DEBUG_MENU) {
-        if (e.key === 'ArrowRight') {
+        if (e.key === 'e' || e.key === 'E') {
+            isEternalMode = !isEternalMode;
+            audio.playSFX('ui');
+        } else if (e.key === 'ArrowRight') {
             if (debugMinigameIndex < 6 && debugMinigameIndex + 6 < DEBUG_MINIGAMES.length) debugMinigameIndex += 6;
             else if (debugMinigameIndex < 6) debugMinigameIndex = DEBUG_MINIGAMES.length - 1;
             audio.playSFX('ui');

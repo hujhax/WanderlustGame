@@ -12,6 +12,7 @@ class AudioManager {
             CHEESE_BGM: new Audio('music/cheese_bgm.mp3'),
             BUMP_BGM: new Audio('music/bump_bgm.mp3'),
             FISH_BGM: new Audio('music/fishing_bgm.mp3'),
+            GOOSE_BGM: new Audio('music/goose_bgm.mp3'),
             CLIMB_BGM: new Audio('music/climb_bgm.webm'),
             JEOPARDY_INTRO_BGM: new Audio('music/jeopardy_intro_bgm.mp3'),
             JEOPARDY_BGM: new Audio('music/jeopardy_bgm.mp3'),

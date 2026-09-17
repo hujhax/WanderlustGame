@@ -58,7 +58,7 @@ const GOOSE_LEVELS = [
             'GGGBGBGG',
             'GGGBGBGG',
             'GGGBGBGG',
-            'GGGGGGGG',
+            'GGBGGGGG',
             'GGGGGGGG'
         ],
         player: { x: 0, y: 6 },
@@ -69,7 +69,7 @@ const GOOSE_LEVELS = [
         ]
     },
 
-    // Level 3 – 8×8, three geese, tighter corridors
+    // Level 3 – 8×8, two geese, balanced corridors
     {
         cols: 8, rows: 8,
         grid: [
@@ -78,20 +78,19 @@ const GOOSE_LEVELS = [
             'GGGBGGGG',
             'GGGBWGGG',
             'GGGGWGGG',
-            'GGGGBGGG',
-            'GGGGBGGG',
+            'GBGGBGGG',
+            'GBGGBGGG',
             'GGGGGGGG'
         ],
         player: { x: 0, y: 7 },
         target:  { x: 7, y: 0 },
         geese: [
             { x: 5, y: 2, dir: GOOSE_DIR.W },
-            { x: 2, y: 5, dir: GOOSE_DIR.E },
-            { x: 6, y: 5, dir: GOOSE_DIR.N }
+            { x: 2, y: 5, dir: GOOSE_DIR.E }
         ]
     },
 
-    // Level 4 – 9×9, four geese, complex layout
+    // Level 4 – 9×9, two geese, open navigation
     {
         cols: 9, rows: 9,
         grid: [
@@ -100,25 +99,23 @@ const GOOSE_LEVELS = [
             'GGGBGGGGG',
             'GGGBWGGGG',
             'GGGGWGGGG',
+            'GBGGBGGGG',
             'GGGGBGGGG',
-            'GGGGBGGGG',
-            'GGGGGGGGG',
+            'GBGGGGGGG',
             'GGGGGGGGG'
         ],
         player: { x: 0, y: 8 },
         target:  { x: 8, y: 0 },
         geese: [
             { x: 6, y: 1, dir: GOOSE_DIR.W },
-            { x: 2, y: 4, dir: GOOSE_DIR.E },
-            { x: 7, y: 5, dir: GOOSE_DIR.N },
-            { x: 4, y: 7, dir: GOOSE_DIR.W }
+            { x: 2, y: 4, dir: GOOSE_DIR.E }
         ]
     }
 ];
 
 // ── State initialiser ─────────────────────────────────────────
 function initGooseGame() {
-    const levelIdx = Math.min(minigameState.successes, GOOSE_LEVELS.length - 1);
+    const levelIdx = minigameState.isEternalMode ? (minigameState.successes % GOOSE_LEVELS.length) : Math.min(minigameState.successes, GOOSE_LEVELS.length - 1);
     const level = GOOSE_LEVELS[levelIdx];
 
     // Deep-copy geese so original definitions are not mutated
@@ -147,24 +144,39 @@ function initGooseGame() {
 // ── Line of sight helper ──────────────────────────────────────
 // Returns true if the line from center of goose cell to center of player cell
 // does not pass through any boulder tiles.
+// ── Line of sight helper ──────────────────────────────────────
+// Returns true if the player cell is within sight range (5.5 tiles),
+// within forward facing direction (180 deg cone), and unblocked by boulders.
 function gooseSpots(g, px, py, grid, cols, rows) {
     if (g.x === px && g.y === py) return true;
+
+    const dx = px - g.x;
+    const dy = py - g.y;
+    const distance = Math.hypot(dx, dy);
+
+    // 1. Max sight range check (5.5 tiles)
+    if (distance > 5.5) return false;
+
+    // 2. Directional vision check: goose only sees in its forward 180-degree field of view
+    if (g.dir === GOOSE_DIR.N && dy > 0) return false; // Player is behind (South)
+    if (g.dir === GOOSE_DIR.S && dy < 0) return false; // Player is behind (North)
+    if (g.dir === GOOSE_DIR.E && dx < 0) return false; // Player is behind (West)
+    if (g.dir === GOOSE_DIR.W && dx > 0) return false; // Player is behind (East)
 
     const x0 = g.x + 0.5;
     const y0 = g.y + 0.5;
     const x1 = px + 0.5;
     const y1 = py + 0.5;
 
-    const dx = x1 - x0;
-    const dy = y1 - y0;
-    const distance = Math.hypot(dx, dy);
+    const stepDx = x1 - x0;
+    const stepDy = y1 - y0;
 
     // Step in small increments along the line segment
     const steps = Math.ceil(distance * 20);
     for (let i = 1; i < steps; i++) {
         const t = i / steps;
-        const cx = Math.floor(x0 + t * dx);
-        const cy = Math.floor(y0 + t * dy);
+        const cx = Math.floor(x0 + t * stepDx);
+        const cy = Math.floor(y0 + t * stepDy);
 
         // Skip the start (goose) and end (player) squares
         if (cx === g.x && cy === g.y) continue;
@@ -205,6 +217,7 @@ function stepGeese(prevPlayerX, prevPlayerY) {
 
     geese.forEach(g => {
         if (!g.active) return;
+        if (typeof g.alertTimer === 'undefined') g.alertTimer = 0;
 
         // Check LOS at start of turn (before player moves) and at end of player move
         const startHasLOS = gooseSpots(g, prevPlayerX, prevPlayerY, grid, cols, rows);
@@ -221,30 +234,36 @@ function stepGeese(prevPlayerX, prevPlayerY) {
         }
 
         if (currentHasLOS) {
-            // Chase: move one square closer (allowing diagonal)
-            const dx = Math.sign(player.x - g.x);
-            const dy = Math.sign(player.y - g.y);
-            let nx = g.x + dx;
-            let ny = g.y + dy;
-
-            if (canGooseEnter(nx, ny, grid, cols, rows)) {
-                g.x = nx;
-                g.y = ny;
+            if (g.alertTimer === 0) {
+                // 1-turn "HONK!" alert delay when first spotted: goose turns to face player but stays in place for 1 move!
+                g.alertTimer = 1;
+                g.dir = getClosestCardinalDirection(g.x, g.y, player.x, player.y);
             } else {
-                // Fallback to cardinal moves towards player if diagonal is blocked
-                const absDx = Math.abs(player.x - g.x);
-                const absDy = Math.abs(player.y - g.y);
-                if (absDx >= absDy) {
-                    if (canGooseEnter(g.x + dx, g.y, grid, cols, rows)) {
-                        g.x = g.x + dx;
-                    } else if (canGooseEnter(g.x, g.y + dy, grid, cols, rows)) {
-                        g.y = g.y + dy;
-                    }
+                // Chase: move one square closer (allowing diagonal)
+                const dx = Math.sign(player.x - g.x);
+                const dy = Math.sign(player.y - g.y);
+                let nx = g.x + dx;
+                let ny = g.y + dy;
+
+                if (canGooseEnter(nx, ny, grid, cols, rows)) {
+                    g.x = nx;
+                    g.y = ny;
                 } else {
-                    if (canGooseEnter(g.x, g.y + dy, grid, cols, rows)) {
-                        g.y = g.y + dy;
-                    } else if (canGooseEnter(g.x + dx, g.y, grid, cols, rows)) {
-                        g.x = g.x + dx;
+                    // Fallback to cardinal moves towards player if diagonal is blocked
+                    const absDx = Math.abs(player.x - g.x);
+                    const absDy = Math.abs(player.y - g.y);
+                    if (absDx >= absDy) {
+                        if (canGooseEnter(g.x + dx, g.y, grid, cols, rows)) {
+                            g.x = g.x + dx;
+                        } else if (canGooseEnter(g.x, g.y + dy, grid, cols, rows)) {
+                            g.y = g.y + dy;
+                        }
+                    } else {
+                        if (canGooseEnter(g.x, g.y + dy, grid, cols, rows)) {
+                            g.y = g.y + dy;
+                        } else if (canGooseEnter(g.x + dx, g.y, grid, cols, rows)) {
+                            g.x = g.x + dx;
+                        }
                     }
                 }
             }
@@ -254,6 +273,7 @@ function stepGeese(prevPlayerX, prevPlayerY) {
                 g.dir = getClosestCardinalDirection(g.x, g.y, player.x, player.y);
             }
         } else {
+            g.alertTimer = 0;
             // Normal behavior: move forward and bounce on boulder or water
             const { dx, dy } = gooseDelta(g.dir);
             const nx = g.x + dx;
@@ -338,7 +358,7 @@ function handleGooseInput(key) {
             gs.waitingForDialog = false;
             gs.showResult = null;
             success();
-            if (minigameState.successes < 4) initGooseGame();
+            if (minigameState.isEternalMode || minigameState.successes < 4) initGooseGame();
         });
     } else if (gs.showResult === 'failure') {
         gs.waitingForDialog = true;
@@ -347,7 +367,7 @@ function handleGooseInput(key) {
             gs.waitingForDialog = false;
             gs.showResult = null;
             failure();
-            if (minigameState.failures < 3) initGooseGame();
+            if (minigameState.isEternalMode || minigameState.failures < 3) initGooseGame();
         });
     }
 }
@@ -762,6 +782,17 @@ function drawGooseSprite(g, x, y, w, h) {
         ctx.quadraticCurveTo(0, -s * 0.7, s * 0.3, -s * 0.55);
         ctx.stroke();
 
+        ctx.restore();
+    }
+
+    if (g.alertTimer > 0) {
+        const cx = x + w / 2;
+        const cy = y + h / 2;
+        ctx.save();
+        ctx.fillStyle = '#ff3333';
+        ctx.font = '10px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.fillText("HONK!", cx, cy - h * 0.55);
         ctx.restore();
     }
 }

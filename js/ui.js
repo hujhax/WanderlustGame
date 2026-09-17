@@ -308,6 +308,8 @@ function drawNextDay() {
 }
 
 let debugMinigameIndex = 0;
+let isEternalMode = false;
+
 const DEBUG_MINIGAMES = [
     { key: 'chicken', name: 'Catch That Chicken' },
     { key: 'math', name: 'Math' },
@@ -339,6 +341,14 @@ function getDebugMenuBounds(i) {
         const w = 340;
         const h = 50;
         return { x, y, w, h };
+    }
+}
+
+function getEternalModeCheckboxBounds() {
+    if (isMobileMode) {
+        return { x: 25, y: 670, w: 550, h: 45 };
+    } else {
+        return { x: 50, y: 515, w: 700, h: 40 };
     }
 }
 
@@ -374,12 +384,40 @@ function drawMinigameDebugMenu() {
         ctx.fillText(label, x + 10, y + h / 2 + 4);
     });
 
+    // Draw Eternal Mode Checkbox
+    const cbBounds = getEternalModeCheckboxBounds();
+    const boxSize = isMobileMode ? 24 : 20;
+    const boxX = cbBounds.x + 10;
+    const boxY = cbBounds.y + (cbBounds.h - boxSize) / 2;
+
+    ctx.fillStyle = isEternalMode ? 'rgba(255, 255, 0, 0.15)' : '#111111';
+    ctx.fillRect(cbBounds.x, cbBounds.y, cbBounds.w, cbBounds.h);
+
+    ctx.strokeStyle = isEternalMode ? COLORS.SELECTION_YELLOW : '#555555';
+    ctx.lineWidth = isEternalMode ? 2 : 1;
+    ctx.strokeRect(cbBounds.x, cbBounds.y, cbBounds.w, cbBounds.h);
+
+    // Checkbox square
+    ctx.strokeStyle = COLORS.WHITE;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(boxX, boxY, boxSize, boxSize);
+
+    if (isEternalMode) {
+        ctx.fillStyle = COLORS.SELECTION_YELLOW;
+        ctx.fillRect(boxX + 4, boxY + 4, boxSize - 8, boxSize - 8);
+    }
+
+    ctx.fillStyle = isEternalMode ? COLORS.SELECTION_YELLOW : COLORS.WHITE;
+    ctx.font = isMobileMode ? '11px "Press Start 2P"' : '12px "Press Start 2P"';
+    ctx.textAlign = 'left';
+    ctx.fillText('Eternal Mode (Play Forever) [E]', boxX + boxSize + 15, cbBounds.y + cbBounds.h / 2 + 4);
+
     if (Math.floor(Date.now() / 500) % 2 === 0) {
         ctx.fillStyle = COLORS.WHITE;
         ctx.textAlign = 'center';
         ctx.font = isMobileMode ? '10px "Press Start 2P"' : '12px "Press Start 2P"';
         const prompt = isMobileMode ? 'Tap or Press Enter to Play' : 'Click or Press Enter to Play';
-        ctx.fillText(prompt, canvas.width / 2, canvas.height - (isMobileMode ? 40 : 35));
+        ctx.fillText(prompt, canvas.width / 2, canvas.height - (isMobileMode ? 20 : 15));
     }
 }
 

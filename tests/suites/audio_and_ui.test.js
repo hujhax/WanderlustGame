@@ -157,4 +157,26 @@ describe('Audio Manager & UI Engine (js/audio.js & js/ui.js)', () => {
         selectDebugMinigame(10); // Unlock Game Masters
         assertEquals(currentPhase, PHASES.UNLOCK_MASTERS, 'selectDebugMinigame(10) should trigger startUnlockMasters and transition to UNLOCK_MASTERS');
     });
+
+    it('Eternal Mode checkbox on debug menu toggles isEternalMode and renders correctly', () => {
+        currentPhase = PHASES.MINIGAME_DEBUG_MENU;
+        isEternalMode = false;
+
+        const bounds = getEternalModeCheckboxBounds();
+        assert(bounds.w > 0 && bounds.h > 0, 'getEternalModeCheckboxBounds should return valid rectangle bounds');
+
+        // Toggle on
+        isEternalMode = true;
+        assertEquals(isEternalMode, true, 'isEternalMode should be true when toggled on');
+
+        try {
+            drawMinigameDebugMenu();
+        } catch (err) {
+            assert(false, `drawMinigameDebugMenu with isEternalMode=true threw error: ${err.message}`);
+        }
+
+        // Toggle off
+        isEternalMode = false;
+        assertEquals(isEternalMode, false, 'isEternalMode should be false when toggled off');
+    });
 });

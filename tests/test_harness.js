@@ -212,6 +212,7 @@
             drawImage: () => {},
             stroke: () => {},
             fill: () => {},
+            clip: () => {},
             bezierCurveTo: () => {},
             measureText: (text) => ({ width: text ? text.length * 8 : 0 }),
             setLineDash: () => {},

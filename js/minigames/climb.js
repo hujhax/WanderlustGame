@@ -1939,7 +1939,7 @@ function executeClimbMove(targetShape) {
             state.selectedCardIndex = -1;
             score += 1000;
             success(0);
-            if (minigameState.successes < 4) {
+            if (minigameState.isEternalMode || minigameState.successes < 4) {
                 const wallNum = minigameState.successes;
                 const handInfo = getItemizedEndWallMessage(wallNum, state.hand, state.extraCoinsPerCard);
                 state.coins += handInfo.bonusCoins;
@@ -1979,7 +1979,7 @@ function executeClimbMove(targetShape) {
     if (state.player.y <= 80) {
         score += 1000;
         success(0);
-        if (minigameState.successes < 4) {
+        if (minigameState.isEternalMode || minigameState.successes < 4) {
             const wallNum = minigameState.successes;
             const handInfo = getItemizedEndWallMessage(wallNum, state.hand, state.extraCoinsPerCard);
             state.coins += handInfo.bonusCoins;
@@ -2040,7 +2040,7 @@ function drawStarWipe() {
             sw.direction = 'out';
             sw.progress = 0;
             failure();
-            if (minigameState.failures < (minigameState.maxFailures || 3)) {
+            if (minigameState.isEternalMode || minigameState.failures < (minigameState.maxFailures || 3)) {
                 startClimbingRound(true);
             }
         }

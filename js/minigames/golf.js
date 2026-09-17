@@ -422,7 +422,7 @@ function drawGolfGame() {
         golf.animTimer++;
         if (golf.animTimer >= 60) {
             success();
-            if (minigameState.successes < 4) {
+            if (minigameState.isEternalMode || minigameState.successes < 4) {
                 nextGolfHole();
             }
         }
@@ -439,7 +439,7 @@ function drawGolfGame() {
         golf.animTimer++;
         if (golf.animTimer >= 60) {
             failure();
-            if (minigameState.failures < 3) {
+            if (minigameState.isEternalMode || minigameState.failures < 3) {
                 nextGolfHole();
             }
         }

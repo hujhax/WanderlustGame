@@ -4,6 +4,7 @@ function startMinigame() {
     if (selectedIndex === undefined || selectedIndex === null) selectedIndex = 5;
     minigameState = {
         type: gameType, successes: 0, failures: 0, startTime: Date.now(), entities: [],
+        isEternalMode: typeof isEternalMode !== 'undefined' ? isEternalMode : false,
         parallax: { bgX: 0, roadX: 0, trees: [] },
         gameOver: false, won: false, playerY: 480, isJumping: false, jumpVel: 0, frame: 0,
         distance: 0, question: "", answer: "", timer: 10, lastTimerUpdate: Date.now(), difficulty: 1,
@@ -78,7 +79,7 @@ function startMinigame() {
             });
         });
     } else if (gameType === 'goose') {
-        audio.play('CHICKEN_BGM'); // park ambience stand-in
+        audio.play('GOOSE_BGM');
         minigameState.gooseIntroShown = false;
         showDialog('Ranger Willis', 'Sam', "Welcome to Algonquin Provincial Park!", () => {
             showDialog('Ranger Willis', 'Sam', "Good to have a tourist willing to... brave the... er, current circumstances.", () => {
@@ -112,7 +113,7 @@ function startMinigame() {
 
 function success(points = 100) {
     minigameState.successes++; score += points; audio.playSFX('SUCCESS');
-    if (minigameState.successes >= 4) { 
+    if (!minigameState.isEternalMode && minigameState.successes >= 4) { 
         minigameState.won = true; 
         score += 1000; 
         audio.playSFX('TADA'); 
@@ -126,7 +127,7 @@ function success(points = 100) {
 
 function failure() {
     minigameState.failures++; audio.playSFX('FAILURE');
-    if (minigameState.failures >= 3) { minigameState.won = false; audio.playSFX('SAD_TROMBONE'); endMinigame(); }
+    if (!minigameState.isEternalMode && minigameState.failures >= 3) { minigameState.won = false; audio.playSFX('SAD_TROMBONE'); endMinigame(); }
 }
 
 function endMinigame() {
