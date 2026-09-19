@@ -79,6 +79,7 @@ function drawChickenGame() {
             }
         } else {
             // Skull jumping physics
+            if (isMobileMode && !ent.isJumping && ent.y === 480) ent.y = roadY;
             ent.y = ent.y || roadY;
             ent.isJumping = ent.isJumping || false;
             ent.jumpVel = ent.jumpVel || 0;

@@ -1,6 +1,8 @@
 function initBumpGame() {
+    const scaleX = (typeof isMobileMode !== 'undefined' && isMobileMode) ? (600 / 800) : 1;
+    const scaleY = (typeof isMobileMode !== 'undefined' && isMobileMode) ? (660 / 600) : 1;
     minigameState.car = {
-        x: 400, y: 300, 
+        x: 400 * scaleX, y: 300 * scaleY, 
         angle: -Math.PI / 2, 
         speed: 0,
         vx: 0, vy: 0,
@@ -9,16 +11,23 @@ function initBumpGame() {
     minigameState.coin = { x: 0, y: 0, frame: 0 };
     spawnCoin();
     minigameState.otherCars = [
-        { x: 200, y: 200, angle: Math.random() * Math.PI * 2, speed: 1.5, color: 'red', state: 'chasing', vx: 0, vy: 0 },
-        { x: 600, y: 200, angle: Math.random() * Math.PI * 2, speed: 1.2, color: 'white', mode: 'random', vx: 0, vy: 0 },
-        { x: 200, y: 400, angle: Math.random() * Math.PI * 2, speed: 1.2, color: 'white', mode: 'random', vx: 0, vy: 0 },
-        { x: 600, y: 400, angle: Math.random() * Math.PI * 2, speed: 1.2, color: 'white', mode: 'random', vx: 0, vy: 0 },
-        { x: 400, y: 500, angle: Math.random() * Math.PI * 2, speed: 1.2, color: 'white', mode: 'random', vx: 0, vy: 0 }
+        { x: 200 * scaleX, y: 200 * scaleY, angle: Math.random() * Math.PI * 2, speed: 1.5, color: 'red', state: 'chasing', vx: 0, vy: 0 },
+        { x: 600 * scaleX, y: 200 * scaleY, angle: Math.random() * Math.PI * 2, speed: 1.2, color: 'white', mode: 'random', vx: 0, vy: 0 },
+        { x: 200 * scaleX, y: 400 * scaleY, angle: Math.random() * Math.PI * 2, speed: 1.2, color: 'white', mode: 'random', vx: 0, vy: 0 },
+        { x: 600 * scaleX, y: 400 * scaleY, angle: Math.random() * Math.PI * 2, speed: 1.2, color: 'white', mode: 'random', vx: 0, vy: 0 },
+        { x: 400 * scaleX, y: 500 * scaleY, angle: Math.random() * Math.PI * 2, speed: 1.2, color: 'white', mode: 'random', vx: 0, vy: 0 }
     ];
 }
 
 function spawnCoin() {
-    const bounds = { x1: 100, y1: 100, x2: 700, y2: 500 };
+    const scaleX = (typeof isMobileMode !== 'undefined' && isMobileMode) ? (600 / 800) : 1;
+    const scaleY = (typeof isMobileMode !== 'undefined' && isMobileMode) ? (660 / 600) : 1;
+    const bounds = { 
+        x1: 100 * scaleX, 
+        y1: 100 * scaleY, 
+        x2: 700 * scaleX, 
+        y2: 500 * scaleY 
+    };
     minigameState.coin.x = bounds.x1 + Math.random() * (bounds.x2 - bounds.x1);
     minigameState.coin.y = bounds.y1 + Math.random() * (bounds.y2 - bounds.y1);
 }
@@ -51,10 +60,17 @@ function drawBumpGame() {
     // Scaled bounds based on rgb(101,101,101) logic
     const bounds = { x1: 50, y1: 50, x2: 750, y2: 550 };
 
+    const playH = isMobileMode ? 660 : canvas.height;
     if (bumperCarLotImg.complete && bumperCarLotImg.naturalWidth > 0) {
-        ctx.drawImage(bumperCarLotImg, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(bumperCarLotImg, 0, 0, canvas.width, playH);
     } else {
-        ctx.fillStyle = '#666'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#666'; ctx.fillRect(0, 0, canvas.width, playH);
+    }
+    if (isMobileMode) {
+        ctx.fillStyle = '#12121c';
+        ctx.fillRect(0, playH, canvas.width, canvas.height - playH);
+        ctx.strokeStyle = '#333355'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, playH); ctx.lineTo(canvas.width, playH); ctx.stroke();
     }
 
     // Update Player Car
@@ -180,28 +196,38 @@ function drawBumpGame() {
     });
 
     if (isMobileMode) {
-        // Left & Right Steering buttons on bottom-left
-        drawTouchButton(20, 680, 110, 90, '◄ LEFT', { bgColor: '#222244', font: '12px "Press Start 2P"' });
-        drawTouchButton(145, 680, 110, 90, 'RIGHT ►', { bgColor: '#222244', font: '12px "Press Start 2P"' });
+        // Left & Right Steering buttons on bottom-left with pixel-art arrows
+        const isLeft = (typeof touchState !== 'undefined' && touchState.bumpSteerLeft) || keysPressed.has('ArrowLeft');
+        const isRight = (typeof touchState !== 'undefined' && touchState.bumpSteerRight) || keysPressed.has('ArrowRight');
+        const isGas = (typeof touchState !== 'undefined' && touchState.bumpGas) || keysPressed.has('ArrowUp');
+        const isRev = (typeof touchState !== 'undefined' && touchState.bumpReverse) || keysPressed.has('ArrowDown');
 
-        // Gas & Reverse buttons on bottom-right
-        drawTouchButton(345, 680, 110, 90, 'GAS ▲', { bgColor: '#004400', font: '12px "Press Start 2P"' });
-        drawTouchButton(470, 680, 110, 90, 'REV ▼', { bgColor: '#440000', font: '12px "Press Start 2P"' });
+        drawArrowButton(20, 675, 115, 95, 'left', isLeft, { bgColor: '#222244' });
+        drawArrowButton(145, 675, 115, 95, 'right', isRight, { bgColor: '#222244' });
+
+        // Gas & Reverse buttons on bottom-right with pixel-art arrows
+        drawArrowButton(340, 675, 115, 95, 'up', isGas, { bgColor: '#004400' });
+        drawArrowButton(465, 675, 115, 95, 'down', isRev, { bgColor: '#440000' });
     }
 }
 
 function checkEnvCollision(c, isPlayer) {
+    const scaleX = (typeof isMobileMode !== 'undefined' && isMobileMode) ? (600 / 800) : 1;
+    const scaleY = (typeof isMobileMode !== 'undefined' && isMobileMode) ? (660 / 600) : 1;
+
     // 1. Left beige wall
-    if (c.x < 73) {
-        c.x = 73;
+    const leftLimit = 73 * scaleX;
+    if (c.x < leftLimit) {
+        c.x = leftLimit;
         c.vx *= -0.8;
         c.angle = Math.PI - c.angle;
         if (isPlayer) c.speed *= -0.5;
     }
     
     // 2. Right green zigzag
-    const rightPhase = ((c.y - 120) % 40 + 40) % 40;
-    const rightLimit = (rightPhase < 20) ? (713 + (rightPhase / 20) * 40) : (753 - ((rightPhase - 20) / 20) * 40);
+    const rightPhase = (((c.y / scaleY) - 120) % 40 + 40) % 40;
+    const baseRight = (rightPhase < 20) ? (713 + (rightPhase / 20) * 40) : (753 - ((rightPhase - 20) / 20) * 40);
+    const rightLimit = baseRight * scaleX;
     if (c.x > rightLimit) {
         c.x = rightLimit - 2;
         c.vx *= -0.8;
@@ -210,8 +236,9 @@ function checkEnvCollision(c, isPlayer) {
     }
     
     // 3. Top white zigzag
-    const topPhase = ((c.x - 60) % 80 + 80) % 80;
-    const topLimit = (topPhase < 40) ? (82 + (topPhase / 40) * 20) : (102 - ((topPhase - 40) / 40) * 20);
+    const topPhase = (((c.x / scaleX) - 60) % 80 + 80) % 80;
+    const baseTop = (topPhase < 40) ? (82 + (topPhase / 40) * 20) : (102 - ((topPhase - 40) / 40) * 20);
+    const topLimit = baseTop * scaleY;
     if (c.y < topLimit) {
         c.y = topLimit + 2;
         c.vy *= -0.8;
@@ -220,8 +247,9 @@ function checkEnvCollision(c, isPlayer) {
     }
     
     // 4. Bottom green zigzag
-    const bottomPhase = ((c.x - 100) % 80 + 80) % 80;
-    const bottomLimit = (bottomPhase < 40) ? (552 + (bottomPhase / 40) * 33) : (585 - ((bottomPhase - 40) / 40) * 33);
+    const bottomPhase = (((c.x / scaleX) - 100) % 80 + 80) % 80;
+    const baseBottom = (bottomPhase < 40) ? (552 + (bottomPhase / 40) * 33) : (585 - ((bottomPhase - 40) / 40) * 33);
+    const bottomLimit = baseBottom * scaleY;
     if (c.y > bottomLimit) {
         c.y = bottomLimit - 2;
         c.vy *= -0.8;

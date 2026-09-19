@@ -259,11 +259,16 @@ function drawConfrontationPlay() {
 
         if (!fightingState.gameOver) {
             // Touch control buttons in blank bottom control strip
-            drawTouchButton(20, 675, 115, 95, '◄ LEFT', { bgColor: '#222244', font: '12px "Press Start 2P"' });
-            drawTouchButton(145, 675, 115, 95, 'RIGHT ►', { bgColor: '#222244', font: '12px "Press Start 2P"' });
+            const isLeft = (typeof touchState !== 'undefined' && touchState.fightingLeft) || keysPressed.has('ArrowLeft');
+            const isRight = (typeof touchState !== 'undefined' && touchState.fightingRight) || keysPressed.has('ArrowRight');
+            const isPunch = (typeof touchState !== 'undefined' && touchState.fightingPunch) || keysPressed.has('a') || keysPressed.has('A');
+            const isKick = (typeof touchState !== 'undefined' && touchState.fightingKick) || keysPressed.has('s') || keysPressed.has('S');
 
-            drawTouchButton(340, 675, 115, 95, 'PUNCH', { bgColor: '#004400', font: '12px "Press Start 2P"' });
-            drawTouchButton(465, 675, 115, 95, 'KICK', { bgColor: '#440000', font: '12px "Press Start 2P"' });
+            drawArrowButton(20, 675, 115, 95, 'left', isLeft, { bgColor: '#222244' });
+            drawArrowButton(145, 675, 115, 95, 'right', isRight, { bgColor: '#222244' });
+
+            drawTouchButton(340, 675, 115, 95, 'PUNCH', { bgColor: '#004400', font: '12px "Press Start 2P"', isPressed: isPunch });
+            drawTouchButton(465, 675, 115, 95, 'KICK', { bgColor: '#440000', font: '12px "Press Start 2P"', isPressed: isKick });
         }
     } else {
         // Desktop rendering (100% UNCHANGED)

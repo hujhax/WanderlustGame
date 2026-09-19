@@ -363,8 +363,8 @@ function drawGolfGame() {
     ctx.textAlign = 'center';
     ctx.fillText(`Hole #${hole.number}: ${hole.name}`, canvas.width / 2, isMobileMode ? 80 : 65);
     
-    ctx.textAlign = 'left';
-    ctx.fillText(`Stroke #${golf.stroke}`, isMobileMode ? 400 : 480, 30);
+    ctx.textAlign = isMobileMode ? 'right' : 'left';
+    ctx.fillText(`Stroke #${golf.stroke}`, isMobileMode ? (canvas.width - 20) : 480, isMobileMode ? 28 : 30);
     
     // Draw power bar
     if (golf.state === 'power_windup') {
@@ -489,7 +489,15 @@ function handleGolfInput(key) {
 
 function handleGolfMouseDown(e) {
     const golf = minigameState.golf;
-    if (golf && golf.state === 'aiming') {
+    if (!golf) return;
+
+    const pos = getCanvasPointerPos(e);
+    if (isMobileMode && pos.x >= 170 && pos.x <= 430 && pos.y >= 665 && pos.y <= 770) {
+        handleGolfInput(' ');
+        return;
+    }
+
+    if (golf.state === 'aiming') {
         golf.isDragging = true;
         updateGolfAim(e);
     }

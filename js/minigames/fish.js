@@ -318,13 +318,28 @@ function drawFishGame() {
     } else if (state.fishWindow) {
         drawFishingWindow();
     } else if (isMobileMode) {
-        // Render touch D-pad and CAST button
-        drawTouchButton(20, 680, 70, 70, '▲', { bgColor: '#222244' });
-        drawTouchButton(20, 755, 70, 40, '▼', { bgColor: '#222244' });
-        drawTouchButton(95, 715, 70, 70, '◄', { bgColor: '#222244' });
-        drawTouchButton(170, 715, 70, 70, '►', { bgColor: '#222244' });
+        // Bottom control strip background
+        ctx.fillStyle = '#12121c';
+        ctx.fillRect(0, 650, canvas.width, 150);
+        ctx.strokeStyle = '#333355'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, 650); ctx.lineTo(canvas.width, 650); ctx.stroke();
 
-        drawTouchButton(360, 680, 210, 100, 'CAST HOOK', { bgColor: '#004400', font: '14px "Press Start 2P"' });
+        const isUp = (typeof touchState !== 'undefined' && touchState.arrowUp) || keysPressed.has('ArrowUp');
+        const isDown = (typeof touchState !== 'undefined' && touchState.arrowDown) || keysPressed.has('ArrowDown');
+        const isLeft = (typeof touchState !== 'undefined' && touchState.arrowLeft) || keysPressed.has('ArrowLeft');
+        const isRight = (typeof touchState !== 'undefined' && touchState.arrowRight) || keysPressed.has('ArrowRight');
+        const isCast = (typeof touchState !== 'undefined' && touchState.waitTurn);
+
+        drawArrowButton(95, 658, 68, 64, 'up', isUp);
+        drawArrowButton(95, 728, 68, 64, 'down', isDown);
+        drawArrowButton(22, 693, 68, 64, 'left', isLeft);
+        drawArrowButton(168, 693, 68, 64, 'right', isRight);
+
+        drawTouchButton(280, 672, 300, 112, 'CAST HOOK', { 
+            bgColor: '#004400', 
+            font: '14px "Press Start 2P"',
+            isPressed: isCast
+        });
     }
 }
 
@@ -664,17 +679,24 @@ function drawFishingModal() {
         ctx.font = '10px "Press Start 2P"';
         ctx.fillText(`${Math.floor(meterVal)}%`, rpX + rpW / 2, barY + barH + 18);
 
-        // Directional touch buttons for hook navigation
-        const btnY = (isMobileMode ? 80 : 60) + winH - 60;
-        drawTouchButton(winX + 40, btnY, 45, 45, '▲', { bgColor: '#222244' });
-        drawTouchButton(winX + 90, btnY, 45, 45, '▼', { bgColor: '#222244' });
-        drawTouchButton(winX + 140, btnY, 45, 45, '◄', { bgColor: '#222244' });
-        drawTouchButton(winX + 190, btnY, 45, 45, '►', { bgColor: '#222244' });
+        // Directional touch buttons for hook navigation with pixel-art arrows
+        const btnY = (isMobileMode ? 80 : 60) + winH - 68;
+        const btnSize = isMobileMode ? 56 : 48;
+        const gap = isMobileMode ? 62 : 54;
+        const isUp = keysPressed.has('ArrowUp') || (typeof touchState !== 'undefined' && touchState.arrowUp);
+        const isDown = keysPressed.has('ArrowDown') || (typeof touchState !== 'undefined' && touchState.arrowDown);
+        const isLeft = keysPressed.has('ArrowLeft') || (typeof touchState !== 'undefined' && touchState.arrowLeft);
+        const isRight = keysPressed.has('ArrowRight') || (typeof touchState !== 'undefined' && touchState.arrowRight);
+
+        drawArrowButton(winX + 25, btnY, btnSize, btnSize, 'up', isUp);
+        drawArrowButton(winX + 25 + gap, btnY, btnSize, btnSize, 'down', isDown);
+        drawArrowButton(winX + 25 + gap * 2, btnY, btnSize, btnSize, 'left', isLeft);
+        drawArrowButton(winX + 25 + gap * 3, btnY, btnSize, btnSize, 'right', isRight);
 
         ctx.fillStyle = '#cccccc';
         ctx.font = '10px "Press Start 2P"';
         ctx.textAlign = 'left';
-        ctx.fillText('WASD / ARROWS / TOUCH BUTTONS', winX + 250, btnY + 28);
+        ctx.fillText('WASD / ARROWS / TOUCH BUTTONS', winX + 25 + gap * 4 + 10, btnY + 28);
     } catch (err) {
         if (typeof console !== 'undefined' && console.error) {
             console.error("Error drawing fishing modal:", err);
@@ -807,23 +829,25 @@ function handleFishTouch(x, y) {
         const modal = state.fishModal;
         const winX = isMobileMode ? 20 : 50;
         const winH = isMobileMode ? 680 : 480;
-        const btnY = (isMobileMode ? 80 : 60) + winH - 60;
+        const btnY = (isMobileMode ? 80 : 60) + winH - 68;
+        const btnSize = isMobileMode ? 56 : 48;
+        const gap = isMobileMode ? 62 : 54;
         const nudge = 180;
 
-        if (x >= winX + 40 && x <= winX + 85 && y >= btnY && y <= btnY + 45) modal.hookVy = (modal.hookVy || 0) - nudge;
-        else if (x >= winX + 90 && x <= winX + 135 && y >= btnY && y <= btnY + 45) modal.hookVy = (modal.hookVy || 0) + nudge;
-        else if (x >= winX + 140 && x <= winX + 185 && y >= btnY && y <= btnY + 45) modal.hookVx = (modal.hookVx || 0) - nudge;
-        else if (x >= winX + 190 && x <= winX + 235 && y >= btnY && y <= btnY + 45) modal.hookVx = (modal.hookVx || 0) + nudge;
+        if (x >= winX + 25 && x <= winX + 25 + btnSize && y >= btnY && y <= btnY + btnSize) modal.hookVy = (modal.hookVy || 0) - nudge;
+        else if (x >= winX + 25 + gap && x <= winX + 25 + gap + btnSize && y >= btnY && y <= btnY + btnSize) modal.hookVy = (modal.hookVy || 0) + nudge;
+        else if (x >= winX + 25 + gap * 2 && x <= winX + 25 + gap * 2 + btnSize && y >= btnY && y <= btnY + btnSize) modal.hookVx = (modal.hookVx || 0) - nudge;
+        else if (x >= winX + 25 + gap * 3 && x <= winX + 25 + gap * 3 + btnSize && y >= btnY && y <= btnY + btnSize) modal.hookVx = (modal.hookVx || 0) + nudge;
         return;
     }
 
     if (!isMobileMode) return;
 
-    if (x >= 20 && x <= 90 && y >= 680 && y <= 750) handleFishInput('ArrowUp');
-    else if (x >= 20 && x <= 90 && y >= 755 && y <= 795) handleFishInput('ArrowDown');
-    else if (x >= 95 && x <= 165 && y >= 715 && y <= 785) handleFishInput('ArrowLeft');
-    else if (x >= 170 && x <= 240 && y >= 715 && y <= 785) handleFishInput('ArrowRight');
-    else if (x >= 360 && x <= 570 && y >= 680 && y <= 780) attemptFish();
+    if (x >= 80 && x <= 180 && y >= 655 && y <= 726) handleFishInput('ArrowUp');
+    else if (x >= 80 && x <= 180 && y >= 727 && y <= 800) handleFishInput('ArrowDown');
+    else if (x >= 10 && x <= 94 && y >= 670 && y <= 790) handleFishInput('ArrowLeft');
+    else if (x >= 166 && x <= 255 && y >= 670 && y <= 790) handleFishInput('ArrowRight');
+    else if (x >= 270 && x <= 590 && y >= 665 && y <= 795) attemptFish();
 }
 
 function attemptFish() {

@@ -135,17 +135,59 @@ function getCanvasPointerPos(e) {
 
 function drawTouchButton(x, y, w, h, text, options = {}) {
     ctx.save();
-    ctx.fillStyle = options.bgColor || '#222222';
+    const isPressed = options.isPressed || false;
+    ctx.fillStyle = isPressed ? (options.pressedBgColor || '#111122') : (options.bgColor || '#222222');
     ctx.fillRect(x, y, w, h);
-    ctx.strokeStyle = options.borderColor || '#FFFFFF';
-    ctx.lineWidth = options.borderWidth || 3;
+    ctx.strokeStyle = isPressed ? (options.pressedBorderColor || '#FFCC00') : (options.borderColor || '#FFFFFF');
+    ctx.lineWidth = isPressed ? 4 : (options.borderWidth || 3);
     ctx.strokeRect(x, y, w, h);
 
-    ctx.fillStyle = options.textColor || '#FFFFFF';
+    ctx.fillStyle = isPressed ? '#FFCC00' : (options.textColor || '#FFFFFF');
     ctx.font = options.font || '12px "Press Start 2P"';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(text, x + w / 2, y + h / 2);
+    ctx.fillText(text, x + w / 2 + (isPressed ? 2 : 0), y + h / 2 + (isPressed ? 2 : 0));
+    ctx.restore();
+}
+
+function drawArrowButton(x, y, w, h, dir, isPressed = false, options = {}) {
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    
+    const bgColor = isPressed ? (options.pressedBgColor || '#111122') : (options.bgColor || '#222244');
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(x, y, w, h);
+    
+    ctx.strokeStyle = isPressed ? (options.pressedBorderColor || (typeof COLORS !== 'undefined' ? COLORS.SELECTION_YELLOW : '#FFCC00')) : (options.borderColor || '#FFFFFF');
+    ctx.lineWidth = isPressed ? 4 : (options.borderWidth || 3);
+    ctx.strokeRect(x, y, w, h);
+
+    const imgs = (typeof window !== 'undefined' && window.arrowImgs) ? window.arrowImgs : null;
+    const imgKey = isPressed ? (dir + '_pressed') : dir;
+    const img = (imgs && imgs[imgKey]) ? imgs[imgKey] : (imgs ? imgs[dir] : null);
+
+    if (img && img.complete && img.naturalWidth > 0) {
+        const pad = options.padding !== undefined ? options.padding : 8;
+        const availW = Math.max(10, w - pad * 2);
+        const availH = Math.max(10, h - pad * 2);
+        const imgAspect = img.naturalWidth / img.naturalHeight;
+        let dw = availW;
+        let dh = dw / imgAspect;
+        if (dh > availH) {
+            dh = availH;
+            dw = dh * imgAspect;
+        }
+        const ox = x + (w - dw) / 2 + (isPressed ? 2 : 0);
+        const oy = y + (h - dh) / 2 + (isPressed ? 2 : 0);
+        ctx.drawImage(img, ox, oy, dw, dh);
+    } else {
+        const arrows = { up: '▲', down: '▼', left: '◄', right: '►' };
+        ctx.fillStyle = isPressed ? (typeof COLORS !== 'undefined' ? COLORS.SELECTION_YELLOW : '#FFCC00') : (options.textColor || '#FFFFFF');
+        ctx.font = options.font || '20px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(arrows[dir] || dir, x + w / 2 + (isPressed ? 2 : 0), y + h / 2 + (isPressed ? 2 : 0));
+    }
     ctx.restore();
 }
 

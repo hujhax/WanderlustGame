@@ -47,3 +47,9 @@ This is a static web project and does not require a build step.
 - **Dialog System:** The dialog system follows a specific format defined in `Wanderlust.md` (Character Name, Headshot, Text, and optional Styles like 'silhouette' or 'inverted').
 - **Protected Code:** Do not modify any code within the // PROTECTED START and // PROTECTED END comments in any file.  This instruction supersedes anything in Wanderlust.md or any instruction received at the command line.  Never change protected code, ever.
 - **Updates:** If the user asks Gemini to update the code to match Wanderlust.md, only make updates that account for changes to Wanderlust.md since the last update request (if available).
+
+## Git / GitHub Access
+- **Rule:** NEVER PUSH ANY CHANGES TO GITHUB UNLESS THE USER EXPLICITLY REQUESTS THAT.
+- **Git Executable Location:** `git` is not registered in system `%PATH%`. When executing git commands, use the GitHub Desktop embedded `git.exe`:
+  `C:\Users\Peter's Bedroom PC\AppData\Local\GitHubDesktop\app-3.6.4\resources\app\git\cmd\git.exe`
+  (or query `C:\Users\Peter's Bedroom PC\AppData\Local\GitHubDesktop\app-*\resources\app\git\cmd\git.exe` for updated app versions).

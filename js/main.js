@@ -23,6 +23,25 @@ if (isMobileMode) {
     canvas.height = 600;
 }
 
+window.arrowImgs = {
+    up: new Image(),
+    down: new Image(),
+    left: new Image(),
+    right: new Image(),
+    up_pressed: new Image(),
+    down_pressed: new Image(),
+    left_pressed: new Image(),
+    right_pressed: new Image()
+};
+window.arrowImgs.up.src = 'images/elements/arrow_up.png';
+window.arrowImgs.down.src = 'images/elements/arrow_down.png';
+window.arrowImgs.left.src = 'images/elements/arrow_left.png';
+window.arrowImgs.right.src = 'images/elements/arrow_right.png';
+window.arrowImgs.up_pressed.src = 'images/elements/arrow_up_pressed.png';
+window.arrowImgs.down_pressed.src = 'images/elements/arrow_down_pressed.png';
+window.arrowImgs.left_pressed.src = 'images/elements/arrow_left_pressed.png';
+window.arrowImgs.right_pressed.src = 'images/elements/arrow_right_pressed.png';
+
 window.touchState = {
     bumpSteerLeft: false,
     bumpSteerRight: false,
@@ -31,7 +50,12 @@ window.touchState = {
     fightingLeft: false,
     fightingRight: false,
     fightingPunch: false,
-    fightingKick: false
+    fightingKick: false,
+    arrowUp: false,
+    arrowDown: false,
+    arrowLeft: false,
+    arrowRight: false,
+    waitTurn: false
 };
 
 function updateTouchState(e) {
@@ -44,6 +68,11 @@ function updateTouchState(e) {
     touchState.fightingRight = false;
     touchState.fightingPunch = false;
     touchState.fightingKick = false;
+    touchState.arrowUp = false;
+    touchState.arrowDown = false;
+    touchState.arrowLeft = false;
+    touchState.arrowRight = false;
+    touchState.waitTurn = false;
 
     const activePointers = e.touches ? Array.from(e.touches) : (e.buttons === 1 || e.type === 'mousedown' ? [e] : []);
     activePointers.forEach(pointer => {
@@ -51,10 +80,17 @@ function updateTouchState(e) {
         const x = pos.x, y = pos.y;
         
         if (currentPhase === PHASES.MINIGAME_PLAY && minigameState && minigameState.type === 'bump') {
-            if (x >= 20 && x <= 130 && y >= 680 && y <= 770) touchState.bumpSteerLeft = true;
-            if (x >= 145 && x <= 255 && y >= 680 && y <= 770) touchState.bumpSteerRight = true;
-            if (x >= 345 && x <= 455 && y >= 680 && y <= 770) touchState.bumpGas = true;
-            if (x >= 470 && x <= 580 && y >= 680 && y <= 770) touchState.bumpReverse = true;
+            if (x >= 20 && x <= 135 && y >= 670 && y <= 775) touchState.bumpSteerLeft = true;
+            if (x >= 145 && x <= 260 && y >= 670 && y <= 775) touchState.bumpSteerRight = true;
+            if (x >= 340 && x <= 455 && y >= 670 && y <= 775) touchState.bumpGas = true;
+            if (x >= 465 && x <= 580 && y >= 670 && y <= 775) touchState.bumpReverse = true;
+        }
+        if (currentPhase === PHASES.MINIGAME_PLAY && minigameState && (minigameState.type === 'goose' || minigameState.type === 'fish')) {
+            if (x >= 80 && x <= 180 && y >= 655 && y <= 730) touchState.arrowUp = true;
+            if (x >= 80 && x <= 180 && y >= 730 && y <= 800) touchState.arrowDown = true;
+            if (x >= 10 && x <= 95 && y >= 670 && y <= 790) touchState.arrowLeft = true;
+            if (x >= 165 && x <= 250 && y >= 670 && y <= 790) touchState.arrowRight = true;
+            if (x >= 270 && x <= 590 && y >= 665 && y <= 795) touchState.waitTurn = true;
         }
         if (currentPhase === PHASES.CONFRONTATION_PLAY) {
             if (x >= 20 && x <= 135 && y >= 660 && y <= 780) touchState.fightingLeft = true;
@@ -526,7 +562,33 @@ window.addEventListener('mousemove', (e) => {
     }
 });
 
+window.addEventListener('pointermove', (e) => {
+    if (currentPhase === PHASES.MINIGAME_PLAY && minigameState && minigameState.type === 'golf') {
+        handleGolfMouseMove(e);
+    }
+});
+
+window.addEventListener('touchmove', (e) => {
+    if (currentPhase === PHASES.MINIGAME_PLAY && minigameState && minigameState.type === 'golf') {
+        if (e.cancelable) e.preventDefault();
+        const touch = e.touches[0];
+        if (touch) handleGolfMouseMove(touch);
+    }
+}, { passive: false });
+
 window.addEventListener('mouseup', (e) => {
+    if (currentPhase === PHASES.MINIGAME_PLAY && minigameState && minigameState.type === 'golf') {
+        handleGolfMouseUp(e);
+    }
+});
+
+window.addEventListener('pointerup', (e) => {
+    if (currentPhase === PHASES.MINIGAME_PLAY && minigameState && minigameState.type === 'golf') {
+        handleGolfMouseUp(e);
+    }
+});
+
+window.addEventListener('touchend', (e) => {
     if (currentPhase === PHASES.MINIGAME_PLAY && minigameState && minigameState.type === 'golf') {
         handleGolfMouseUp(e);
     }

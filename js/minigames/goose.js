@@ -330,17 +330,20 @@ function handleGooseInput(key) {
     let nx = gs.player.x;
     let ny = gs.player.y;
 
+    const isWait = (key === ' ' || key === 'Spacebar' || key === 'w' || key === 'W' || key === 'wait');
     if (key === 'ArrowUp')         { ny--; gs.player.dir = GOOSE_DIR.N; }
     else if (key === 'ArrowDown')  { ny++; gs.player.dir = GOOSE_DIR.S; }
     else if (key === 'ArrowLeft')  { nx--; gs.player.dir = GOOSE_DIR.W; }
     else if (key === 'ArrowRight') { nx++; gs.player.dir = GOOSE_DIR.E; }
-    else return;
+    else if (!isWait) return;
 
-    // Bounds check
-    if (nx < 0 || nx >= gs.cols || ny < 0 || ny >= gs.rows) return;
-    // Can't step onto boulder or water
-    const tile = gooseTileAt(gs.grid, nx, ny);
-    if (tile === GOOSE_TILE.BOULDER || tile === GOOSE_TILE.WATER) return;
+    if (!isWait) {
+        // Bounds check
+        if (nx < 0 || nx >= gs.cols || ny < 0 || ny >= gs.rows) return;
+        // Can't step onto boulder or water
+        const tile = gooseTileAt(gs.grid, nx, ny);
+        if (tile === GOOSE_TILE.BOULDER || tile === GOOSE_TILE.WATER) return;
+    }
 
     const prevPlayerX = gs.player.x;
     const prevPlayerY = gs.player.y;
@@ -473,13 +476,34 @@ function drawGooseGame() {
     ctx.fillText(`Level ${gs.levelIdx + 1}`, 20, 45);
 
     if (isMobileMode) {
-        // Touch D-pad & Wait button
-        drawTouchButton(20, 680, 70, 70, '▲', { bgColor: '#222244' });
-        drawTouchButton(20, 755, 70, 40, '▼', { bgColor: '#222244' });
-        drawTouchButton(95, 715, 70, 70, '◄', { bgColor: '#222244' });
-        drawTouchButton(170, 715, 70, 70, '►', { bgColor: '#222244' });
+        // Bottom control strip background
+        ctx.fillStyle = '#12121c';
+        ctx.fillRect(0, 650, canvas.width, 150);
+        ctx.strokeStyle = '#333355'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, 650); ctx.lineTo(canvas.width, 650); ctx.stroke();
 
-        drawTouchButton(340, 695, 230, 90, 'WAIT TURN', { bgColor: '#444400', font: '12px "Press Start 2P"' });
+        const isUp = (typeof touchState !== 'undefined' && touchState.arrowUp) || keysPressed.has('ArrowUp');
+        const isDown = (typeof touchState !== 'undefined' && touchState.arrowDown) || keysPressed.has('ArrowDown');
+        const isLeft = (typeof touchState !== 'undefined' && touchState.arrowLeft) || keysPressed.has('ArrowLeft');
+        const isRight = (typeof touchState !== 'undefined' && touchState.arrowRight) || keysPressed.has('ArrowRight');
+        const isWait = (typeof touchState !== 'undefined' && touchState.waitTurn) || keysPressed.has(' ');
+
+        drawArrowButton(95, 658, 68, 64, 'up', isUp);
+        drawArrowButton(95, 728, 68, 64, 'down', isDown);
+        drawArrowButton(22, 693, 68, 64, 'left', isLeft);
+        drawArrowButton(168, 693, 68, 64, 'right', isRight);
+
+        drawTouchButton(280, 672, 300, 112, 'WAIT TURN', { 
+            bgColor: '#444400', 
+            font: '14px "Press Start 2P"',
+            isPressed: isWait
+        });
+    } else {
+        drawTouchButton(canvas.width - 205, 10, 190, 36, 'WAIT (SPACE)', { 
+            bgColor: '#444400', 
+            font: '9px "Press Start 2P"',
+            isPressed: keysPressed.has(' ')
+        });
     }
 
     // ── Result flash ──
@@ -494,12 +518,17 @@ function drawGooseGame() {
 }
 
 function handleGooseTouch(x, y) {
-    if (!isMobileMode) return;
-    if (x >= 20 && x <= 90 && y >= 680 && y <= 750) handleGooseInput('ArrowUp');
-    else if (x >= 20 && x <= 90 && y >= 755 && y <= 795) handleGooseInput('ArrowDown');
-    else if (x >= 95 && x <= 165 && y >= 715 && y <= 785) handleGooseInput('ArrowLeft');
-    else if (x >= 170 && x <= 240 && y >= 715 && y <= 785) handleGooseInput('ArrowRight');
-    else if (x >= 340 && x <= 570 && y >= 695 && y <= 785) handleGooseInput(' ');
+    if (isMobileMode) {
+        if (x >= 80 && x <= 180 && y >= 655 && y <= 726) handleGooseInput('ArrowUp');
+        else if (x >= 80 && x <= 180 && y >= 727 && y <= 800) handleGooseInput('ArrowDown');
+        else if (x >= 10 && x <= 94 && y >= 670 && y <= 790) handleGooseInput('ArrowLeft');
+        else if (x >= 166 && x <= 255 && y >= 670 && y <= 790) handleGooseInput('ArrowRight');
+        else if (x >= 270 && x <= 590 && y >= 665 && y <= 795) handleGooseInput(' ');
+    } else {
+        if (x >= canvas.width - 205 && x <= canvas.width - 15 && y >= 10 && y <= 46) {
+            handleGooseInput(' ');
+        }
+    }
 }
 
 // ── Cone-of-recognition renderer ─────────────────────────────

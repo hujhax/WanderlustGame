@@ -66,17 +66,20 @@ class AudioManager {
         }
     }
     playSFX(name) {
-        if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.unlockAudio();
         const sfx = this.tracks[name];
         if (sfx && sfx.readyState >= 2) {
             sfx.currentTime = 0;
-            sfx.play().catch(e => this.synthSFX(name));
+            const p = sfx.play();
+            if (p !== undefined) {
+                p.catch(() => this.synthSFX(name));
+            }
         } else {
             this.synthSFX(name);
         }
     }
     synthSFX(name) {
-        if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.unlockAudio();
         const osc = this.audioCtx.createOscillator();
         const gain = this.audioCtx.createGain();
         osc.connect(gain);
@@ -102,11 +105,26 @@ class AudioManager {
             osc.type = 'square'; osc.frequency.setValueAtTime(1000 + Math.random() * 500, now);
             gain.gain.setValueAtTime(0.01, now); gain.gain.linearRampToValueAtTime(0, now + 0.1);
             osc.start(now); osc.stop(now + 0.1);
-        } else if (name === 'TADA') {
-            [440, 554, 659, 880].forEach((f, i) => {
-                const o = this.audioCtx.createOscillator(); o.connect(gain); o.frequency.setValueAtTime(f, now + i * 0.1); o.start(now + i * 0.1); o.stop(now + i * 0.1 + 0.2);
+        } else if (name === 'TADA' || name === 'ZELDA_VICTORY' || name === 'VICTORY') {
+            const notes = [
+                { f: 587.33, t: 0, d: 0.12 },     // D5
+                { f: 659.25, t: 0.12, d: 0.12 },  // E5
+                { f: 698.46, t: 0.24, d: 0.12 },  // F5
+                { f: 880.00, t: 0.36, d: 0.45 }   // A5
+            ];
+            notes.forEach(note => {
+                const o = this.audioCtx.createOscillator();
+                const g = this.audioCtx.createGain();
+                o.type = 'square';
+                o.frequency.setValueAtTime(note.f, now + note.t);
+                g.gain.setValueAtTime(0.12, now + note.t);
+                g.gain.exponentialRampToValueAtTime(0.01, now + note.t + note.d);
+                o.connect(g);
+                g.connect(this.audioCtx.destination);
+                o.start(now + note.t);
+                o.stop(now + note.t + note.d);
             });
-            gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            osc.start(now); osc.stop(now + 0.01);
         } else if (name === 'SAD_TROMBONE') {
             osc.type = 'sawtooth'; osc.frequency.setValueAtTime(220, now); osc.frequency.linearRampToValueAtTime(110, now + 1);
             gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 1);

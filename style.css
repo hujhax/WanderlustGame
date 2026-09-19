@@ -9,7 +9,10 @@ body, html {
     justify-content: center;
     align-items: center;
     font-family: 'Press Start 2P', cursive;
-    touch-action: manipulation;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 #game-container {
@@ -21,6 +24,10 @@ body, html {
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 canvas {

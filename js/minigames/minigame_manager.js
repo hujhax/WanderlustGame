@@ -6,7 +6,7 @@ function startMinigame() {
         type: gameType, successes: 0, failures: 0, startTime: Date.now(), entities: [],
         isEternalMode: typeof isEternalMode !== 'undefined' ? isEternalMode : false,
         parallax: { bgX: 0, roadX: 0, trees: [] },
-        gameOver: false, won: false, playerY: 480, isJumping: false, jumpVel: 0, frame: 0,
+        gameOver: false, won: false, playerY: (typeof isMobileMode !== 'undefined' && isMobileMode && typeof canvas !== 'undefined') ? (canvas.height - 120) : 480, isJumping: false, jumpVel: 0, frame: 0,
         distance: 0, question: "", answer: "", timer: 10, lastTimerUpdate: Date.now(), difficulty: 1,
         // Cheese specific
         grid: [], visualGrid: [], selected: null, swapTarget: null, swapTime: 0, progress: 0, eatMode: false, matches: [],
@@ -26,10 +26,11 @@ function startMinigame() {
         showDialog('Farmer Lucky', 'Jason', "Thanks for stopping at my farm — all my chickens are running loose! Can you help me catch them? Just don't hit any skulls — " + jumpText, () => {
             currentPhase = PHASES.MINIGAME_PLAY;
             for (let i = 0; i < 5; i++) minigameState.parallax.trees.push({ x: i * 400, y: 400, speed: 2, scale: 0.8 + Math.random() * 0.4, flipped: Math.random() < 0.5 });
+            const roadY = (typeof isMobileMode !== 'undefined' && isMobileMode) ? (canvas.height - 120) : 480;
             for (let i = 0; i < 100; i++) {
                 const startX = i < 2 ? 400 + i * 300 : 1000 + i * 300 + Math.random() * 200;
-                minigameState.entities.push({ type: 'chicken', x: startX, y: 480, speed: 1 + Math.random() * 1, frame: Math.random() * 16 });
-                if (i > 0 && i % 8 < 3) minigameState.entities.push({ type: 'skull', x: startX + 150 + Math.random() * 100, y: 480 });
+                minigameState.entities.push({ type: 'chicken', x: startX, y: roadY, speed: 1 + Math.random() * 1, frame: Math.random() * 16 });
+                if (i > 0 && i % 8 < 3) minigameState.entities.push({ type: 'skull', x: startX + 150 + Math.random() * 100, y: roadY });
             }
         });
     } else if (gameType === 'math') {

@@ -235,13 +235,15 @@
 
     function createMockCanvas() {
         const ctx = createMockContext();
-        return {
+        const c = {
             width: 800,
             height: 600,
             getContext: () => ctx,
             toDataURL: () => 'data:image/png;base64,mock',
-            addEventListener: () => {}
+            addEventListener: () => {},
+            getBoundingClientRect: () => ({ left: 0, top: 0, width: c.width, height: c.height })
         };
+        return c;
     }
 
     initMockDOM();

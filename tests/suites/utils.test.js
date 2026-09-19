@@ -83,4 +83,16 @@ describe('Utility Functions (js/utils.js)', () => {
         }
         assert(screenCaptures.length <= 20, `screenCaptures length should be capped at 20, got ${screenCaptures.length}`);
     });
+
+    it('drawArrowButton renders successfully for all directions in pressed and unpressed states', () => {
+        ['up', 'down', 'left', 'right'].forEach(dir => {
+            try {
+                drawArrowButton(10, 10, 60, 60, dir, false);
+                drawArrowButton(10, 10, 60, 60, dir, true);
+            } catch (err) {
+                assert(false, `drawArrowButton failed for dir "${dir}": ${err.message}`);
+            }
+        });
+    });
 });
+

@@ -74,7 +74,47 @@ describe('Individual Minigames Implementation', () => {
             assertEquals(minigameState.failures, 3, 'Failure count should increment to 3');
             assertEquals(currentPhase, PHASES.MINIGAME_PLAY, 'Eternal mode should not transition away on 3 failures');
         });
+
+        it('Chicken and skulls spawn along road ground line (canvas.height - 120) in mobile mode', () => {
+            const origMobile = isMobileMode;
+            const origW = canvas.width;
+            const origH = canvas.height;
+            try {
+                isMobileMode = true;
+                canvas.width = 600;
+                canvas.height = 800;
+                currentMinigameIndex = 0;
+                minigameOrder = ['chicken'];
+                startMinigame();
+                while (typeof currentDialog !== 'undefined' && currentDialog !== null) {
+                    currentDialog.chunkIndex++;
+                    if (currentDialog.chunkIndex >= currentDialog.chunks.length) {
+                        const cb = dialogCallback; currentDialog = null; dialogCallback = null; if (cb) cb();
+                    }
+                }
+
+                const expectedRoadY = canvas.height - 120;
+                assertEquals(minigameState.playerY, expectedRoadY, 'Mobile player should start on roadY');
+
+                const skulls = minigameState.entities.filter(e => e.type === 'skull');
+                assert(skulls.length > 0, 'Skulls should be spawned in chicken minigame');
+                skulls.forEach(s => {
+                    assertEquals(s.y, expectedRoadY, `Mobile skull should spawn on ground line ${expectedRoadY}, got ${s.y}`);
+                });
+
+                const chickens = minigameState.entities.filter(e => e.type === 'chicken');
+                assert(chickens.length > 0, 'Chickens should be spawned');
+                chickens.forEach(c => {
+                    assertEquals(c.y, expectedRoadY, `Mobile chicken should spawn on ground line ${expectedRoadY}, got ${c.y}`);
+                });
+            } finally {
+                isMobileMode = origMobile;
+                canvas.width = origW;
+                canvas.height = origH;
+            }
+        });
     });
+
 
     // --- MATHEMAGIC ---
     describe('Mathemagic! (math.js)', () => {
@@ -239,6 +279,33 @@ describe('Individual Minigames Implementation', () => {
             }
 
             assertEquals(minigameState.failures, 1, 'Red car getting coin should yield failure');
+        });
+
+        it('Bumpertown boundaries and coins fit within mobile canvas bounds', () => {
+            const origMobile = isMobileMode;
+            const origW = canvas.width;
+            const origH = canvas.height;
+            try {
+                isMobileMode = true;
+                canvas.width = 600;
+                canvas.height = 800;
+                minigameState = { type: 'bump', car: {}, coin: {}, otherCars: [] };
+                initBumpGame();
+
+                assert(minigameState.car.x >= 20 && minigameState.car.x <= 560, 'Player car x within mobile arena');
+                assert(minigameState.car.y >= 20 && minigameState.car.y <= 620, 'Player car y within mobile arena');
+                assert(minigameState.coin.x >= 20 && minigameState.coin.x <= 560, 'Coin x within mobile arena');
+                assert(minigameState.coin.y >= 20 && minigameState.coin.y <= 620, 'Coin y within mobile arena');
+
+                minigameState.otherCars.forEach((c, idx) => {
+                    assert(c.x >= 20 && c.x <= 560, `Other car ${idx} x within mobile arena`);
+                    assert(c.y >= 20 && c.y <= 620, `Other car ${idx} y within mobile arena`);
+                });
+            } finally {
+                isMobileMode = origMobile;
+                canvas.width = origW;
+                canvas.height = origH;
+            }
         });
     });
 
@@ -541,6 +608,32 @@ describe('Individual Minigames Implementation', () => {
             const distTraveled = Math.hypot(minigameState.golf.ball.x - startX, minigameState.golf.ball.y - startY);
             assert(distTraveled > 30, `Ball should travel substantially (>30px) across fairway, actually traveled ${distTraveled.toFixed(1)}px`);
         });
+
+        it('SWING / HIT touch button area triggers stroke windup in mobile mode', () => {
+            const origMobile = isMobileMode;
+            const origW = canvas.width;
+            const origH = canvas.height;
+            try {
+                isMobileMode = true;
+                canvas.width = 600;
+                canvas.height = 800;
+                initGolfGame();
+                assertEquals(minigameState.golf.state, 'aiming');
+
+                // Tap inside mobile swing button (180, 675, 240, 85)
+                handleGolfMouseDown({
+                    clientX: 250,
+                    clientY: 710,
+                    preventDefault: () => {}
+                });
+
+                assertEquals(minigameState.golf.state, 'power_windup', 'Tapping SWING / HIT button should initiate power windup');
+            } finally {
+                isMobileMode = origMobile;
+                canvas.width = origW;
+                canvas.height = origH;
+            }
+        });
     });
 
     // --- CANADIAN JEOPARDY ---
@@ -573,6 +666,26 @@ describe('Individual Minigames Implementation', () => {
             minigameState.earnings = 4000;
             minigameState.successes = Math.floor(minigameState.earnings / 1000);
             assertEquals(minigameState.successes, 4, '$4000 earnings should equal 4 successes');
+        });
+
+        it('Charter of Rights and Freedoms clue contains gun ownership option instead of freedom of the press', () => {
+            let charterVariant = null;
+            JEOPARDY_CLUES_DATA.categories.forEach(cat => {
+                cat.clues.forEach(clue => {
+                    clue.variants.forEach(variant => {
+                        if (variant.clue && variant.clue.includes('Charter of Rights and Freedoms')) {
+                            charterVariant = variant;
+                        }
+                    });
+                });
+            });
+
+            assert(charterVariant !== null, 'Charter of Rights clue should exist in dataset');
+            const hasGuns = charterVariant.wrong.some(w => w.includes('freedom to own lots of guns'));
+            const hasPress = charterVariant.wrong.some(w => w.includes('freedom of the press')) || (charterVariant.correct && charterVariant.correct.includes('freedom of the press'));
+
+            assertTrue(hasGuns, 'Charter clue wrong options should include "What is freedom to own lots of guns?"');
+            assertFalse(hasPress, 'Charter clue options must NOT include "freedom of the press"');
         });
     });
 
@@ -684,6 +797,51 @@ describe('Individual Minigames Implementation', () => {
                 assert(solution !== null, `Goose Level ${idx + 1} must be winnable, but BFS solver found no path.`);
                 assert(solution.length > 0, `Goose Level ${idx + 1} solution path should contain moves.`);
             });
+        });
+
+        it('Player waiting turn keeps player stationary and advances geese', () => {
+            minigameState = { type: 'goose', successes: 0, failures: 0 };
+            initGooseGame();
+
+            const startX = minigameState.goose.player.x;
+            const startY = minigameState.goose.player.y;
+
+            handleGooseInput(' ');
+            assertEquals(minigameState.goose.player.x, startX, 'Player X should remain unchanged on wait turn');
+            assertEquals(minigameState.goose.player.y, startY, 'Player Y should remain unchanged on wait turn');
+        });
+
+        it('handleGooseTouch triggers wait turn for desktop button and mobile button', () => {
+            const origMobile = isMobileMode;
+            const origW = canvas.width;
+            const origH = canvas.height;
+            try {
+                minigameState = { type: 'goose', successes: 0, failures: 0 };
+                initGooseGame();
+
+                const startX = minigameState.goose.player.x;
+                const startY = minigameState.goose.player.y;
+
+                // Desktop button click (canvas.width - 205 <= x <= canvas.width - 15, y in 10..46)
+                isMobileMode = false;
+                canvas.width = 800;
+                canvas.height = 600;
+                handleGooseTouch(700, 25);
+                assertEquals(minigameState.goose.player.x, startX, 'Desktop wait click keeps player stationary');
+                assertEquals(minigameState.goose.player.y, startY, 'Desktop wait click keeps player stationary');
+
+                // Mobile button touch (270 <= x <= 590, 665 <= y <= 795)
+                isMobileMode = true;
+                canvas.width = 600;
+                canvas.height = 800;
+                handleGooseTouch(350, 720);
+                assertEquals(minigameState.goose.player.x, startX, 'Mobile wait touch keeps player stationary');
+                assertEquals(minigameState.goose.player.y, startY, 'Mobile wait touch keeps player stationary');
+            } finally {
+                isMobileMode = origMobile;
+                canvas.width = origW;
+                canvas.height = origH;
+            }
         });
     });
 
